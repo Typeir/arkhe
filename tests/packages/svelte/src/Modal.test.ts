@@ -4,7 +4,7 @@ import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
 import ShadowModal from '@tests/fixtures/svelte/ShadowModal.svelte';
 import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
 import { textSnippet } from '@tests/fixtures/svelte/snippets';
-import { render, screen, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -95,6 +95,20 @@ describe('Modal', () => {
   it('returns focus to the nearest row when the opener row is gone', async () => {
     render(DeleteRows);
     await userEvent.click(screen.getByRole('button', { name: 'Delete a' }));
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Confirm' }),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Delete b' })).toHaveFocus(),
+    );
+  });
+
+  it('starts from the pressed button when a click leaves focus on the body', async () => {
+    render(DeleteRows);
+    const opener = screen.getByRole('button', { name: 'Delete a' });
+    await fireEvent.pointerDown(opener);
+    await fireEvent.click(opener);
+    expect(opener).not.toHaveFocus();
     await userEvent.click(
       await screen.findByRole('button', { name: 'Confirm' }),
     );

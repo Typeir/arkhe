@@ -99,6 +99,7 @@ export const Modal = ({
   );
   const [inner, setInner] = useState(defaultOpen ?? false);
   const [focusReturn] = useState(() => new FocusReturn());
+  useEffect(() => focusReturn.watch(env.getRootNode()), [focusReturn, env]);
   const change = (next: boolean) => {
     setInner(next);
     onOpenChange?.(next);

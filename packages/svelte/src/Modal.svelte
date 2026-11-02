@@ -69,6 +69,7 @@ machine is needed.
   const initial = untrack(() => defaultOpen ?? false);
   let mounted = $state(false);
   const focusReturn = new FocusReturn();
+  $effect(() => focusReturn.watch(env().getRootNode()));
 
   onMount(() => {
     mounted = true;

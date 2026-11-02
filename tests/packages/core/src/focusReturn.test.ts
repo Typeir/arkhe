@@ -76,4 +76,19 @@ describe('FocusReturn', () => {
     $('a').remove();
     expect(memory.target()).toBe($('b'));
   });
+
+  it('takes the last pressed element when a click leaves focus on the body', () => {
+    const $ = build('<button id="a"></button><button id="b"></button>');
+    const memory = new FocusReturn();
+    const stop = memory.watch(document);
+    $('a').dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    memory.track(true, document);
+    $('a').remove();
+    expect(memory.target()).toBe($('b'));
+    stop();
+    memory.track(false, document);
+    $('b').dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    memory.track(true, document);
+    expect(memory.target()).toBeNull();
+  });
 });
