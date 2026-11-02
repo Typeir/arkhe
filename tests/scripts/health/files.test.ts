@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   AUTHORED,
   codeLines,
+  comments,
   stripBlockComments,
 } from '../../../.github/scripts/health/files.mjs';
 
@@ -16,6 +17,42 @@ describe('stripBlockComments', () => {
   it('keeps the line count', () => {
     const text = 'a\n/* b\nc */\nd';
     expect(stripBlockComments(text).split('\n')).toHaveLength(4);
+  });
+
+  it('leaves comment markers inside literals alone', () => {
+    const text = [
+      "const g = '**/x/**';",
+      'alert(1);',
+      'const t = `*/`;',
+      'const r = /\\/\\*/;',
+      'b();',
+      'const h = "*/";',
+    ].join('\n');
+    expect(stripBlockComments(text)).toBe(text);
+  });
+
+  it('blanks markup comments', () => {
+    expect(stripBlockComments('<b><!-- x --></b>')).toBe(
+      `<b>${' '.repeat(10)}</b>`,
+    );
+  });
+});
+
+describe('comments', () => {
+  it('lists line, block and markup comments with their lines', () => {
+    const text = "const a = '//'; // one\n/* two */\n<!-- three -->";
+    expect(
+      comments(text).map(({ kind, line, text: body }) => [kind, line, body]),
+    ).toEqual([
+      ['line', 1, '// one'],
+      ['block', 2, '/* two */'],
+      ['markup', 3, '<!-- three -->'],
+    ]);
+  });
+
+  it('tells a regular expression from division', () => {
+    expect(comments('const r = /[\'"]/; // c')).toHaveLength(1);
+    expect(comments('const q = a / b; // c')).toHaveLength(1);
   });
 });
 

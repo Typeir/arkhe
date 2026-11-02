@@ -74,6 +74,30 @@ describe('file checks', () => {
     ).toEqual([]);
   });
 
+  it.each([
+    ['packages/core/src/a.ts', 'const a = 1; // trailing note'],
+    ['packages/core/src/a.ts', 'function f() {\n  /* inner note */\n}'],
+    ['packages/svelte/src/A.svelte', '<div><!-- markup note --></div>'],
+    ['packages/core/src/a.ts', "const g = '**/x/**';\n// why\nconst h = '*/';"],
+  ])('flags the inline comment in %s: %j', (file, content) => {
+    expect(scan('no-inline-comments', file, content)).toHaveLength(1);
+  });
+
+  it.each([
+    ['packages/core/src/a.ts', '/**\n * Doc.\n */\nexport const a = 1;'],
+    ['packages/core/src/a.ts', "const u = 'http://x/*';\nconst r = /\\/\\//g;"],
+    ['packages/svelte/src/A.svelte', '<!--\n@component\nA.\n-->\n<div></div>'],
+    [
+      'packages/svelte/src/A.svelte',
+      '<!-- svelte-ignore a11y_x -->\n<div></div>',
+    ],
+  ])(
+    'allows JSDoc, docs, directives and literals in %s: %j',
+    (file, content) => {
+      expect(scan('no-inline-comments', file, content)).toEqual([]);
+    },
+  );
+
   it('flags browser dialogs in sources', () => {
     expect(
       scan('no-browser-dialogs', 'apps/showcase/src/a.ts', 'confirm("x");'),
@@ -123,6 +147,19 @@ describe('file checks', () => {
     ).toEqual([]);
   });
 
+  it('finds game words in comments too', () => {
+    expect(
+      scan(
+        'banned-words',
+        'packages/core/src/a.ts',
+        '/**\n * As in Flamelost.\n */',
+      ),
+    ).toEqual([expect.objectContaining({ line: 2 })]);
+    expect(
+      scan('banned-words', 'packages/core/styles/_a.scss', '/* Ikuisuus */'),
+    ).toHaveLength(1);
+  });
+
   it('keeps frameworks out of core', () => {
     expect(
       scan('core-purity', 'packages/core/src/a.ts', "import x from 'react';"),
@@ -130,6 +167,31 @@ describe('file checks', () => {
     expect(
       scan('core-purity', 'packages/react/src/a.ts', "import x from 'react';"),
     ).toEqual([]);
+  });
+
+  it.each([
+    "import { writable } from 'svelte/store';",
+    "import { normalizeProps } from '@zag-js/react';",
+    "import { jsx } from 'react/jsx-runtime';",
+    "import { X } from 'lucide-svelte';",
+    "import 'react';",
+    "export * from 'react-dom/client';",
+    "const fs = await import('node:fs');",
+    "import { readFileSync } from 'fs';",
+    "import {\n  x,\n} from\n  'svelte';",
+  ])('flags the core import %j', (content) => {
+    expect(scan('core-purity', 'packages/core/src/a.ts', content)).toHaveLength(
+      1,
+    );
+  });
+
+  it('allows framework-free core imports', () => {
+    const content = [
+      "import { x } from '@zag-js/core';",
+      "import { y } from './react.js';",
+      "const note = 'from react';",
+    ].join('\n');
+    expect(scan('core-purity', 'packages/core/src/a.ts', content)).toEqual([]);
   });
 
   it('enforces function style', () => {
@@ -159,6 +221,39 @@ describe('file checks', () => {
         'packages/svelte/src/A.svelte',
         '<script>\n  function go() {}\n</script>',
       ),
+    ).toHaveLength(1);
+  });
+
+  it.each([
+    'const helper = x => x;',
+    'const helper: (n: number) => number = (n) => n;',
+    'const helper = <T,>(x: T) => x;',
+    'let helper = () => 1;',
+    'const _helper = () => 1;',
+    'export const helper = async (a: number) =>\n  a;',
+    'const helper = function () {};',
+  ])('flags the top-level helper %j', (content) => {
+    expect(
+      scan('function-style', 'packages/core/src/a.ts', content),
+    ).toHaveLength(1);
+  });
+
+  it.each([
+    'const f: () => void = noop;',
+    'const total: number = (a + b) * 2;',
+    'const Part = <T,>(x: T) => x;',
+  ])('allows the non-helper %j', (content) => {
+    expect(scan('function-style', 'packages/core/src/a.ts', content)).toEqual(
+      [],
+    );
+  });
+
+  it.each([
+    'function Button() {}\nexport { Button };',
+    'export default function Button() {}',
+  ])('flags the function component %j', (content) => {
+    expect(
+      scan('function-style', 'packages/react/src/A.tsx', content),
     ).toHaveLength(1);
   });
 });

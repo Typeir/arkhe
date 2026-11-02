@@ -43,6 +43,8 @@ const DEPENDENCY_FIELDS = [
   'peerDependencies',
   'optionalDependencies',
 ];
+const DECLARED_EXPORT =
+  /^export\s+(?:default\s+)?(?:async\s+)?(?:const(?!\s+enum\b)|let|var|function\*?|class|enum)\s+([\w$]+)/gm;
 const REACT_INDEX = 'packages/react/src/index.ts';
 const SVELTE_INDEX = 'packages/svelte/src/index.ts';
 
@@ -59,7 +61,8 @@ export function expectedTests(source) {
 }
 
 /**
- * Collects value export names from a barrel; type-only exports are skipped.
+ * Collects value export names from a barrel: `export { … }` lists,
+ * declarations and `export * as name`. Type-only exports are skipped.
  *
  * @function valueExports
  * @param {string} content - Barrel source.
@@ -67,6 +70,10 @@ export function expectedTests(source) {
  */
 export function valueExports(content) {
   const names = [];
+  for (const match of content.matchAll(DECLARED_EXPORT)) names.push(match[1]);
+  for (const match of content.matchAll(/export\s*\*\s*as\s+([\w$]+)/g)) {
+    names.push(match[1]);
+  }
   for (const match of content.matchAll(/export\s+(type\s+)?\{([^}]*)\}/g)) {
     if (match[1]) continue;
     for (const raw of match[2].split(',')) {
@@ -81,6 +88,45 @@ export function valueExports(content) {
     }
   }
   return names.sort();
+}
+
+/**
+ * Lists the specifiers of `export * from` lines, whose names a barrel
+ * scan cannot see. Type-only star exports are skipped.
+ *
+ * @function starExports
+ * @param {string} content - Barrel source.
+ * @returns {string[]} Re-exported module specifiers.
+ */
+export function starExports(content) {
+  return [...content.matchAll(/export\s*\*\s*from\s*['"]([^'"]+)['"]/g)].map(
+    (match) => match[1],
+  );
+}
+
+/**
+ * Collects version ranges in npm `overrides`, yarn `resolutions` and
+ * `pnpm.overrides`, walking nested override objects. A `$name` reference to
+ * a direct dependency is a pin by proxy and is skipped.
+ *
+ * @function overrideRanges
+ * @param {Record<string, unknown>} manifest - Parsed package.json.
+ * @returns {{ path: string, version: string }[]} Ranges that are not exact.
+ */
+export function overrideRanges(manifest) {
+  const walk = (value, path) =>
+    typeof value === 'string'
+      ? EXACT_VERSION.test(value) || value.startsWith('$')
+        ? []
+        : [{ path, version: value }]
+      : Object.entries(value ?? {}).flatMap(([key, inner]) =>
+          walk(inner, `${path}.${key}`),
+        );
+  return [
+    ...walk(manifest.overrides, 'overrides'),
+    ...walk(manifest.resolutions, 'resolutions'),
+    ...walk(manifest.pnpm?.overrides, 'pnpm.overrides'),
+  ];
 }
 
 /**
@@ -119,6 +165,10 @@ export const PROJECT_CHECKS = [
       );
       const failures = manifests.flatMap((file) => {
         const manifest = JSON.parse(read(file));
+        const overrides = overrideRanges(manifest).map(({ path, version }) => ({
+          file,
+          message: `${path} is "${version}"; pin an exact version.`,
+        }));
         return DEPENDENCY_FIELDS.flatMap((field) => {
           const peer = field === 'peerDependencies';
           const shape = peer ? CARET_VERSION : EXACT_VERSION;
@@ -129,7 +179,7 @@ export const PROJECT_CHECKS = [
               file,
               message: `${field}.${name} is "${version}"; ${want}.`,
             }));
-        });
+        }).concat(overrides);
       });
       return { failures, scanned: manifests.length };
     },
@@ -149,8 +199,15 @@ export const PROJECT_CHECKS = [
             file,
             message: `Exports ${name}; the other port does not.`,
           }));
+      const stars = (file) =>
+        starExports(read(file)).map((specifier) => ({
+          file,
+          message: `export * from '${specifier}' hides its names; list them.`,
+        }));
       return {
         failures: [
+          ...stars(REACT_INDEX),
+          ...stars(SVELTE_INDEX),
           ...missing(react, svelte, REACT_INDEX),
           ...missing(svelte, react, SVELTE_INDEX),
         ],
