@@ -25,7 +25,14 @@ Svelte side of the parity scenes. Each scene must match its twin in
     Tooltip,
   } from '@arkhe/svelte';
   import type { NumericValue } from '@arkhe/core';
-  import { COMBO_ITEMS, MENU_ITEMS, TAB_ITEMS, TAB_TEXT } from './scenes';
+  import {
+    COMBO_ITEMS,
+    MENU_ITEMS,
+    TAB_ITEMS,
+    TAB_TEXT,
+    TWIN_OPTIONS,
+    TWIN_TABS,
+  } from './scenes';
 
   /**
    * Props of SvelteCases.
@@ -102,6 +109,12 @@ Svelte side of the parity scenes. Each scene must match its twin in
   <Tabs items={TAB_ITEMS} label="Sheet">
     {#snippet panel(key)}{TAB_TEXT[key]}{/snippet}
   </Tabs>
+{:else if name === 'duplicates'}
+  <Progress value={5} max={10} label="Budget" markers={[2, 2]} />
+  <Tabs items={TWIN_TABS} label="Sheet">
+    {#snippet panel(key)}{TAB_TEXT[key]}{/snippet}
+  </Tabs>
+  <Combobox label="Spell" items={TWIN_OPTIONS} />
 {:else if name === 'modal'}
   <Modal title="Rest" description="Recover." trigger="Open">Body</Modal>
 {:else if name === 'tooltip'}

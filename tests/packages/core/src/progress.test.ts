@@ -37,6 +37,13 @@ describe('progressState', () => {
     ]);
   });
 
+  it('drops repeated markers', () => {
+    expect(progressState(5, 10, [2, 2, 8]).markers).toEqual([
+      { at: 0.2, reached: true },
+      { at: 0.8, reached: false },
+    ]);
+  });
+
   it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])(
     'rejects max %s',
     (max) => {

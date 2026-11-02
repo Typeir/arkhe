@@ -28,11 +28,21 @@ describe('resolveTabValue', () => {
     expect(resolveTabValue('Spell list', ITEMS)).toBe('Spell list');
   });
 
-  it('falls back to the first enabled tab and warns once', () => {
+  it('falls back to the first enabled tab and warns once per set', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-    expect(resolveTabValue('gear', ITEMS)).toBe('stats');
-    expect(resolveTabValue('gear', ITEMS)).toBe('stats');
+    const warned = new Set<string>();
+    expect(resolveTabValue('gear', ITEMS, warned)).toBe('stats');
+    expect(resolveTabValue('gear', ITEMS, warned)).toBe('stats');
     expect(warn).toHaveBeenCalledOnce();
+    resolveTabValue('gear', ITEMS, new Set());
+    expect(warn).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps no warning state of its own', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    resolveTabValue('lost', ITEMS);
+    resolveTabValue('lost', ITEMS);
+    expect(warn).toHaveBeenCalledTimes(2);
   });
 
   it('uses the first enabled tab silently without a value', () => {

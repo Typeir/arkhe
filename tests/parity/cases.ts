@@ -131,6 +131,10 @@ export const PARITY_CASES: readonly ParityCase[] = [
     ],
   },
   { name: 'tabs', steps: [click('Notes', 'tab')] },
+  {
+    name: 'duplicates',
+    steps: [click('Notes', 'tab'), click('Spell', 'combobox')],
+  },
   { name: 'modal', steps: [click('Open'), press('{Escape}')] },
   { name: 'tooltip', steps: [hover('resistance')] },
   { name: 'hover-card', steps: [hover('charge'), click('Pin Charge')] },

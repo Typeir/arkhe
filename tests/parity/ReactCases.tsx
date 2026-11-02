@@ -30,7 +30,14 @@ import {
 } from '@arkhe/react';
 import type { NumericValue } from '@arkhe/core';
 import { useState, type JSX, type ReactNode } from 'react';
-import { COMBO_ITEMS, MENU_ITEMS, TAB_ITEMS, TAB_TEXT } from './scenes';
+import {
+  COMBO_ITEMS,
+  MENU_ITEMS,
+  TAB_ITEMS,
+  TAB_TEXT,
+  TWIN_OPTIONS,
+  TWIN_TABS,
+} from './scenes';
 
 const Buttons = (): JSX.Element => {
   const [pressed, setPressed] = useState(false);
@@ -130,6 +137,13 @@ const SCENES: Readonly<Record<string, () => ReactNode>> = {
   ),
   'numeric-controlled': () => <ControlledNumeric />,
   tabs: () => <Tabs items={TAB_ITEMS} label='Sheet' panels={TAB_TEXT} />,
+  duplicates: () => (
+    <>
+      <Progress value={5} max={10} label='Budget' markers={[2, 2]} />
+      <Tabs items={TWIN_TABS} label='Sheet' panels={TAB_TEXT} />
+      <Combobox label='Spell' items={TWIN_OPTIONS} />
+    </>
+  ),
   modal: () => (
     <Modal title='Rest' description='Recover.' trigger='Open'>
       Body

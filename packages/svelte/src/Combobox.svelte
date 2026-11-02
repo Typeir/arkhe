@@ -42,7 +42,7 @@ next key, so Enter never acts on a stale list.
    *
    * @interface Props
    * @property {string} label - Visible label.
-   * @property {readonly T[]} items - Options.
+   * @property {readonly T[]} items - Options; a repeated value is dropped.
    * @property {string} [placeholder] - Input placeholder.
    * @property {string | null} [value] - Selected value; makes the selection controlled.
    * @property {string | null} [defaultValue] - First selection when uncontrolled.

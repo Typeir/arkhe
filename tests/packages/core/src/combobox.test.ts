@@ -39,6 +39,13 @@ describe('matching', () => {
     ).toEqual([OPTIONS[2]]);
   });
 
+  it('drops options that repeat an earlier value', () => {
+    const twin = { value: 'fireball', label: 'Fireball again' };
+    expect(filterOptions([...OPTIONS, twin], '')).toEqual(OPTIONS);
+    expect(filterOptions([...OPTIONS, twin], 'fire', false)).toEqual(OPTIONS);
+    expect(filterOptions([...OPTIONS, twin], 'fire')).toEqual([OPTIONS[0]]);
+  });
+
   it('filters only on typed text', () => {
     expect(queryAfterChange({ inputValue: 'fi', reason: 'input-change' })).toBe(
       'fi',
