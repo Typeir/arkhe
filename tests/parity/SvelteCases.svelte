@@ -115,6 +115,8 @@ Svelte side of the parity scenes. Each scene must match its twin in
   </HoverCard>
 {:else if name === 'popover'}
   <Popover trigger="Filters" title="Filter by">Body</Popover>
+{:else if name === 'popover-untitled'}
+  <Popover trigger="Sort">Body</Popover>
 {:else if name === 'menu'}
   <Menu trigger="Actions" items={MENU_ITEMS} onSelect={() => undefined} />
 {:else if name === 'combobox'}

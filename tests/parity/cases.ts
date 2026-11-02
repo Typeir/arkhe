@@ -121,6 +121,7 @@ export const PARITY_CASES: readonly ParityCase[] = [
   { name: 'tooltip', steps: [hover('resistance')] },
   { name: 'hover-card', steps: [hover('charge'), click('Pin Charge')] },
   { name: 'popover', steps: [click('Filters'), press('{Escape}')] },
+  { name: 'popover-untitled', steps: [click('Sort')] },
   { name: 'menu', steps: [click('Actions'), press('{ArrowDown}')] },
   {
     name: 'combobox',

@@ -24,7 +24,7 @@ import { usePortalContainer } from './usePortalContainer';
  *
  * @interface PopoverProps
  * @property {string} trigger - Text of the open button.
- * @property {string} [title] - Heading; names the panel.
+ * @property {string} [title] - Heading; names the panel. Without it the trigger text does.
  * @property {boolean} [open] - Open state; makes the popover controlled.
  * @property {boolean} [defaultOpen] - First open state when uncontrolled.
  * @property {(open: boolean) => void} [onOpenChange] - Open-state callback.
@@ -83,7 +83,9 @@ export const Popover = ({
       <Portal container={container} getRootNode={env.getRootNode}>
         <div className={ARKHE_CLASS}>
           <div {...api.getPositionerProps()}>
-            <div {...api.getContentProps()}>
+            <div
+              {...api.getContentProps()}
+              aria-label={title === undefined ? trigger : undefined}>
               <div data-scope='popover' data-part='header'>
                 {title === undefined ? null : (
                   <h2 {...api.getTitleProps()}>{title}</h2>

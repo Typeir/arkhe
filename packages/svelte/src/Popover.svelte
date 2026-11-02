@@ -27,7 +27,7 @@ outside clicks close it; focus returns to the button.
    *
    * @interface Props
    * @property {string} trigger - Text of the open button.
-   * @property {string} [title] - Heading; names the panel.
+   * @property {string} [title] - Heading; names the panel. Without it the trigger text does.
    * @property {boolean} [open] - Open state; makes the popover controlled.
    * @property {boolean} [defaultOpen] - First open state when uncontrolled.
    * @property {(open: boolean) => void} [onOpenChange] - Open-state callback.
@@ -75,7 +75,9 @@ outside clicks close it; focus returns to the button.
   class={ARKHE_CLASS}
   use:portal={{ container: env().container(), getRootNode: env().getRootNode }}>
   <div {...api.getPositionerProps()}>
-    <div {...api.getContentProps()}>
+    <div
+      {...api.getContentProps()}
+      aria-label={title === undefined ? trigger : undefined}>
       <div data-scope="popover" data-part="header">
         {#if title !== undefined}<h2 {...api.getTitleProps()}>{title}</h2>{/if}
         <button

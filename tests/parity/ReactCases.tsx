@@ -150,6 +150,7 @@ const SCENES: Readonly<Record<string, () => ReactNode>> = {
       Body
     </Popover>
   ),
+  'popover-untitled': () => <Popover trigger='Sort'>Body</Popover>,
   menu: () => (
     <Menu trigger='Actions' items={MENU_ITEMS} onSelect={() => undefined} />
   ),
