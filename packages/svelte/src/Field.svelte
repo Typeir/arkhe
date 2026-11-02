@@ -19,7 +19,7 @@ invalid state through the `children` snippet.
    *
    * @interface Props
    * @property {string} label - Visible label.
-   * @property {string | number} [readout] - Current value shown beside the label.
+   * @property {string | number} [readout] - Current value shown beside the label; not announced as it changes.
    * @property {string} [hint] - Help text under the control.
    * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
    * @property {Snippet<[FieldControlAttrs]>} children - Renders the control with the given attributes.
@@ -47,8 +47,10 @@ invalid state through the `children` snippet.
     <label {...partAttrs('field', 'label')} id={ids.label} for={ids.control}
       >{label}</label>
     {#if readout !== undefined}
-      <output {...partAttrs('field', 'readout')} for={ids.control}
-        >{readout}</output>
+      <output
+        {...partAttrs('field', 'readout')}
+        for={ids.control}
+        aria-live="off">{readout}</output>
     {/if}
   </div>
   {@render children(control)}

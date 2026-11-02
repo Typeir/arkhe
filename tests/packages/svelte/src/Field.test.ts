@@ -46,5 +46,6 @@ describe('Field', () => {
     const readout = screen.getByText('6 / 24');
     expect(readout.tagName).toBe('OUTPUT');
     expect(readout).toHaveAttribute('for', screen.getByRole('textbox').id);
+    expect(readout).toHaveAttribute('aria-live', 'off');
   });
 });
