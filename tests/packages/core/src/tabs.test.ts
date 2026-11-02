@@ -60,7 +60,8 @@ describe('staleTabFallback', () => {
   });
 
   it('gives nothing when no tab is enabled', () => {
-    expect(staleTabFallback('stats', [ITEMS[1]!])).toBeUndefined();
+    const locked = [{ value: 'stats', label: 'Stats', disabled: true }];
+    expect(staleTabFallback('stats', locked)).toBeUndefined();
   });
 });
 

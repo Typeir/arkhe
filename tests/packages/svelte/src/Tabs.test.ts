@@ -59,7 +59,12 @@ describe('Tabs', () => {
       '0',
     );
     expect(onValueChange).toHaveBeenLastCalledWith('stats');
-    await rerender({ items: [{ ...ITEMS[0]!, disabled: true }, ITEMS[2]!] });
+    await rerender({
+      items: [
+        { value: 'stats', label: 'Stats', disabled: true },
+        { value: 'spells', label: 'Spells' },
+      ],
+    });
     await waitFor(() =>
       expect(screen.getByRole('tabpanel')).toHaveTextContent('panel spells'),
     );

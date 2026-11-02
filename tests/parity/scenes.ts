@@ -30,8 +30,15 @@ export const TAB_ITEMS: readonly TabItem[] = [
  */
 export const TAB_STAGES: readonly (readonly TabItem[])[] = [
   TAB_ITEMS,
-  [TAB_ITEMS[0]!, TAB_ITEMS[1]!, { ...TAB_ITEMS[2]!, disabled: true }],
-  [TAB_ITEMS[1]!, TAB_ITEMS[2]!],
+  [
+    { value: 'stats', label: 'Stats' },
+    { value: 'gear', label: 'Gear', disabled: true },
+    { value: 'notes', label: 'Notes', disabled: true },
+  ],
+  [
+    { value: 'gear', label: 'Gear', disabled: true },
+    { value: 'notes', label: 'Notes' },
+  ],
 ];
 
 /**

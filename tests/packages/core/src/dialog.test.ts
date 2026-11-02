@@ -1,6 +1,6 @@
+// @vitest-environment jsdom
 import { dialogMachineProps, hideShadowSiblings } from '@arkhe/core';
-import { JSDOM } from 'jsdom';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const base = {
   id: 'd',
@@ -45,18 +45,23 @@ describe('dialogMachineProps', () => {
 });
 
 describe('hideShadowSiblings', () => {
+  afterEach(() => {
+    document.body.replaceChildren();
+  });
+
   function shadowTree() {
-    const { document } = new JSDOM(
-      '<main id="page"></main><div id="host"></div>',
-    ).window;
-    const shadow = document.getElementById('host')!.attachShadow({
-      mode: 'open',
-    });
+    document.body.innerHTML = '<main id="page"></main>';
+    const host = document.createElement('div');
+    document.body.append(host);
+    const shadow = host.attachShadow({ mode: 'open' });
     shadow.innerHTML =
       '<style></style><nav id="nav"></nav><div aria-live="polite" id="live"></div>' +
       '<div id="portal"><aside id="other"></aside><div id="content"></div></div>';
-    const byId = (id: string) =>
-      shadow.getElementById(id) ?? document.getElementById(id)!;
+    const byId = (id: string): Element => {
+      const node = shadow.getElementById(id) ?? document.getElementById(id);
+      if (!node) throw new Error(`No #${id}`);
+      return node;
+    };
     return { byId };
   }
 
@@ -75,12 +80,10 @@ describe('hideShadowSiblings', () => {
   });
 
   it('leaves the light DOM to Zag', () => {
-    const { document } = new JSDOM(
-      '<nav id="nav"></nav><div id="content"></div>',
-    ).window;
-    hideShadowSiblings(document.getElementById('content')!)();
-    expect(document.getElementById('nav')!.hasAttribute('aria-hidden')).toBe(
-      false,
-    );
+    const nav = document.createElement('nav');
+    const content = document.createElement('div');
+    document.body.append(nav, content);
+    hideShadowSiblings(content)();
+    expect(nav.hasAttribute('aria-hidden')).toBe(false);
   });
 });

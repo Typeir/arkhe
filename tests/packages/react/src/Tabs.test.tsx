@@ -95,7 +95,10 @@ describe('Tabs', () => {
     expect(onValueChange).toHaveBeenLastCalledWith('stats');
     rerender(
       <Tabs
-        items={[{ ...ITEMS[0]!, disabled: true }, ITEMS[2]!]}
+        items={[
+          { value: 'stats', label: 'Stats', disabled: true },
+          { value: 'spell list', label: 'Spells' },
+        ]}
         label='Sheet'
         panels={panels}
       />,
