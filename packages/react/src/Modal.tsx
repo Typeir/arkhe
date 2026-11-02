@@ -13,6 +13,7 @@
 
 import {
   ARKHE_CLASS,
+  FocusReturn,
   dialogMachineProps,
   hideShadowSiblings,
   type DialogRole,
@@ -97,6 +98,7 @@ export const Modal = ({
     () => false,
   );
   const [inner, setInner] = useState(defaultOpen ?? false);
+  const [focusReturn] = useState(() => new FocusReturn());
   const change = (next: boolean) => {
     setInner(next);
     onOpenChange?.(next);
@@ -110,6 +112,7 @@ export const Modal = ({
       role,
       onOpenChange: change,
       finalFocus,
+      focusReturn,
       getRootNode: env.getRootNode,
     }),
   );

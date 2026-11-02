@@ -1,13 +1,12 @@
 <!--
 @component
-Renders a status line: empty, loading, error or info. Errors interrupt; the
-rest wait their turn. A polite one re-inserts its text once mounted, so it is
-spoken even when the host mounts it already filled.
+Renders a status line: empty, loading, error or info. The app announcer
+speaks its text on mount and on each change; errors interrupt, the rest wait.
 -->
 <script lang="ts">
   import {
     ARKHE_CLASS,
-    announceOnMount,
+    announceText,
     partAttrs,
     statusLook,
     type StatusKind,
@@ -32,18 +31,18 @@ spoken even when the host mounts it already filled.
   const arkhe = useArkhe();
   const look = $derived(statusLook(kind, arkhe().labels));
   let region = $state<HTMLDivElement>();
-  $effect(() => {
-    if (look.role !== 'status' || !region) return;
-    return announceOnMount(region);
-  });
+  $effect(() =>
+    region
+      ? announceText(region, arkhe().announcer, () => look.politeness)
+      : undefined,
+  );
 </script>
 
 <div
   bind:this={region}
   class={ARKHE_CLASS}
   {...partAttrs('status', 'root')}
-  data-kind={kind}
-  role={look.role}>
+  data-kind={kind}>
   <Icon name={look.icon} />
   <span {...partAttrs('status', 'text')}>
     {#if children}{@render children()}{:else}{look.text}{/if}

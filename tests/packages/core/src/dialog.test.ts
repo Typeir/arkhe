@@ -1,5 +1,9 @@
 // @vitest-environment jsdom
-import { dialogMachineProps, hideShadowSiblings } from '@arkhe/core';
+import {
+  FocusReturn,
+  dialogMachineProps,
+  hideShadowSiblings,
+} from '@arkhe/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const base = {
@@ -33,11 +37,19 @@ describe('dialogMachineProps', () => {
     expect(onOpenChange).toHaveBeenCalledWith(true);
   });
 
-  it('forwards finalFocus as Zag finalFocusEl', () => {
-    const finalFocus = () => null;
-    expect(
-      dialogMachineProps({ ...base, open: false, finalFocus }).finalFocusEl,
-    ).toBe(finalFocus);
+  it('returns focus to finalFocus first, then to the remembered neighbour', () => {
+    const picked = document.createElement('button');
+    const near = document.createElement('button');
+    const focusReturn = new FocusReturn();
+    const target = vi.spyOn(focusReturn, 'target').mockReturnValue(near);
+    const track = vi.spyOn(focusReturn, 'track');
+    const props = (finalFocus?: () => HTMLElement | null) =>
+      dialogMachineProps({ ...base, open: true, finalFocus, focusReturn });
+    expect(props(() => picked).finalFocusEl?.()).toBe(picked);
+    expect(props(() => null).finalFocusEl?.()).toBe(near);
+    target.mockReturnValue(null);
+    expect(props().finalFocusEl?.()).toBeNull();
+    expect(track).toHaveBeenCalledWith(true, expect.anything());
     expect(dialogMachineProps({ ...base, open: false })).not.toHaveProperty(
       'finalFocusEl',
     );

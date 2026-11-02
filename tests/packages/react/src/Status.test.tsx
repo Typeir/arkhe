@@ -1,47 +1,48 @@
-import { Status } from '@arkhe/react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { ArkheProvider, Status } from '@arkhe/react';
+import { announced } from '@tests/fixtures/announced';
+import { render, waitFor } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
 
-function additions(region: Element): Node[] {
-  const added: Node[] = [];
-  new MutationObserver((records) => {
-    for (const record of records) added.push(...record.addedNodes);
-  }).observe(region, { childList: true });
-  return added;
-}
+const app = (children: ReactNode) => <ArkheProvider>{children}</ArkheProvider>;
 
 describe('Status', () => {
-  it('says the kind default text politely', () => {
-    render(<Status kind='empty' />);
-    expect(screen.getByRole('status')).toHaveTextContent('Nothing here yet.');
+  it('says the kind default text politely, without a live role of its own', () => {
+    const { container } = render(app(<Status kind='empty' />));
+    expect(announced()).toBe('Nothing here yet.');
+    expect(
+      container.querySelector('[data-scope="status"]'),
+    ).not.toHaveAttribute('role');
   });
 
   it('interrupts for errors', () => {
-    render(<Status kind='error' />);
-    expect(screen.getByRole('alert')).toHaveAttribute('data-kind', 'error');
+    render(app(<Status kind='error' />));
+    expect(announced('assertive')).toBe('Something went wrong.');
+    expect(announced()).toBe('');
   });
 
   it('prefers given text and draws the kind icon', () => {
-    const { container } = render(<Status kind='info'>Two rolls left.</Status>);
-    expect(screen.getByRole('status')).toHaveTextContent('Two rolls left.');
+    const { container } = render(
+      app(<Status kind='info'>Two rolls left.</Status>),
+    );
+    expect(container.querySelector('[data-scope="status"]')).toHaveTextContent(
+      'Two rolls left.',
+    );
     expect(container.querySelector('[data-scope="icon"]')).toHaveAttribute(
       'data-name',
       'info',
     );
   });
 
-  it('re-inserts polite text once mounted so it is spoken', async () => {
-    render(<Status kind='loading' />);
-    const region = screen.getByRole('status');
-    const added = additions(region);
-    await waitFor(() => expect(added).toHaveLength(region.childNodes.length));
-    expect(region).toHaveTextContent('Loading…');
+  it('speaks each change of text, once', async () => {
+    const { rerender } = render(app(<Status kind='info'>One</Status>));
+    rerender(app(<Status kind='info'>Two</Status>));
+    rerender(app(<Status kind='info'>Two</Status>));
+    await waitFor(() => expect(announced()).toBe('OneTwo'));
   });
 
-  it('leaves alerts alone: they speak on insertion', async () => {
-    render(<Status kind='error' />);
-    const added = additions(screen.getByRole('alert'));
-    await new Promise((resolve) => setTimeout(resolve, 150));
-    expect(added).toHaveLength(0);
+  it('speaks without a provider once its regions settle', async () => {
+    render(<Status kind='loading' />);
+    await waitFor(() => expect(announced()).toContain('Loading…'));
   });
 });

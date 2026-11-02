@@ -9,6 +9,7 @@ machine is needed.
 <script lang="ts">
   import {
     ARKHE_CLASS,
+    FocusReturn,
     dialogMachineProps,
     hideShadowSiblings,
     type DialogRole,
@@ -67,6 +68,7 @@ machine is needed.
   const env = useArkheEnvironment();
   const initial = untrack(() => defaultOpen ?? false);
   let mounted = $state(false);
+  const focusReturn = new FocusReturn();
 
   onMount(() => {
     mounted = true;
@@ -85,6 +87,7 @@ machine is needed.
       role,
       onOpenChange: change,
       finalFocus,
+      focusReturn,
       getRootNode: env().getRootNode,
     }),
   );

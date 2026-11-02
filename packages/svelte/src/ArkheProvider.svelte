@@ -1,9 +1,15 @@
 <!--
 @component
-Supplies labels, icons and the link renderer to every Arkhé component below.
+Supplies labels, icons, the link renderer and the announcer to every Arkhé
+component below. Mounts the announcer's live regions with itself.
 -->
 <script lang="ts">
-  import { resolveLabels, type ArkheLabels, type IconSet } from '@arkhe/core';
+  import {
+    Announcer,
+    resolveLabels,
+    type ArkheLabels,
+    type IconSet,
+  } from '@arkhe/core';
   import type { Snippet } from 'svelte';
   import {
     provideArkhe,
@@ -28,10 +34,13 @@ Supplies labels, icons and the link renderer to every Arkhé component below.
   }
 
   let { labels, icons, link, children }: Props = $props();
+  const announcer = new Announcer();
+  $effect.pre(() => announcer.mount());
   const value = $derived({
     labels: resolveLabels(labels),
     icons: icons ? [icons] : [],
     link,
+    announcer,
   });
   provideArkhe(() => value);
 </script>

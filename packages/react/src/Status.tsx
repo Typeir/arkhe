@@ -1,6 +1,6 @@
 /**
- * @fileoverview Status line: empty, loading, error or info, with its icon and
- * a live region role. Errors interrupt; the rest wait their turn.
+ * @fileoverview Status line: empty, loading, error or info, with its icon.
+ * The app announcer speaks its text; errors interrupt, the rest wait.
  *
  * @module packages/react/src/Status
  * @version 1.0.0
@@ -12,12 +12,18 @@
 
 import {
   ARKHE_CLASS,
-  announceOnMount,
+  announceText,
   partAttrs,
   statusLook,
   type StatusKind,
 } from '@arkhe/core';
-import { useEffect, useRef, type JSX, type ReactNode } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  type JSX,
+  type ReactNode,
+} from 'react';
 import { useArkhe } from './ArkheProvider.js';
 import { Icon } from './Icon.js';
 
@@ -34,8 +40,8 @@ export interface StatusProps {
 }
 
 /**
- * Renders a status line. A polite one re-inserts its text once mounted, so
- * it is spoken even when the host mounts it already filled.
+ * Renders a status line. The announcer speaks its text on mount and on each
+ * change, so a line mounted already filled is heard too.
  *
  * @component
  * @param {StatusProps} props - Component props.
@@ -44,20 +50,26 @@ export interface StatusProps {
  * @returns {JSX.Element} Status line.
  */
 export const Status = ({ kind, children }: StatusProps): JSX.Element => {
-  const { labels } = useArkhe();
+  const { labels, announcer } = useArkhe();
   const look = statusLook(kind, labels);
   const region = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (look.role !== 'status' || !region.current) return undefined;
-    return announceOnMount(region.current);
-  }, [look.role]);
+  const politeness = useRef(look.politeness);
+  useLayoutEffect(() => {
+    politeness.current = look.politeness;
+  });
+  useEffect(
+    () =>
+      region.current
+        ? announceText(region.current, announcer, () => politeness.current)
+        : undefined,
+    [announcer],
+  );
   return (
     <div
       ref={region}
       className={ARKHE_CLASS}
       {...partAttrs('status', 'root')}
-      data-kind={kind}
-      role={look.role}>
+      data-kind={kind}>
       <Icon name={look.icon} />
       <span {...partAttrs('status', 'text')}>{children ?? look.text}</span>
     </div>

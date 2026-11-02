@@ -1,14 +1,7 @@
 import { ArkheProvider, Skeleton, SkeletonGroup } from '@arkhe/react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { announced } from '@tests/fixtures/announced';
+import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-
-function additions(region: Element): Node[] {
-  const added: Node[] = [];
-  new MutationObserver((records) => {
-    for (const record of records) added.push(...record.addedNodes);
-  }).observe(region, { childList: true });
-  return added;
-}
 
 describe('Skeleton', () => {
   it('renders a hidden line by default', () => {
@@ -29,17 +22,18 @@ describe('Skeleton', () => {
 });
 
 describe('SkeletonGroup', () => {
-  it('announces one loading region with text of its own', async () => {
-    render(
-      <SkeletonGroup>
-        <Skeleton />
-      </SkeletonGroup>,
+  it('speaks its hidden loading label once mounted, holding no live region', () => {
+    const { container } = render(
+      <ArkheProvider>
+        <SkeletonGroup>
+          <Skeleton />
+        </SkeletonGroup>
+      </ArkheProvider>,
     );
-    const region = screen.getByRole('status', { name: 'Loading' });
-    expect(region).not.toHaveAttribute('aria-busy');
-    expect(region).toHaveTextContent('Loading');
-    const added = additions(region);
-    await waitFor(() => expect(added).toHaveLength(region.childNodes.length));
+    expect(announced()).toBe('Loading');
+    const group = container.querySelector('[data-part="group"]');
+    expect(group).not.toHaveAttribute('role');
+    expect(group).toHaveTextContent('Loading');
   });
 
   it('uses the translated loading label', () => {
@@ -50,8 +44,6 @@ describe('SkeletonGroup', () => {
         </SkeletonGroup>
       </ArkheProvider>,
     );
-    expect(
-      screen.getByRole('status', { name: 'Ladataan' }),
-    ).toBeInTheDocument();
+    expect(announced()).toBe('Ladataan');
   });
 });

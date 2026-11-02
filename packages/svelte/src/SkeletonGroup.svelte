@@ -1,11 +1,11 @@
 <!--
 @component
-Groups skeletons into one loading region. Its only text is the hidden
-`loading` label, re-inserted once mounted so it is spoken; the host removes the
-group when the content arrives.
+Groups skeletons into one placeholder. Its only text is the hidden `loading`
+label, which the announcer speaks on mount; the host removes the group when
+the content arrives.
 -->
 <script lang="ts">
-  import { ARKHE_CLASS, announceOnMount, partAttrs } from '@arkhe/core';
+  import { ARKHE_CLASS, announceText, partAttrs } from '@arkhe/core';
   import type { Snippet } from 'svelte';
   import { useArkhe } from './context.js';
 
@@ -21,16 +21,14 @@ group when the content arrives.
 
   let { children }: Props = $props();
   const arkhe = useArkhe();
-  let region = $state<HTMLDivElement>();
-  $effect(() => (region ? announceOnMount(region) : undefined));
+  let label = $state<HTMLSpanElement>();
+  $effect(() =>
+    label ? announceText(label, arkhe().announcer, () => 'polite') : undefined,
+  );
 </script>
 
-<div
-  bind:this={region}
-  class={ARKHE_CLASS}
-  {...partAttrs('skeleton', 'group')}
-  role="status"
-  aria-label={arkhe().labels.loading}>
-  <span {...partAttrs('skeleton', 'label')}>{arkhe().labels.loading}</span>
+<div class={ARKHE_CLASS} {...partAttrs('skeleton', 'group')}>
+  <span bind:this={label} {...partAttrs('skeleton', 'label')}
+    >{arkhe().labels.loading}</span>
   {@render children()}
 </div>

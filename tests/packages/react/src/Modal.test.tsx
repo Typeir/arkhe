@@ -1,5 +1,6 @@
 import { ArkheEnvironment, ArkheProvider, Modal } from '@arkhe/react';
 import { render, screen, waitFor } from '@testing-library/react';
+import { useState } from 'react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -95,6 +96,39 @@ describe('Modal', () => {
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(fallback).toHaveFocus());
     fallback.remove();
+  });
+
+  it('returns focus to the nearest row when the opener row is gone', async () => {
+    const Rows = () => {
+      const [rows, setRows] = useState(['a', 'b']);
+      const [open, setOpen] = useState(false);
+      return (
+        <>
+          {rows.map((row) => (
+            <div key={row}>
+              <button onClick={() => setOpen(true)}>Delete {row}</button>
+            </div>
+          ))}
+          <Modal title='Sure?' open={open} onOpenChange={setOpen}>
+            <button
+              onClick={() => {
+                setRows((all) => all.slice(1));
+                setOpen(false);
+              }}>
+              Confirm
+            </button>
+          </Modal>
+        </>
+      );
+    };
+    render(<Rows />);
+    await userEvent.click(screen.getByRole('button', { name: 'Delete a' }));
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Confirm' }),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Delete b' })).toHaveFocus(),
+    );
   });
 
   it('hides the rest of a shadow-root app while open', async () => {

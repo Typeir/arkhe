@@ -1,4 +1,4 @@
-import { resolveLabels } from '@arkhe/core';
+import { Announcer, resolveLabels } from '@arkhe/core';
 import type { ArkheContextValue } from '@arkhe/svelte';
 import ContextProbe from '@tests/fixtures/svelte/ContextProbe.svelte';
 import { render } from '@testing-library/svelte';
@@ -10,6 +10,7 @@ describe('useArkhe', () => {
       labels: resolveLabels({ loading: 'Ladataan' }),
       icons: [],
       link: undefined,
+      announcer: new Announcer(),
     };
     const seen: { value?: ArkheContextValue } = {};
     render(ContextProbe, {

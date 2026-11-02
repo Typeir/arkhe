@@ -1,6 +1,8 @@
 /**
  * @fileoverview App-wide adapters for the Svelte port: translated labels,
- * icon sets and the link component, passed down through Svelte context.
+ * icon sets, the link component and the announcer, passed down through
+ * Svelte context. Without a provider the announcer makes its regions on
+ * first use.
  *
  * @module packages/svelte/src/context
  * @version 1.0.0
@@ -8,7 +10,12 @@
  * @since 0.1.0
  */
 
-import { resolveLabels, type ArkheLabels, type IconSet } from '@arkhe/core';
+import {
+  Announcer,
+  resolveLabels,
+  type ArkheLabels,
+  type IconSet,
+} from '@arkhe/core';
 import { getContext, setContext, type Component } from 'svelte';
 
 /**
@@ -35,11 +42,13 @@ export type LinkComponent = Component<Record<string, unknown>> | undefined;
  * @property {ArkheLabels} labels - Complete label templates.
  * @property {readonly IconSet<IconComponent>[]} icons - App icon sets; Icon falls back to Lucide after them.
  * @property {LinkComponent} link - Link renderer.
+ * @property {Announcer} announcer - Speaks text through the app's live regions.
  */
 export interface ArkheContextValue {
   readonly labels: ArkheLabels;
   readonly icons: readonly IconSet<IconComponent>[];
   readonly link: LinkComponent;
+  readonly announcer: Announcer;
 }
 
 const KEY = Symbol.for('arkhe.context');
@@ -48,6 +57,7 @@ const DEFAULT_CONTEXT: ArkheContextValue = {
   labels: resolveLabels(),
   icons: [],
   link: undefined,
+  announcer: new Announcer(),
 };
 
 /**

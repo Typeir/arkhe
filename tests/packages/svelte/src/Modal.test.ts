@@ -1,4 +1,5 @@
 import { Modal } from '@arkhe/svelte';
+import DeleteRows from '@tests/fixtures/svelte/DeleteRows.svelte';
 import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
 import ShadowModal from '@tests/fixtures/svelte/ShadowModal.svelte';
 import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
@@ -89,6 +90,17 @@ describe('Modal', () => {
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(fallback).toHaveFocus());
     fallback.remove();
+  });
+
+  it('returns focus to the nearest row when the opener row is gone', async () => {
+    render(DeleteRows);
+    await userEvent.click(screen.getByRole('button', { name: 'Delete a' }));
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Confirm' }),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Delete b' })).toHaveFocus(),
+    );
   });
 
   it('hides the rest of a shadow-root app while open', async () => {

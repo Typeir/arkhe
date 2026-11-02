@@ -1,25 +1,27 @@
 import { Status } from '@arkhe/svelte';
+import { announced } from '@tests/fixtures/announced';
+import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
 import { textSnippet } from '@tests/fixtures/svelte/snippets';
-import { render, screen, waitFor } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
 
-function additions(region: Element): Node[] {
-  const added: Node[] = [];
-  new MutationObserver((records) => {
-    for (const record of records) added.push(...record.addedNodes);
-  }).observe(region, { childList: true });
-  return added;
-}
-
 describe('Status', () => {
-  it('says the kind default text politely', () => {
-    render(Status, { kind: 'empty' });
-    expect(screen.getByRole('status')).toHaveTextContent('Nothing here yet.');
+  it('says the kind default text politely, without a live role of its own', async () => {
+    const { container } = renderWithProvider({}, Status, {
+      kind: 'empty' as const,
+    });
+    await waitFor(() => expect(announced()).toBe('Nothing here yet.'));
+    expect(
+      container.querySelector('[data-scope="status"]'),
+    ).not.toHaveAttribute('role');
   });
 
-  it('interrupts for errors', () => {
-    render(Status, { kind: 'error' });
-    expect(screen.getByRole('alert')).toHaveAttribute('data-kind', 'error');
+  it('interrupts for errors', async () => {
+    renderWithProvider({}, Status, { kind: 'error' as const });
+    await waitFor(() =>
+      expect(announced('assertive')).toBe('Something went wrong.'),
+    );
+    expect(announced()).toBe('');
   });
 
   it('prefers given text and draws the kind icon', () => {
@@ -27,25 +29,29 @@ describe('Status', () => {
       kind: 'info',
       children: textSnippet('Two rolls left.'),
     });
-    expect(screen.getByRole('status')).toHaveTextContent('Two rolls left.');
+    expect(container.querySelector('[data-scope="status"]')).toHaveTextContent(
+      'Two rolls left.',
+    );
     expect(container.querySelector('[data-scope="icon"]')).toHaveAttribute(
       'data-name',
       'info',
     );
   });
 
-  it('re-inserts polite text once mounted so it is spoken', async () => {
-    render(Status, { kind: 'loading' });
-    const region = screen.getByRole('status');
-    const added = additions(region);
-    await waitFor(() => expect(added).toHaveLength(region.childNodes.length));
-    expect(region).toHaveTextContent('Loading…');
+  it('speaks each change of text, once', async () => {
+    const { rerender } = renderWithProvider({}, Status, {
+      kind: 'info' as const,
+      children: textSnippet('One'),
+    });
+    await waitFor(() => expect(announced()).toBe('One'));
+    await rerender({
+      innerProps: { kind: 'info', children: textSnippet('Two') },
+    });
+    await waitFor(() => expect(announced()).toBe('OneTwo'));
   });
 
-  it('leaves alerts alone: they speak on insertion', async () => {
-    render(Status, { kind: 'error' });
-    const added = additions(screen.getByRole('alert'));
-    await new Promise((resolve) => setTimeout(resolve, 150));
-    expect(added).toHaveLength(0);
+  it('speaks without a provider once its regions settle', async () => {
+    render(Status, { kind: 'loading' });
+    await waitFor(() => expect(announced()).toContain('Loading…'));
   });
 });
