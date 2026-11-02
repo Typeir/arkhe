@@ -8,3 +8,5 @@ blob-report
 .ignore
 
 package-lock.json
+
+.claude/worktrees/
