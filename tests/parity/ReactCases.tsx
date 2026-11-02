@@ -76,6 +76,18 @@ const ChangingTabs = (): JSX.Element => {
   );
 };
 
+const DescribedModal = (): JSX.Element => {
+  const [described, setDescribed] = useState(true);
+  return (
+    <Modal
+      title='Rest'
+      description={described ? 'Recover.' : undefined}
+      trigger='Open'>
+      <Button onClick={() => setDescribed(false)}>Drop description</Button>
+    </Modal>
+  );
+};
+
 const SCENES: Readonly<Record<string, () => ReactNode>> = {
   buttons: () => <Buttons />,
   chips: () => (
@@ -135,6 +147,7 @@ const SCENES: Readonly<Record<string, () => ReactNode>> = {
       Body
     </Modal>
   ),
+  'modal-description': () => <DescribedModal />,
   tooltip: () => (
     <Tooltip content='Halves damage.' openDelay={0} closeDelay={0}>
       resistance

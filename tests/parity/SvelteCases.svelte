@@ -45,6 +45,7 @@ Svelte side of the parity scenes. Each scene must match its twin in
   let { name }: Props = $props();
   let pressed = $state(false);
   let stage = $state(0);
+  let described = $state(true);
 </script>
 
 {#if name === 'buttons'}
@@ -105,6 +106,13 @@ Svelte side of the parity scenes. Each scene must match its twin in
   </Tabs>
 {:else if name === 'modal'}
   <Modal title="Rest" description="Recover." trigger="Open">Body</Modal>
+{:else if name === 'modal-description'}
+  <Modal
+    title="Rest"
+    description={described ? 'Recover.' : undefined}
+    trigger="Open">
+    <Button onclick={() => (described = false)}>Drop description</Button>
+  </Modal>
 {:else if name === 'tooltip'}
   <Tooltip content="Halves damage." openDelay={0} closeDelay={0}
     >resistance</Tooltip>

@@ -10,6 +10,7 @@ machine is needed.
   import {
     ARKHE_CLASS,
     dialogMachineProps,
+    hideShadowSiblings,
     type DialogRole,
   } from '@arkhe/core';
   import * as dialog from '@zag-js/dialog';
@@ -35,6 +36,7 @@ machine is needed.
    * @property {boolean} [defaultOpen] - First open state when uncontrolled.
    * @property {(open: boolean) => void} [onOpenChange] - Open-state callback.
    * @property {DialogRole} [role] - `alertdialog` for confirmations. Defaults to `dialog`.
+   * @property {() => HTMLElement | null} [finalFocus] - Element to focus on close; for when the opener is gone.
    * @property {Snippet} [children] - Body.
    */
   interface Props {
@@ -45,6 +47,7 @@ machine is needed.
     defaultOpen?: boolean;
     onOpenChange?: (open: boolean) => void;
     role?: DialogRole;
+    finalFocus?: () => HTMLElement | null;
     children?: Snippet;
   }
 
@@ -56,6 +59,7 @@ machine is needed.
     defaultOpen,
     onOpenChange,
     role,
+    finalFocus,
     children,
   }: Props = $props();
   const id = $props.id();
@@ -80,10 +84,16 @@ machine is needed.
       ready: mounted,
       role,
       onOpenChange: change,
+      finalFocus,
       getRootNode: env().getRootNode,
     }),
   );
   const api = $derived(dialog.connect(service, normalizeProps));
+  let content = $state<HTMLDivElement>();
+  $effect(() => {
+    if (!api.open || !content) return;
+    return hideShadowSiblings(content);
+  });
 </script>
 
 {#if trigger !== undefined}
@@ -99,7 +109,12 @@ machine is needed.
     }}>
     <div {...api.getBackdropProps()}></div>
     <div {...api.getPositionerProps()}>
-      <div {...api.getContentProps()}>
+      <div
+        bind:this={content}
+        {...api.getContentProps()}
+        aria-describedby={description === undefined
+          ? undefined
+          : api.getDescriptionProps().id}>
         <header data-scope="dialog" data-part="header">
           <h2 {...api.getTitleProps()}>{title}</h2>
           <button
