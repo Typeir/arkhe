@@ -24,6 +24,7 @@ Svelte side of the parity scenes. Each scene must match its twin in
     TextInput,
     Tooltip,
   } from '@arkhe/svelte';
+  import type { NumericValue } from '@arkhe/core';
   import { COMBO_ITEMS, MENU_ITEMS, TAB_ITEMS, TAB_TEXT } from './scenes';
 
   /**
@@ -38,6 +39,12 @@ Svelte side of the parity scenes. Each scene must match its twin in
 
   let { name }: Props = $props();
   let pressed = $state(false);
+  let speed = $state<NumericValue>(5);
+  let speedLog = $state<NumericValue[]>([]);
+  const answerSpeed = (next: NumericValue) => {
+    speedLog.push(next);
+    speed = next === null ? null : Math.min(next, 10);
+  };
 </script>
 
 {#if name === 'buttons'}
@@ -87,6 +94,10 @@ Svelte side of the parity scenes. Each scene must match its twin in
   <Status kind="info">Two rolls left.</Status>
 {:else if name === 'numeric'}
   <NumericInput label="Speed" defaultValue={3} min={0} max={10} />
+{:else if name === 'numeric-controlled'}
+  <NumericInput label="Speed" value={speed} onValueChange={answerSpeed} />
+  <Button onclick={() => (speed = 8)}>Set 8</Button>
+  <output>{speedLog.join(' ')}</output>
 {:else if name === 'tabs'}
   <Tabs items={TAB_ITEMS} label="Sheet">
     {#snippet panel(key)}{TAB_TEXT[key]}{/snippet}

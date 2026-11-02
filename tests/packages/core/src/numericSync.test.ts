@@ -41,6 +41,39 @@ describe('NumericSync', () => {
     expect(onValueChange).not.toHaveBeenCalled();
   });
 
+  it('stays silent when Zag runs the send in a later microtask', async () => {
+    const { state, api, sync } = fakeApi(1);
+    const onValueChange = vi.fn();
+    vi.mocked(api.setValue).mockImplementation((value: number) =>
+      queueMicrotask(() => {
+        state.value = value;
+        sync.emit(value, onValueChange);
+      }),
+    );
+    sync.receive(1);
+    sync.focus();
+    sync.emit(17, onValueChange);
+    sync.receive(17);
+    sync.receive(42);
+    await Promise.resolve();
+    await Promise.resolve();
+    sync.receive(43);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(onValueChange.mock.calls).toEqual([[17]]);
+    expect(api.setValue).toHaveBeenLastCalledWith(43);
+    expect(state.value).toBe(43);
+  });
+
+  it('reports user changes once the silence has passed', async () => {
+    const { sync } = fakeApi(1);
+    const onValueChange = vi.fn();
+    sync.receive(5);
+    await Promise.resolve();
+    sync.emit(6, onValueChange);
+    expect(onValueChange).toHaveBeenCalledWith(6);
+  });
+
   it('holds the answer to its own change until blur', () => {
     const { state, api, sync } = fakeApi(1);
     sync.receive(1);

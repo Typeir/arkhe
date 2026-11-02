@@ -28,6 +28,7 @@ import {
   TextInput,
   Tooltip,
 } from '@arkhe/react';
+import type { NumericValue } from '@arkhe/core';
 import { useState, type JSX, type ReactNode } from 'react';
 import { COMBO_ITEMS, MENU_ITEMS, TAB_ITEMS, TAB_TEXT } from './scenes';
 
@@ -52,6 +53,25 @@ const Buttons = (): JSX.Element => {
       <Button href='#b' disabled>
         Dead link
       </Button>
+    </>
+  );
+};
+
+const ControlledNumeric = (): JSX.Element => {
+  const [value, setValue] = useState<NumericValue>(5);
+  const [log, setLog] = useState<readonly NumericValue[]>([]);
+  return (
+    <>
+      <NumericInput
+        label='Speed'
+        value={value}
+        onValueChange={(next) => {
+          setLog((entries) => [...entries, next]);
+          setValue(next === null ? null : Math.min(next, 10));
+        }}
+      />
+      <Button onClick={() => setValue(8)}>Set 8</Button>
+      <output>{log.join(' ')}</output>
     </>
   );
 };
@@ -108,6 +128,7 @@ const SCENES: Readonly<Record<string, () => ReactNode>> = {
   numeric: () => (
     <NumericInput label='Speed' defaultValue={3} min={0} max={10} />
   ),
+  'numeric-controlled': () => <ControlledNumeric />,
   tabs: () => <Tabs items={TAB_ITEMS} label='Sheet' panels={TAB_TEXT} />,
   modal: () => (
     <Modal title='Rest' description='Recover.' trigger='Open'>

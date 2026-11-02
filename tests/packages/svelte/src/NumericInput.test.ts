@@ -1,7 +1,8 @@
 import { NumericInput } from '@arkhe/svelte';
+import BoundNumeric from '@tests/fixtures/svelte/BoundNumeric.svelte';
 import ClampedNumeric from '@tests/fixtures/svelte/ClampedNumeric.svelte';
 import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
-import { render, screen } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -41,8 +42,59 @@ describe('NumericInput', () => {
     await userEvent.type(input, '71');
     expect(input).toHaveValue('71');
     await userEvent.tab();
-    expect(input).toHaveValue('10');
+    await waitFor(() => expect(input).toHaveValue('10'));
     expect(onCommit).toHaveBeenLastCalledWith(10);
+  });
+
+  it('does not echo outside values and applies each while focused', async () => {
+    const onValueChange = vi.fn();
+    const { rerender } = render(NumericInput, {
+      label: 'Speed',
+      value: 1,
+      onValueChange,
+    });
+    const input = screen.getByRole('spinbutton');
+    await userEvent.click(input);
+    await fireEvent.input(input, { target: { value: '17' } });
+    expect(onValueChange).toHaveBeenCalledWith(17);
+    await rerender({ value: 17 });
+    onValueChange.mockClear();
+    await rerender({ value: 42 });
+    await waitFor(() => expect(input).toHaveValue('42'));
+    await rerender({ value: 43 });
+    await waitFor(() => expect(input).toHaveValue('43'));
+    expect(input).toHaveFocus();
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  it('snaps back to a parent that ignores the change, silently', async () => {
+    const onValueChange = vi.fn();
+    render(NumericInput, { label: 'Speed', value: 5, onValueChange });
+    const input = screen.getByRole('spinbutton');
+    await userEvent.type(input, '7');
+    await userEvent.tab();
+    await waitFor(() => expect(input).toHaveValue('5'));
+    expect(onValueChange.mock.calls).toEqual([[57]]);
+  });
+
+  it('snaps back to a parent that clamps to the value it held', async () => {
+    render(ClampedNumeric, { onCommit: () => undefined, unbounded: true });
+    const input = screen.getByRole('spinbutton');
+    await userEvent.clear(input);
+    await fireEvent.input(input, { target: { value: '7' } });
+    await fireEvent.input(input, { target: { value: '71' } });
+    await fireEvent.input(input, { target: { value: '710' } });
+    expect(screen.getByRole('status')).toHaveTextContent('10');
+    await userEvent.tab();
+    await waitFor(() => expect(input).toHaveValue('10'));
+  });
+
+  it('writes a binding that starts undefined', async () => {
+    render(BoundNumeric);
+    const input = screen.getByRole('spinbutton');
+    await userEvent.type(input, '42');
+    await userEvent.tab();
+    expect(screen.getByRole('status')).toHaveTextContent('42');
   });
 
   it('uses translated step labels', () => {

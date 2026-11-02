@@ -112,6 +112,24 @@ export const PARITY_CASES: readonly ParityCase[] = [
     name: 'numeric',
     steps: [click('Increase Speed'), click('Decrease Speed')],
   },
+  {
+    name: 'numeric-controlled',
+    steps: [
+      click('Set 8'),
+      {
+        label: 'focus and type "710"',
+        run: async () => {
+          const input = screen.getByRole('spinbutton');
+          await userEvent.click(input);
+          for (const text of ['7', '71', '710']) {
+            fireEvent.input(input, { target: { value: text } });
+            await new Promise((resolve) => setTimeout(resolve));
+          }
+        },
+      },
+      press('{Tab}'),
+    ],
+  },
   { name: 'tabs', steps: [click('Notes', 'tab')] },
   { name: 'modal', steps: [click('Open'), press('{Escape}')] },
   { name: 'tooltip', steps: [hover('resistance')] },
