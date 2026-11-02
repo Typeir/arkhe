@@ -2,8 +2,9 @@
  * @fileoverview Turns a DOM tree into comparable lines, removing what may
  * differ between ports without changing meaning: generated ids (element ids
  * and the instance ids Zag stamps into `data-ownedby` and `data-uid`),
- * attribute and class order, style formatting, whitespace, comments. Form
- * controls compare by their live value, not the `value` attribute.
+ * attribute and class order, style formatting, text node splits, whitespace
+ * that does not render, comments. Form controls compare by their live value,
+ * checked and selected state, not the attributes that seed them.
  *
  * @module tests/parity/normalize
  * @version 1.0.0
@@ -24,6 +25,32 @@ export interface Tolerance {
 }
 
 const INSTANCE_ID_ATTRIBUTES = ['data-ownedby', 'data-uid'];
+const SPACE = '␠';
+const INLINE_ELEMENTS = new Set([
+  'a',
+  'abbr',
+  'b',
+  'button',
+  'code',
+  'em',
+  'i',
+  'img',
+  'input',
+  'kbd',
+  'label',
+  'mark',
+  's',
+  'select',
+  'small',
+  'span',
+  'strong',
+  'sub',
+  'sup',
+  'svg',
+  'textarea',
+  'time',
+  'u',
+]);
 
 /**
  * Maps every id in `root` to `id-1`, `id-2`… in document order.
@@ -69,38 +96,110 @@ function attributeValue(attribute: Attr, ids: Map<string, string>): string {
 }
 
 /**
- * Serialises `node` and its subtree into indented lines.
+ * Live form state as `[property, value]` pairs: what the user sees, which
+ * the matching attributes only seed.
+ *
+ * @function liveState
+ * @param {Element} element - Element.
+ * @returns {[string, string][]} Properties to compare.
+ */
+function liveState(element: Element): [string, string][] {
+  if (element instanceof HTMLInputElement) {
+    const toggle = element.type === 'checkbox' || element.type === 'radio';
+    return [
+      ['value', element.value],
+      ...(toggle
+        ? ([
+            ['checked', String(element.checked)],
+            ['indeterminate', String(element.indeterminate)],
+          ] as [string, string][])
+        : []),
+    ];
+  }
+  if (
+    element instanceof HTMLTextAreaElement ||
+    element instanceof HTMLSelectElement
+  ) {
+    return [['value', element.value]];
+  }
+  if (element instanceof HTMLOptionElement) {
+    return [['selected', String(element.selected)]];
+  }
+  return [];
+}
+
+/**
+ * Says whether `node` is an element laid out inline, where the whitespace
+ * next to it renders as a space.
+ *
+ * @function isInline
+ * @param {Node | string | undefined} node - Neighbour.
+ * @returns {boolean} True for an inline element.
+ */
+function isInline(node: Node | string | undefined): boolean {
+  return node instanceof Element && INLINE_ELEMENTS.has(node.localName);
+}
+
+/**
+ * Serialises the children of `parent`. Adjacent text nodes merge, so how a
+ * port splits text does not matter. Whitespace runs collapse to one space;
+ * a space next to an inline element is kept as `␠`, since it renders.
+ *
+ * @function childLines
+ * @param {Node} parent - Parent node.
+ * @param {Map<string, string>} ids - Canonical ids.
+ * @param {string} indent - Indent of the children.
+ * @returns {string[]} Lines.
+ */
+function childLines(
+  parent: Node,
+  ids: Map<string, string>,
+  indent: string,
+): string[] {
+  const runs: (Element | string)[] = [];
+  for (const child of parent.childNodes) {
+    if (child instanceof Element) {
+      runs.push(child);
+    } else if (child.nodeType === Node.TEXT_NODE) {
+      const last = runs.length - 1;
+      const text = child.textContent ?? '';
+      if (typeof runs[last] === 'string') runs[last] += text;
+      else runs.push(text);
+    }
+  }
+  return runs.flatMap((run, index) => {
+    if (typeof run !== 'string') return lines(run, ids, indent);
+    const text = run.replace(/\s+/g, ' ');
+    const lead = text.startsWith(' ') && isInline(runs[index - 1]) ? SPACE : '';
+    const trail = text.endsWith(' ') && isInline(runs[index + 1]) ? SPACE : '';
+    const core = text.trim();
+    if (!core) return [];
+    return [`${indent}"${lead}${core}${trail}"`];
+  });
+}
+
+/**
+ * Serialises `element` and its subtree into indented lines.
  *
  * @function lines
- * @param {Node} node - Node.
+ * @param {Element} element - Element.
  * @param {Map<string, string>} ids - Canonical ids.
  * @param {string} indent - Current indent.
  * @returns {string[]} Lines.
  */
-function lines(node: Node, ids: Map<string, string>, indent: string): string[] {
-  if (node.nodeType === Node.TEXT_NODE) {
-    const text = (node.textContent ?? '').replace(/\s+/g, ' ').trim();
-    return text ? [`${indent}"${text}"`] : [];
-  }
-  if (node.nodeType !== Node.ELEMENT_NODE) return [];
-  const element = node as Element;
-  const live =
-    element instanceof HTMLInputElement ||
-    element instanceof HTMLTextAreaElement
-      ? [`.value="${element.value}"`]
-      : [];
+function lines(
+  element: Element,
+  ids: Map<string, string>,
+  indent: string,
+): string[] {
+  const live = liveState(element);
   const attributes = [...element.attributes]
-    .filter((attribute) => !(live.length && attribute.name === 'value'))
+    .filter((attribute) => !live.some(([name]) => name === attribute.name))
     .map((attribute) => `${attribute.name}="${attributeValue(attribute, ids)}"`)
-    .concat(live)
+    .concat(live.map(([name, value]) => `.${name}="${value}"`))
     .sort();
   const open = [element.localName, ...attributes].join(' ');
-  return [
-    `${indent}<${open}>`,
-    ...[...element.childNodes].flatMap((child) =>
-      lines(child, ids, `${indent}  `),
-    ),
-  ];
+  return [`${indent}<${open}>`, ...childLines(element, ids, `${indent}  `)];
 }
 
 /**
@@ -116,7 +215,7 @@ export function normalizeDom(
   tolerances: readonly Tolerance[] = [],
 ): string[] {
   const ids = canonicalIds(root);
-  return [...root.childNodes]
-    .flatMap((child) => lines(child, ids, ''))
-    .filter((line) => !tolerances.some(({ pattern }) => pattern.test(line)));
+  return childLines(root, ids, '').filter(
+    (line) => !tolerances.some(({ pattern }) => pattern.test(line)),
+  );
 }

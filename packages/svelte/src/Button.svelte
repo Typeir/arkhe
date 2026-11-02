@@ -70,8 +70,7 @@ anchor that keeps its text but loses its address, click and tab stop.
 </script>
 
 {#snippet content()}
-  {#if icon}<Icon name={icon} />{/if}
-  {@render children?.()}
+  {#if icon}<Icon name={icon} />{/if}{@render children?.()}
 {/snippet}
 
 {#if href !== undefined && disabled}

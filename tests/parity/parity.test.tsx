@@ -61,6 +61,10 @@ describe('React and Svelte render the same DOM', () => {
     it(scene.name, async () => {
       const react = await snapshots(REACT, scene);
       const svelte = await snapshots(SVELTE, scene);
+      const missing = (shot: string[]) =>
+        shot.some((line) => line.includes(`missing scene ${scene.name}`));
+      expect(missing(react[0]), `${scene.name}: no React scene`).toBe(false);
+      expect(missing(svelte[0]), `${scene.name}: no Svelte scene`).toBe(false);
       const labels = [
         'first render',
         ...(scene.steps ?? []).map((s) => s.label),

@@ -31,6 +31,49 @@ describe('normalizeDom', () => {
     expect(normalizeDom(withProperty)).toEqual(normalizeDom(withAttribute));
   });
 
+  it('sees a space between text and an inline element', () => {
+    expect(normalizeDom(tree('<p>Known: <b>Ward</b></p>'))).not.toEqual(
+      normalizeDom(tree('<p>Known:<b>Ward</b></p>')),
+    );
+    expect(normalizeDom(tree('<p><i></i> Rename</p>'))).not.toEqual(
+      normalizeDom(tree('<p><i></i>Rename</p>')),
+    );
+  });
+
+  it('ignores how text is split and space at block edges', () => {
+    const split = tree('<p>Known: </p>');
+    split.firstElementChild?.append(document.createTextNode('3'));
+    expect(normalizeDom(split)).toEqual(normalizeDom(tree('<p> Known: 3</p>')));
+    expect(normalizeDom(tree('<div> <p>a</p> </div>'))).toEqual(
+      normalizeDom(tree('<div><p>a</p></div>')),
+    );
+  });
+
+  it('compares checkboxes by live checked and indeterminate state', () => {
+    const checked = tree('<input type="checkbox">');
+    const unchecked = tree('<input type="checkbox" checked>');
+    (checked.firstElementChild as HTMLInputElement).checked = true;
+    (unchecked.firstElementChild as HTMLInputElement).checked = false;
+    expect(normalizeDom(checked)).not.toEqual(normalizeDom(unchecked));
+    const mixed = tree('<input type="checkbox">');
+    (mixed.firstElementChild as HTMLInputElement).indeterminate = true;
+    expect(normalizeDom(mixed)).not.toEqual(
+      normalizeDom(tree('<input type="checkbox">')),
+    );
+  });
+
+  it('compares selects by live value and options by selection', () => {
+    const html =
+      '<select><option value="a">A</option><option value="b">B</option></select>';
+    const first = tree(html);
+    const second = tree(html);
+    (second.firstElementChild as HTMLSelectElement).value = 'b';
+    expect(normalizeDom(first)).not.toEqual(normalizeDom(second));
+    expect(normalizeDom(second)).toContain(
+      '  <option .selected="true" value="b">',
+    );
+  });
+
   it('still sees real differences', () => {
     const base = normalizeDom(tree('<button aria-pressed="true">Go</button>'));
     expect(

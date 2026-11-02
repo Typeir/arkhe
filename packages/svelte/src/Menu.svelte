@@ -75,8 +75,7 @@ focus returns to the button on close.
               disabled: entry.disabled,
             })}
             data-danger={entry.danger ? '' : undefined}>
-            {#if entry.icon}<Icon name={entry.icon} />{/if}
-            {entry.label}
+            {#if entry.icon}<Icon name={entry.icon} />{/if}{entry.label}
           </li>
         {/if}
       {/each}
