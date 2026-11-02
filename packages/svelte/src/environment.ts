@@ -8,12 +8,10 @@
  * @since 0.1.0
  */
 
-import {
-  DEFAULT_ENVIRONMENT,
-  ENVIRONMENT_KEY,
-  type ArkheEnvironmentValue,
-} from '@arkhe/core';
+import { DEFAULT_ENVIRONMENT, type ArkheEnvironmentValue } from '@arkhe/core';
 import { getContext, setContext } from 'svelte';
+
+const KEY = Symbol.for('arkhe.environment');
 
 /**
  * Publishes an environment to every Arkhé component below the caller.
@@ -25,7 +23,7 @@ import { getContext, setContext } from 'svelte';
 export function provideArkheEnvironment(
   read: () => ArkheEnvironmentValue,
 ): void {
-  setContext(ENVIRONMENT_KEY, read);
+  setContext(KEY, read);
 }
 
 /**
@@ -37,7 +35,7 @@ export function provideArkheEnvironment(
  */
 export function useArkheEnvironment(): () => ArkheEnvironmentValue {
   return (
-    getContext<(() => ArkheEnvironmentValue) | undefined>(ENVIRONMENT_KEY) ??
+    getContext<(() => ArkheEnvironmentValue) | undefined>(KEY) ??
     (() => DEFAULT_ENVIRONMENT)
   );
 }

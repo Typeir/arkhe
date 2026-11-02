@@ -25,7 +25,7 @@ export function usePortalContainer(): RefObject<HTMLElement> {
     () =>
       ({
         get current() {
-          return env.container() ?? null;
+          return env.container();
         },
       }) as RefObject<HTMLElement>,
     [env],

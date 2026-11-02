@@ -27,9 +27,8 @@ describe('createEnvironment', () => {
     expect(env.container()).toBe(other.body);
   });
 
-  it('takes a container element or getter', () => {
+  it('takes a container element', () => {
     const box = document.createElement('div');
     expect(createEnvironment({ container: box }).container()).toBe(box);
-    expect(createEnvironment({ container: () => box }).container()).toBe(box);
   });
 });

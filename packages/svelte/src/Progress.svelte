@@ -34,7 +34,7 @@ value text says by how much. Throws a RangeError when `max` is not positive.
   let { value, max, label, markers, showValue }: Props = $props();
   const arkhe = useArkhe();
   const state = $derived(progressState(value, max, markers));
-  const text = $derived(progressValueText(value, max, arkhe().labels));
+  const text = $derived(progressValueText(state, max, arkhe().labels));
 </script>
 
 <div

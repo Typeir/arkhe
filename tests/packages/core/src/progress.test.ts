@@ -45,22 +45,24 @@ describe('progressState', () => {
   );
 });
 
+function text(value: number): string {
+  return progressValueText(progressState(value, 10), 10, DEFAULT_LABELS);
+}
+
 describe('progressValueText', () => {
   it('reads value of max', () => {
-    expect(progressValueText(6, 10, DEFAULT_LABELS)).toBe('6 of 10');
+    expect(text(6)).toBe('6 of 10');
   });
 
   it('reads the overflow', () => {
-    expect(progressValueText(13, 10, DEFAULT_LABELS)).toBe('13 of 10, 3 over');
+    expect(text(13)).toBe('13 of 10, 3 over');
   });
 
   it('reads the overflow without float noise', () => {
-    expect(progressValueText(10.2, 10, DEFAULT_LABELS)).toBe(
-      '10.2 of 10, 0.2 over',
-    );
+    expect(text(10.2)).toBe('10.2 of 10, 0.2 over');
   });
 
   it('reads a non-finite value as the bar draws it', () => {
-    expect(progressValueText(Number.NaN, 10, DEFAULT_LABELS)).toBe('0 of 10');
+    expect(text(Number.NaN)).toBe('0 of 10');
   });
 });
