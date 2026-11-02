@@ -1,0 +1,40 @@
+{
+  "name": "@arkhe/svelte",
+  "version": "0.1.0",
+  "type": "module",
+  "sideEffects": false,
+  "svelte": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node ../../.github/scripts/ascii-cwd.mjs svelte-package -i src -o dist",
+    "typecheck": "svelte-check --tsconfig ./tsconfig.json --fail-on-warnings"
+  },
+  "dependencies": {
+    "@arkhe/core": "0.1.0",
+    "@lucide/svelte": "1.64.0",
+    "@zag-js/combobox": "1.47.0",
+    "@zag-js/dialog": "1.47.0",
+    "@zag-js/hover-card": "1.47.0",
+    "@zag-js/menu": "1.47.0",
+    "@zag-js/number-input": "1.47.0",
+    "@zag-js/popover": "1.47.0",
+    "@zag-js/svelte": "1.47.0",
+    "@zag-js/tabs": "1.47.0",
+    "@zag-js/tooltip": "1.47.0"
+  },
+  "peerDependencies": {
+    "svelte": "^5.57.3"
+  },
+  "devDependencies": {
+    "@sveltejs/package": "3.0.1",
+    "svelte": "5.57.3"
+  }
+}

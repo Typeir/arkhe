@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "types": ["vite/client"],
+    "paths": {
+      "@arkhe/core": ["../../packages/core/src/index.ts"],
+      "@arkhe/react": ["../../packages/react/src/index.ts"],
+      "@arkhe/svelte": ["../../packages/svelte/src/index.ts"]
+    }
+  },
+  "include": ["src"]
+}

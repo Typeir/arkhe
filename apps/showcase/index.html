@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Arkhé showcase</title>
+  </head>
+  <body class="landing">
+    <header class="masthead">
+      <h1>Arkhé</h1>
+      <p>Every target renders the same specimen from the same origin.</p>
+      <div
+        id="controls"
+        class="controls arkhe"
+        role="toolbar"
+        aria-label="Showcase settings">
+        <span class="group" aria-label="Theme">
+          <button
+            class="arkhe"
+            data-scope="button"
+            data-part="root"
+            data-set="theme=dark">
+            Dark
+          </button>
+          <button
+            class="arkhe"
+            data-scope="button"
+            data-part="root"
+            data-set="theme=light">
+            Light
+          </button>
+        </span>
+        <span class="group" aria-label="Text size">
+          <button
+            class="arkhe"
+            data-scope="button"
+            data-part="root"
+            data-set="scale=90">
+            90%
+          </button>
+          <button
+            class="arkhe"
+            data-scope="button"
+            data-part="root"
+            data-set="scale=100">
+            100%
+          </button>
+          <button
+            class="arkhe"
+            data-scope="button"
+            data-part="root"
+            data-set="scale=125">
+            125%
+          </button>
+        </span>
+        <span class="group" aria-label="Layout">
+          <button
+            class="arkhe"
+            data-scope="button"
+            data-part="root"
+            data-set="layout=columns">
+            Columns
+          </button>
+          <button
+            class="arkhe"
+            data-scope="button"
+            data-part="root"
+            data-set="layout=stacked">
+            Stacked
+          </button>
+        </span>
+        <span class="group" aria-label="Targets">
+          <button
+            class="arkhe"
+            data-scope="button"
+            data-part="root"
+            data-set="target=react">
+            React
+          </button>
+          <button
+            class="arkhe"
+            data-scope="button"
+            data-part="root"
+            data-set="target=svelte">
+            Svelte
+          </button>
+          <button
+            class="arkhe"
+            data-scope="button"
+            data-part="root"
+            data-set="target=static">
+            Static
+          </button>
+        </span>
+      </div>
+    </header>
+    <div id="stage" class="stage"></div>
+    <script type="module" src="./src/landing/main.ts"></script>
+  </body>
+</html>

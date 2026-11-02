@@ -1,0 +1,10 @@
+node_modules
+dist
+.svelte-kit
+coverage
+test-results
+playwright-report
+blob-report
+.ignore
+
+package-lock.json

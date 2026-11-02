@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": false,
+    "types": ["node", "vite/client"],
+    "paths": {
+      "@arkhe/core": ["./packages/core/src/index.ts"],
+      "@arkhe/react": ["./packages/react/src/index.ts"],
+      "@arkhe/svelte": ["./packages/svelte/src/index.ts"],
+      "@tests/*": ["./tests/*"]
+    }
+  },
+  "include": ["tests", "vitest.config.ts", "playwright.config.ts"]
+}
