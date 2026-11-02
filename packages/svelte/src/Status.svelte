@@ -1,11 +1,13 @@
 <!--
 @component
 Renders a status line: empty, loading, error or info. Errors interrupt; the
-rest wait their turn.
+rest wait their turn. A polite one re-inserts its text once mounted, so it is
+spoken even when the host mounts it already filled.
 -->
 <script lang="ts">
   import {
     ARKHE_CLASS,
+    announceOnMount,
     partAttrs,
     statusLook,
     type StatusKind,
@@ -29,9 +31,15 @@ rest wait their turn.
   let { kind, children }: Props = $props();
   const arkhe = useArkhe();
   const look = $derived(statusLook(kind, arkhe().labels));
+  let region = $state<HTMLDivElement>();
+  $effect(() => {
+    if (look.role !== 'status' || !region) return;
+    return announceOnMount(region);
+  });
 </script>
 
 <div
+  bind:this={region}
   class={ARKHE_CLASS}
   {...partAttrs('status', 'root')}
   data-kind={kind}

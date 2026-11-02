@@ -3,10 +3,16 @@
 Renders a tab list and its panels on Zag's tabs machine. Panels come from the
 `panel` snippet, called per value, or, for Astro, which cannot pass a
 parameterised snippet, from one named slot per value. A value that matches no
-enabled tab shows the first enabled tab and warns once.
+enabled tab shows the first enabled tab and warns once; uncontrolled tabs move
+there too when the selected tab is removed or disabled.
 -->
 <script lang="ts">
-  import { ARKHE_CLASS, tabsMachineProps, type TabItem } from '@arkhe/core';
+  import {
+    ARKHE_CLASS,
+    staleTabFallback,
+    tabsMachineProps,
+    type TabItem,
+  } from '@arkhe/core';
   import { mergeProps, normalizeProps, useMachine } from '@zag-js/svelte';
   import * as tabs from '@zag-js/tabs';
   import type { Snippet } from 'svelte';
@@ -56,6 +62,11 @@ enabled tab shows the first enabled tab and warns once.
     }),
   );
   const api = $derived(tabs.connect(service, normalizeProps));
+  $effect(() => {
+    if (value !== undefined) return;
+    const fallback = staleTabFallback(api.value, items);
+    if (fallback !== undefined) api.setValue(fallback);
+  });
   const slotFor = (key: string) => slots[key] as Snippet | undefined;
 </script>
 

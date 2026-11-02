@@ -24,7 +24,13 @@ Svelte side of the parity scenes. Each scene must match its twin in
     TextInput,
     Tooltip,
   } from '@arkhe/svelte';
-  import { COMBO_ITEMS, MENU_ITEMS, TAB_ITEMS, TAB_TEXT } from './scenes';
+  import {
+    COMBO_ITEMS,
+    MENU_ITEMS,
+    TAB_ITEMS,
+    TAB_STAGES,
+    TAB_TEXT,
+  } from './scenes';
 
   /**
    * Props of SvelteCases.
@@ -38,6 +44,8 @@ Svelte side of the parity scenes. Each scene must match its twin in
 
   let { name }: Props = $props();
   let pressed = $state(false);
+  let stage = $state(0);
+  let described = $state(true);
 </script>
 
 {#if name === 'buttons'}
@@ -91,8 +99,20 @@ Svelte side of the parity scenes. Each scene must match its twin in
   <Tabs items={TAB_ITEMS} label="Sheet">
     {#snippet panel(key)}{TAB_TEXT[key]}{/snippet}
   </Tabs>
+{:else if name === 'tabs-change'}
+  <Button onclick={() => (stage += 1)}>Change tabs</Button>
+  <Tabs items={TAB_STAGES[stage] ?? TAB_ITEMS} label="Sheet">
+    {#snippet panel(key)}{TAB_TEXT[key]}{/snippet}
+  </Tabs>
 {:else if name === 'modal'}
   <Modal title="Rest" description="Recover." trigger="Open">Body</Modal>
+{:else if name === 'modal-description'}
+  <Modal
+    title="Rest"
+    description={described ? 'Recover.' : undefined}
+    trigger="Open">
+    <Button onclick={() => (described = false)}>Drop description</Button>
+  </Modal>
 {:else if name === 'tooltip'}
   <Tooltip content="Halves damage." openDelay={0} closeDelay={0}
     >resistance</Tooltip>
@@ -103,6 +123,8 @@ Svelte side of the parity scenes. Each scene must match its twin in
   </HoverCard>
 {:else if name === 'popover'}
   <Popover trigger="Filters" title="Filter by">Body</Popover>
+{:else if name === 'popover-untitled'}
+  <Popover trigger="Sort">Body</Popover>
 {:else if name === 'menu'}
   <Menu trigger="Actions" items={MENU_ITEMS} onSelect={() => undefined} />
 {:else if name === 'combobox'}

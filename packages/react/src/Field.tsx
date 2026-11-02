@@ -25,7 +25,7 @@ import { useId, type JSX, type ReactNode } from 'react';
  *
  * @interface FieldProps
  * @property {string} label - Visible label.
- * @property {ReactNode} [readout] - Current value shown beside the label.
+ * @property {ReactNode} [readout] - Current value shown beside the label; not announced as it changes.
  * @property {string} [hint] - Help text under the control.
  * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
  * @property {(control: FieldControlAttrs) => ReactNode} children - Renders the control with the given attributes.
@@ -73,7 +73,10 @@ export const Field = ({
           {label}
         </label>
         {readout === undefined ? null : (
-          <output {...partAttrs('field', 'readout')} htmlFor={ids.control}>
+          <output
+            {...partAttrs('field', 'readout')}
+            htmlFor={ids.control}
+            aria-live='off'>
             {readout}
           </output>
         )}

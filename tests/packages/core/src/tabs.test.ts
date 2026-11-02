@@ -1,4 +1,10 @@
-import { resolveTabValue, slug, tabIds, tabsMachineProps } from '@arkhe/core';
+import {
+  resolveTabValue,
+  slug,
+  staleTabFallback,
+  tabIds,
+  tabsMachineProps,
+} from '@arkhe/core';
 import { describe, expect, it, vi } from 'vitest';
 
 const ITEMS = [
@@ -39,6 +45,23 @@ describe('resolveTabValue', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     expect(resolveTabValue(undefined, ITEMS)).toBe('stats');
     expect(warn).not.toHaveBeenCalled();
+  });
+});
+
+describe('staleTabFallback', () => {
+  it('stays put while the shown tab is enabled', () => {
+    expect(staleTabFallback('Spell list', ITEMS)).toBeUndefined();
+  });
+
+  it('moves to the first enabled tab once the shown tab is gone or disabled', () => {
+    expect(staleTabFallback('Spell list', ITEMS.slice(0, 2))).toBe('stats');
+    expect(staleTabFallback('gear', ITEMS)).toBe('stats');
+    expect(staleTabFallback(null, ITEMS)).toBe('stats');
+  });
+
+  it('gives nothing when no tab is enabled', () => {
+    const locked = [{ value: 'stats', label: 'Stats', disabled: true }];
+    expect(staleTabFallback('stats', locked)).toBeUndefined();
   });
 });
 

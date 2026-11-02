@@ -1,6 +1,7 @@
 import { Chip } from '@arkhe/svelte';
+import ChipList from '@tests/fixtures/svelte/ChipList.svelte';
 import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
-import { render, screen } from '@testing-library/svelte';
+import { render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -32,5 +33,18 @@ describe('Chip', () => {
     expect(
       screen.getByRole('button', { name: 'Poista charge' }),
     ).toBeInTheDocument();
+  });
+
+  it('hands focus to the next chip, then the previous, on keyboard removal', async () => {
+    render(ChipList);
+    screen.getByRole('button', { name: 'Remove frost' }).focus();
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Remove ward' })).toHaveFocus(),
+    );
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Remove fire' })).toHaveFocus(),
+    );
   });
 });

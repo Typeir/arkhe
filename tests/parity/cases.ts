@@ -113,10 +113,19 @@ export const PARITY_CASES: readonly ParityCase[] = [
     steps: [click('Increase Speed'), click('Decrease Speed')],
   },
   { name: 'tabs', steps: [click('Notes', 'tab')] },
+  {
+    name: 'tabs-change',
+    steps: [click('Notes', 'tab'), click('Change tabs'), click('Change tabs')],
+  },
   { name: 'modal', steps: [click('Open'), press('{Escape}')] },
+  {
+    name: 'modal-description',
+    steps: [click('Open'), click('Drop description')],
+  },
   { name: 'tooltip', steps: [hover('resistance')] },
   { name: 'hover-card', steps: [hover('charge'), click('Pin Charge')] },
   { name: 'popover', steps: [click('Filters'), press('{Escape}')] },
+  { name: 'popover-untitled', steps: [click('Sort')] },
   { name: 'menu', steps: [click('Actions'), press('{ArrowDown}')] },
   {
     name: 'combobox',

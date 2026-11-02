@@ -11,10 +11,15 @@
 
 'use client';
 
-import { ARKHE_CLASS, tabsMachineProps, type TabItem } from '@arkhe/core';
+import {
+  ARKHE_CLASS,
+  staleTabFallback,
+  tabsMachineProps,
+  type TabItem,
+} from '@arkhe/core';
 import { mergeProps, normalizeProps, useMachine } from '@zag-js/react';
 import * as tabs from '@zag-js/tabs';
-import { useId, type JSX, type ReactNode } from 'react';
+import { useEffect, useId, type JSX, type ReactNode } from 'react';
 import { useArkheEnvironment } from './ArkheEnvironment.js';
 
 /**
@@ -47,7 +52,8 @@ export interface TabsProps {
 
 /**
  * Renders a tab list and its panels. A value that matches no enabled tab
- * shows the first enabled tab and warns once.
+ * shows the first enabled tab and warns once; uncontrolled tabs move there
+ * too when the selected tab is removed or disabled.
  *
  * @component
  * @param {TabsProps} props - Items, value, panels.
@@ -75,6 +81,11 @@ export const Tabs = ({
     }),
   );
   const api = tabs.connect(service, normalizeProps);
+  const fallback =
+    value === undefined ? staleTabFallback(api.value, items) : undefined;
+  useEffect(() => {
+    if (fallback !== undefined) api.setValue(fallback);
+  }, [api, fallback]);
   const panelFor = (key: string) =>
     typeof panels === 'function' ? panels(key) : panels[key];
   return (

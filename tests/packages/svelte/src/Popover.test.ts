@@ -40,4 +40,11 @@ describe('Popover', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Sulje' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
   });
+
+  it('names an untitled panel after its trigger', async () => {
+    render(Popover, { trigger: 'Sort', children: textSnippet('Body') });
+    await userEvent.click(screen.getByRole('button', { name: 'Sort' }));
+    const panel = await screen.findByRole('dialog', { name: 'Sort' });
+    expect(panel).not.toHaveAttribute('aria-labelledby');
+  });
 });

@@ -1,9 +1,21 @@
 import { Modal } from '@arkhe/svelte';
+import ShadowModal from '@tests/fixtures/svelte/ShadowModal.svelte';
 import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
 import { textSnippet } from '@tests/fixtures/svelte/snippets';
 import { render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
+
+function shadowApp() {
+  const host = document.createElement('div');
+  document.body.append(host);
+  const shadow = host.attachShadow({ mode: 'open' });
+  const app = document.createElement('button');
+  app.textContent = 'App';
+  const container = document.createElement('div');
+  shadow.append(app, container);
+  return { host, shadow, app, container };
+}
 
 describe('Modal', () => {
   it('opens from its trigger, named and described', async () => {
@@ -46,5 +58,46 @@ describe('Modal', () => {
     expect(
       await screen.findByRole('alertdialog', { name: 'Delete?' }),
     ).toBeInTheDocument();
+  });
+
+  it('keeps aria-describedby in step with the description while open', async () => {
+    const { rerender } = render(Modal, {
+      title: 'Rest',
+      open: true,
+      description: 'D1',
+    });
+    const dialog = await screen.findByRole('dialog');
+    await waitFor(() => expect(dialog).toHaveAccessibleDescription('D1'));
+    await rerender({ description: undefined });
+    expect(dialog).not.toHaveAttribute('aria-describedby');
+    await rerender({ description: 'Loaded' });
+    expect(dialog).toHaveAccessibleDescription('Loaded');
+  });
+
+  it('returns focus to finalFocus when the opener is gone', async () => {
+    const fallback = document.createElement('button');
+    document.body.append(fallback);
+    render(Modal, {
+      title: 'Rest',
+      defaultOpen: true,
+      finalFocus: () => fallback,
+    });
+    await screen.findByRole('dialog');
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(fallback).toHaveFocus());
+    fallback.remove();
+  });
+
+  it('hides the rest of a shadow-root app while open', async () => {
+    const { host, shadow, app, container } = shadowApp();
+    const { unmount } = render(ShadowModal, { shadow, container });
+    await waitFor(() =>
+      expect(container.querySelector('[role="dialog"]')).not.toBeNull(),
+    );
+    await waitFor(() => expect(app).toHaveAttribute('aria-hidden', 'true'));
+    expect(container).not.toHaveAttribute('aria-hidden');
+    unmount();
+    expect(app).not.toHaveAttribute('aria-hidden');
+    host.remove();
   });
 });

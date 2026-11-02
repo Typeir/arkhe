@@ -3,6 +3,17 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
+function shadowApp() {
+  const host = document.createElement('div');
+  document.body.append(host);
+  const shadow = host.attachShadow({ mode: 'open' });
+  const app = document.createElement('button');
+  app.textContent = 'App';
+  const container = document.createElement('div');
+  shadow.append(app, container);
+  return { host, shadow, app, container };
+}
+
 describe('Modal', () => {
   it('opens from its trigger, named and described', async () => {
     render(
@@ -64,5 +75,42 @@ describe('Modal', () => {
     await screen.findByRole('dialog');
     expect(box.querySelector('[role="dialog"]')).not.toBeNull();
     box.remove();
+  });
+
+  it('keeps aria-describedby in step with the description while open', async () => {
+    const { rerender } = render(<Modal title='Rest' open description='D1' />);
+    const dialog = await screen.findByRole('dialog');
+    await waitFor(() => expect(dialog).toHaveAccessibleDescription('D1'));
+    rerender(<Modal title='Rest' open />);
+    expect(dialog).not.toHaveAttribute('aria-describedby');
+    rerender(<Modal title='Rest' open description='Loaded' />);
+    expect(dialog).toHaveAccessibleDescription('Loaded');
+  });
+
+  it('returns focus to finalFocus when the opener is gone', async () => {
+    const fallback = document.createElement('button');
+    document.body.append(fallback);
+    render(<Modal title='Rest' defaultOpen finalFocus={() => fallback} />);
+    await screen.findByRole('dialog');
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(fallback).toHaveFocus());
+    fallback.remove();
+  });
+
+  it('hides the rest of a shadow-root app while open', async () => {
+    const { host, shadow, app, container } = shadowApp();
+    const { unmount } = render(
+      <ArkheEnvironment rootNode={() => shadow} container={container}>
+        <Modal title='Rest' defaultOpen />
+      </ArkheEnvironment>,
+    );
+    await waitFor(() =>
+      expect(container.querySelector('[role="dialog"]')).not.toBeNull(),
+    );
+    await waitFor(() => expect(app).toHaveAttribute('aria-hidden', 'true'));
+    expect(container).not.toHaveAttribute('aria-hidden');
+    unmount();
+    expect(app).not.toHaveAttribute('aria-hidden');
+    host.remove();
   });
 });

@@ -29,7 +29,13 @@ import {
   Tooltip,
 } from '@arkhe/react';
 import { useState, type JSX, type ReactNode } from 'react';
-import { COMBO_ITEMS, MENU_ITEMS, TAB_ITEMS, TAB_TEXT } from './scenes';
+import {
+  COMBO_ITEMS,
+  MENU_ITEMS,
+  TAB_ITEMS,
+  TAB_STAGES,
+  TAB_TEXT,
+} from './scenes';
 
 const Buttons = (): JSX.Element => {
   const [pressed, setPressed] = useState(false);
@@ -53,6 +59,32 @@ const Buttons = (): JSX.Element => {
         Dead link
       </Button>
     </>
+  );
+};
+
+const ChangingTabs = (): JSX.Element => {
+  const [stage, setStage] = useState(0);
+  return (
+    <>
+      <Button onClick={() => setStage(stage + 1)}>Change tabs</Button>
+      <Tabs
+        items={TAB_STAGES[stage] ?? TAB_ITEMS}
+        label='Sheet'
+        panels={TAB_TEXT}
+      />
+    </>
+  );
+};
+
+const DescribedModal = (): JSX.Element => {
+  const [described, setDescribed] = useState(true);
+  return (
+    <Modal
+      title='Rest'
+      description={described ? 'Recover.' : undefined}
+      trigger='Open'>
+      <Button onClick={() => setDescribed(false)}>Drop description</Button>
+    </Modal>
   );
 };
 
@@ -109,11 +141,13 @@ const SCENES: Readonly<Record<string, () => ReactNode>> = {
     <NumericInput label='Speed' defaultValue={3} min={0} max={10} />
   ),
   tabs: () => <Tabs items={TAB_ITEMS} label='Sheet' panels={TAB_TEXT} />,
+  'tabs-change': () => <ChangingTabs />,
   modal: () => (
     <Modal title='Rest' description='Recover.' trigger='Open'>
       Body
     </Modal>
   ),
+  'modal-description': () => <DescribedModal />,
   tooltip: () => (
     <Tooltip content='Halves damage.' openDelay={0} closeDelay={0}>
       resistance
@@ -129,6 +163,7 @@ const SCENES: Readonly<Record<string, () => ReactNode>> = {
       Body
     </Popover>
   ),
+  'popover-untitled': () => <Popover trigger='Sort'>Body</Popover>,
   menu: () => (
     <Menu trigger='Actions' items={MENU_ITEMS} onSelect={() => undefined} />
   ),

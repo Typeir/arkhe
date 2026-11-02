@@ -1,5 +1,6 @@
-import { dialogMachineProps } from '@arkhe/core';
-import { describe, expect, it, vi } from 'vitest';
+// @vitest-environment jsdom
+import { dialogMachineProps, hideShadowSiblings } from '@arkhe/core';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const base = {
   id: 'd',
@@ -30,5 +31,59 @@ describe('dialogMachineProps', () => {
       open: true,
     });
     expect(onOpenChange).toHaveBeenCalledWith(true);
+  });
+
+  it('forwards finalFocus as Zag finalFocusEl', () => {
+    const finalFocus = () => null;
+    expect(
+      dialogMachineProps({ ...base, open: false, finalFocus }).finalFocusEl,
+    ).toBe(finalFocus);
+    expect(dialogMachineProps({ ...base, open: false })).not.toHaveProperty(
+      'finalFocusEl',
+    );
+  });
+});
+
+describe('hideShadowSiblings', () => {
+  afterEach(() => {
+    document.body.replaceChildren();
+  });
+
+  function shadowTree() {
+    document.body.innerHTML = '<main id="page"></main>';
+    const host = document.createElement('div');
+    document.body.append(host);
+    const shadow = host.attachShadow({ mode: 'open' });
+    shadow.innerHTML =
+      '<style></style><nav id="nav"></nav><div aria-live="polite" id="live"></div>' +
+      '<div id="portal"><aside id="other"></aside><div id="content"></div></div>';
+    const byId = (id: string): Element => {
+      const node = shadow.getElementById(id) ?? document.getElementById(id);
+      if (!node) throw new Error(`No #${id}`);
+      return node;
+    };
+    return { byId };
+  }
+
+  it('hides every shadow-root sibling on the path, then restores them', () => {
+    const { byId } = shadowTree();
+    byId('other').setAttribute('aria-hidden', 'true');
+    const restore = hideShadowSiblings(byId('content'));
+    expect(byId('nav').getAttribute('aria-hidden')).toBe('true');
+    expect(byId('other').getAttribute('aria-hidden')).toBe('true');
+    expect(byId('portal').hasAttribute('aria-hidden')).toBe(false);
+    expect(byId('live').hasAttribute('aria-hidden')).toBe(false);
+    expect(byId('page').hasAttribute('aria-hidden')).toBe(false);
+    restore();
+    expect(byId('nav').hasAttribute('aria-hidden')).toBe(false);
+    expect(byId('other').getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('leaves the light DOM to Zag', () => {
+    const nav = document.createElement('nav');
+    const content = document.createElement('div');
+    document.body.append(nav, content);
+    hideShadowSiblings(content)();
+    expect(nav.hasAttribute('aria-hidden')).toBe(false);
   });
 });
