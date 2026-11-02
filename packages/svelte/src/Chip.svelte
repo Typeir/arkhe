@@ -1,9 +1,10 @@
 <!--
 @component
-Renders a chip. The remove button's name comes from the `chipRemove` label.
+Renders a chip. The remove button's name comes from the `chipRemove` label;
+when the host drops the chip, focus moves to the next chip's remove button.
 -->
 <script lang="ts">
-  import { ARKHE_CLASS, formatLabel, partAttrs } from '@arkhe/core';
+  import { ARKHE_CLASS, formatLabel, partAttrs, removeChip } from '@arkhe/core';
   import { useArkhe } from './context.js';
   import Icon from './Icon.svelte';
 
@@ -38,7 +39,7 @@ Renders a chip. The remove button's name comes from the `chipRemove` label.
       type="button"
       {...partAttrs('chip', 'remove')}
       aria-label={removeLabel}
-      onclick={onRemove}>
+      onclick={(event) => removeChip(event.currentTarget, () => onRemove?.())}>
       <Icon name="x" />
     </button>
   {/if}

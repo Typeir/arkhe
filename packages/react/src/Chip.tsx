@@ -9,7 +9,7 @@
 
 'use client';
 
-import { ARKHE_CLASS, formatLabel, partAttrs } from '@arkhe/core';
+import { ARKHE_CLASS, formatLabel, partAttrs, removeChip } from '@arkhe/core';
 import type { JSX } from 'react';
 import { useArkhe } from './ArkheProvider';
 import { Icon } from './Icon';
@@ -38,7 +38,8 @@ export interface ChipProps {
 }
 
 /**
- * Renders a chip. The remove button's name comes from the `chipRemove` label.
+ * Renders a chip. The remove button's name comes from the `chipRemove` label;
+ * when the host drops the chip, focus moves to the next chip's remove button.
  *
  * @component
  * @param {ChipProps} props - Component props.
@@ -67,7 +68,7 @@ export const Chip = ({
           type='button'
           {...partAttrs('chip', 'remove')}
           aria-label={formatLabel(labels.chipRemove, { label })}
-          onClick={onRemove}>
+          onClick={(event) => removeChip(event.currentTarget, onRemove)}>
           <Icon name='x' />
         </button>
       ) : null}
