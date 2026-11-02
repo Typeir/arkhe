@@ -19,7 +19,7 @@ import {
 } from '@arkhe/core';
 import * as hoverCard from '@zag-js/hover-card';
 import { mergeProps, normalizeProps, useMachine } from '@zag-js/react';
-import { useId, useState, type JSX, type ReactNode } from 'react';
+import { useEffect, useId, useState, type JSX, type ReactNode } from 'react';
 import { useArkhe } from './ArkheProvider';
 import { useArkheEnvironment } from './ArkheEnvironment';
 import { Button } from './Button';
@@ -34,7 +34,7 @@ import { useContentLoader } from './useContentLoader';
  * @property {string} title - Card heading; also names the pin button.
  * @property {ReactNode} children - Trigger content; wrapped in a button.
  * @property {ReactNode} [content] - Card body.
- * @property {() => Promise<T>} [load] - Fetches the body on first open.
+ * @property {() => Promise<T>} [load] - Fetches the body on first open. A new function loads afresh; keep it stable.
  * @property {(value: T) => ReactNode} [loaded] - Renders what `load` returned.
  * @property {boolean} [pinnable] - Shows a pin button. Defaults to true.
  * @property {Placement} [placement] - Side. Defaults to `bottom-start`.
@@ -56,6 +56,8 @@ export interface HoverCardProps<T> {
 /**
  * Renders a trigger that opens a reference card on hover or focus. The card
  * renders in place, so a nested card stays inside its parent's layer.
+ * Unpinning hands the card back to hover: it stays open while the pointer
+ * is over it.
  *
  * @component
  * @param {HoverCardProps<T>} props - Title, trigger, body, timing.
@@ -75,21 +77,30 @@ export const HoverCard = <T,>({
   const { labels } = useArkhe();
   const env = useArkheEnvironment();
   const [pinned, setPinned] = useState(false);
+  const [open, setOpen] = useState(false);
   const body = useContentLoader(load);
   const service = useMachine(hoverCard.machine, {
     ...floatingMachineProps({
       id: useId(),
+      open,
       hold: pinned,
       placement,
       strategy: 'fixed',
-      onOpenChange: (open) => open && body.load(),
+      onOpenChange: setOpen,
       getRootNode: env.getRootNode,
     }),
     openDelay,
     closeDelay,
   });
   const api = hoverCard.connect(service, normalizeProps);
-  const { state } = body;
+  const { state, load: start } = body;
+  useEffect(() => {
+    if (api.open) start();
+  }, [api.open, start]);
+  const togglePin = () => {
+    if (pinned) setOpen(service.state.matches('open'));
+    setPinned(!pinned);
+  };
   return (
     <span className={ARKHE_CLASS} data-scope='hover-card' data-part='root'>
       <button type='button' {...api.getTriggerProps()}>
@@ -109,7 +120,7 @@ export const HoverCard = <T,>({
                   label: title,
                 })}
                 pressed={pinned}
-                onClick={() => setPinned(!pinned)}
+                onClick={togglePin}
               />
             ) : null}
           </span>

@@ -2,7 +2,8 @@
 @component
 Renders a trigger that opens a rich reference card on hover or focus, on
 Zag's hover-card machine. Cards nest, load content on first open, and pin
-open until unpinned. The card renders in place, so a nested card stays inside
+open until unpinned; unpinning hands the card back to hover, so it stays open
+while the pointer is over it. A new `load` loads afresh. The card renders in place, so a nested card stays inside
 its parent's layer. Give `content`, or `load` with `loaded`.
 -->
 <script lang="ts" generics="T">
@@ -14,7 +15,7 @@ its parent's layer. Give `content`, or `load` with `loaded`.
   } from '@arkhe/core';
   import * as hoverCard from '@zag-js/hover-card';
   import { mergeProps, normalizeProps, useMachine } from '@zag-js/svelte';
-  import { untrack, type Snippet } from 'svelte';
+  import type { Snippet } from 'svelte';
   import Button from './Button.svelte';
   import { useContentLoader } from './contentLoader.svelte.js';
   import { useArkhe } from './context.js';
@@ -61,21 +62,30 @@ its parent's layer. Give `content`, or `load` with `loaded`.
   const id = $props.id();
   const arkhe = useArkhe();
   const env = useArkheEnvironment();
-  const body = useContentLoader(untrack(() => load));
+  const body = useContentLoader(() => load);
   let pinned = $state(false);
+  let open = $state(false);
   const service = useMachine(hoverCard.machine, () => ({
     ...floatingMachineProps({
       id,
+      open,
       hold: pinned,
       placement,
       strategy: 'fixed',
-      onOpenChange: (open) => open && body.load(),
+      onOpenChange: (next) => (open = next),
       getRootNode: env().getRootNode,
     }),
     openDelay,
     closeDelay,
   }));
   const api = $derived(hoverCard.connect(service, normalizeProps));
+  $effect(() => {
+    if (api.open) body.load();
+  });
+  const togglePin = () => {
+    if (pinned) open = service.state.matches('open');
+    pinned = !pinned;
+  };
   const pinLabel = $derived(
     formatLabel(pinned ? arkhe().labels.unpin : arkhe().labels.pin, {
       label: title,
@@ -95,7 +105,7 @@ its parent's layer. Give `content`, or `load` with `loaded`.
             icon={pinned ? 'pin-off' : 'pin'}
             label={pinLabel}
             pressed={pinned}
-            onclick={() => (pinned = !pinned)} />
+            onclick={togglePin} />
         {/if}
       </span>
       <span data-scope="hover-card" data-part="body">

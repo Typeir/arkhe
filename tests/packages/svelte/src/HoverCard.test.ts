@@ -60,4 +60,33 @@ describe('HoverCard', () => {
     expect(card('Charge')).toBeVisible();
     expect(card('Charge')).toHaveAttribute('data-pinned', '');
   });
+
+  it('stays open under the pointer when unpinned, then closes on leave', async () => {
+    const user = userEvent.setup();
+    render(NestedCards);
+    await user.hover(screen.getByRole('button', { name: 'charge' }));
+    await waitFor(() => expect(card('Charge')).toBeVisible());
+    await user.click(screen.getByRole('button', { name: 'Pin Charge' }));
+    await user.click(screen.getByRole('button', { name: 'Unpin Charge' }));
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    expect(card('Charge')).toBeVisible();
+    expect(card('Charge')).not.toHaveAttribute('data-pinned');
+    await user.hover(screen.getByText('elsewhere'));
+    await waitFor(() => expect(card('Charge')).not.toBeVisible());
+  });
+
+  it('loads afresh when load changes while open', async () => {
+    const { rerender } = render(HoverCard<string>, {
+      title: 'Who',
+      openDelay: 0,
+      load: async () => 'Ada',
+      loaded: valueSnippet(),
+      children: textSnippet('who'),
+    });
+    await userEvent.hover(screen.getByRole('button', { name: 'who' }));
+    expect(await screen.findByText('Ada')).toBeInTheDocument();
+    await rerender({ load: async () => 'Grace' });
+    expect(await screen.findByText('Grace')).toBeInTheDocument();
+    expect(screen.queryByText('Ada')).not.toBeInTheDocument();
+  });
 });

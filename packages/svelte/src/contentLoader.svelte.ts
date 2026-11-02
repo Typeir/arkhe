@@ -1,6 +1,6 @@
 /**
- * @fileoverview Svelte glue for `ContentLoader`: one loader per component,
- * its state mirrored into a rune.
+ * @fileoverview Svelte glue for `ContentLoader`: one loader per source, read
+ * through a Svelte subscriber.
  *
  * @module packages/svelte/src/contentLoader.svelte
  * @version 1.0.0
@@ -9,6 +9,9 @@
  */
 
 import { ContentLoader, type LoadState } from '@arkhe/core';
+import { createSubscriber } from 'svelte/reactivity';
+
+const IDLE: LoadState<never> = { status: 'idle' };
 
 /**
  * What `useContentLoader` returns.
@@ -24,26 +27,43 @@ export interface ContentLoaderHandle<T> {
 }
 
 /**
- * Keeps one loader for `source`. Without a source the state stays idle.
- * Call during component initialisation.
+ * Wraps a loader so reading its state inside an effect subscribes to it.
+ *
+ * @function watch
+ * @template T
+ * @param {ContentLoader<T>} loader - Loader.
+ * @returns {() => LoadState<T>} Reads the state.
+ */
+function watch<T>(loader: ContentLoader<T>): () => LoadState<T> {
+  const track = createSubscriber((update) => loader.subscribe(update));
+  return () => {
+    track();
+    return loader.snapshot();
+  };
+}
+
+/**
+ * Keeps one loader per source. A new source gets a new loader. Without a
+ * source the state stays idle. Call during component initialisation.
  *
  * @function useContentLoader
  * @template T
- * @param {(() => Promise<T>) | undefined} source - Fetches the content.
+ * @param {() => (() => Promise<T>) | undefined} source - Reads the current source.
  * @returns {ContentLoaderHandle<T>} State and start.
  */
 export function useContentLoader<T>(
-  source: (() => Promise<T>) | undefined,
+  source: () => (() => Promise<T>) | undefined,
 ): ContentLoaderHandle<T> {
-  const loader = source ? new ContentLoader(source) : undefined;
-  let state = $state<LoadState<T>>({ status: 'idle' });
-  loader?.subscribe(() => {
-    state = loader.snapshot();
+  const current = $derived.by(() => {
+    const next = source();
+    if (!next) return undefined;
+    const loader = new ContentLoader(next);
+    return { loader, read: watch(loader) };
   });
   return {
     get state() {
-      return state;
+      return current?.read() ?? IDLE;
     },
-    load: () => void loader?.load(),
+    load: () => void current?.loader.load(),
   };
 }
