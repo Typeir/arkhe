@@ -17,8 +17,8 @@ import {
   type StatusKind,
 } from '@arkhe/core';
 import type { JSX, ReactNode } from 'react';
-import { useArkhe } from './ArkheProvider';
-import { Icon } from './Icon';
+import { useArkhe } from './ArkheProvider.js';
+import { Icon } from './Icon.js';
 
 /**
  * Props of Status.

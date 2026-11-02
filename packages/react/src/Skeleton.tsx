@@ -12,7 +12,7 @@
 
 import { ARKHE_CLASS, partAttrs } from '@arkhe/core';
 import type { CSSProperties, JSX, ReactNode } from 'react';
-import { useArkhe } from './ArkheProvider';
+import { useArkhe } from './ArkheProvider.js';
 
 /**
  * Props of Skeleton.

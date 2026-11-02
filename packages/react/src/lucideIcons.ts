@@ -22,7 +22,7 @@ import {
   TriangleAlert,
   X,
 } from 'lucide-react';
-import type { IconComponent } from './ArkheProvider';
+import type { IconComponent } from './ArkheProvider.js';
 
 /**
  * Lucide glyphs by Lucide name, for Arkhé's own icons.

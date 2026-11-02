@@ -22,9 +22,9 @@ import {
 import * as menu from '@zag-js/menu';
 import { Portal, mergeProps, normalizeProps, useMachine } from '@zag-js/react';
 import { useId, type JSX } from 'react';
-import { useArkheEnvironment } from './ArkheEnvironment';
-import { Icon } from './Icon';
-import { usePortalContainer } from './usePortalContainer';
+import { useArkheEnvironment } from './ArkheEnvironment.js';
+import { Icon } from './Icon.js';
+import { usePortalContainer } from './usePortalContainer.js';
 
 /**
  * Props of Menu.

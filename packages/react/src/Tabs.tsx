@@ -15,7 +15,7 @@ import { ARKHE_CLASS, tabsMachineProps, type TabItem } from '@arkhe/core';
 import { mergeProps, normalizeProps, useMachine } from '@zag-js/react';
 import * as tabs from '@zag-js/tabs';
 import { useId, type JSX, type ReactNode } from 'react';
-import { useArkheEnvironment } from './ArkheEnvironment';
+import { useArkheEnvironment } from './ArkheEnvironment.js';
 
 /**
  * Panel source: a render function, or one node per value.

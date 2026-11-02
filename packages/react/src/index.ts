@@ -14,39 +14,39 @@ export {
   type ArkheProviderProps,
   type IconComponent,
   type LinkComponent,
-} from './ArkheProvider';
+} from './ArkheProvider.js';
 export {
   ArkheEnvironment,
   useArkheEnvironment,
   type ArkheEnvironmentProps,
-} from './ArkheEnvironment';
-export { Button, type ButtonProps, type ButtonVariant } from './Button';
-export { Chip, type ChipProps, type ChipTone } from './Chip';
-export { Combobox, type ComboboxProps } from './Combobox';
-export { Field, type FieldProps } from './Field';
-export { HoverCard, type HoverCardProps } from './HoverCard';
-export { Icon, type IconProps } from './Icon';
-export { LUCIDE_ICONS } from './lucideIcons';
-export { Menu, type MenuProps } from './Menu';
-export { Modal, type ModalProps } from './Modal';
-export { NumericInput, type NumericInputProps } from './NumericInput';
-export { Popover, type PopoverProps } from './Popover';
-export { Progress, type ProgressProps } from './Progress';
+} from './ArkheEnvironment.js';
+export { Button, type ButtonProps, type ButtonVariant } from './Button.js';
+export { Chip, type ChipProps, type ChipTone } from './Chip.js';
+export { Combobox, type ComboboxProps } from './Combobox.js';
+export { Field, type FieldProps } from './Field.js';
+export { HoverCard, type HoverCardProps } from './HoverCard.js';
+export { Icon, type IconProps } from './Icon.js';
+export { LUCIDE_ICONS } from './lucideIcons.js';
+export { Menu, type MenuProps } from './Menu.js';
+export { Modal, type ModalProps } from './Modal.js';
+export { NumericInput, type NumericInputProps } from './NumericInput.js';
+export { Popover, type PopoverProps } from './Popover.js';
+export { Progress, type ProgressProps } from './Progress.js';
 export {
   Skeleton,
   SkeletonGroup,
   type SkeletonGroupProps,
   type SkeletonProps,
-} from './Skeleton';
-export { Status, type StatusProps } from './Status';
-export { Tabs, type TabPanels, type TabsProps } from './Tabs';
+} from './Skeleton.js';
+export { Status, type StatusProps } from './Status.js';
+export { Tabs, type TabPanels, type TabsProps } from './Tabs.js';
 export {
   TextArea,
   TextInput,
   type TextAreaProps,
   type TextInputProps,
-} from './TextInput';
-export { Tooltip, type TooltipProps } from './Tooltip';
+} from './TextInput.js';
+export { Tooltip, type TooltipProps } from './Tooltip.js';
 export type {
   ArkheLabels,
   ComboboxOption,

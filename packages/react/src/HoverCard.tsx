@@ -20,11 +20,11 @@ import {
 import * as hoverCard from '@zag-js/hover-card';
 import { mergeProps, normalizeProps, useMachine } from '@zag-js/react';
 import { useId, useState, type JSX, type ReactNode } from 'react';
-import { useArkhe } from './ArkheProvider';
-import { useArkheEnvironment } from './ArkheEnvironment';
-import { Button } from './Button';
-import { Status } from './Status';
-import { useContentLoader } from './useContentLoader';
+import { useArkhe } from './ArkheProvider.js';
+import { useArkheEnvironment } from './ArkheEnvironment.js';
+import { Button } from './Button.js';
+import { Status } from './Status.js';
+import { useContentLoader } from './useContentLoader.js';
 
 /**
  * Props of HoverCard. Give `content`, or `load` with `loaded`.

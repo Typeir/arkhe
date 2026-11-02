@@ -12,8 +12,8 @@
 
 import { ARKHE_CLASS, flag, partAttrs } from '@arkhe/core';
 import type { JSX, MouseEventHandler, ReactNode } from 'react';
-import { useArkhe } from './ArkheProvider';
-import { Icon } from './Icon';
+import { useArkhe } from './ArkheProvider.js';
+import { Icon } from './Icon.js';
 
 /**
  * Visual weight of a button.

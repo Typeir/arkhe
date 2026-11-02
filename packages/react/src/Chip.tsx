@@ -11,8 +11,8 @@
 
 import { ARKHE_CLASS, formatLabel, partAttrs } from '@arkhe/core';
 import type { JSX } from 'react';
-import { useArkhe } from './ArkheProvider';
-import { Icon } from './Icon';
+import { useArkhe } from './ArkheProvider.js';
+import { Icon } from './Icon.js';
 
 /**
  * Colour of a chip.

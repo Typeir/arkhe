@@ -18,7 +18,7 @@ import {
   progressValueText,
 } from '@arkhe/core';
 import type { CSSProperties, JSX } from 'react';
-import { useArkhe } from './ArkheProvider';
+import { useArkhe } from './ArkheProvider.js';
 
 /**
  * Props of Progress.

@@ -11,7 +11,7 @@
 'use client';
 
 import { useMemo, type RefObject } from 'react';
-import { useArkheEnvironment } from './ArkheEnvironment';
+import { useArkheEnvironment } from './ArkheEnvironment.js';
 
 /**
  * Returns a ref whose `current` is the environment's portal target.

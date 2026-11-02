@@ -14,10 +14,10 @@ import { ARKHE_CLASS, floatingMachineProps, type Placement } from '@arkhe/core';
 import * as popover from '@zag-js/popover';
 import { Portal, mergeProps, normalizeProps, useMachine } from '@zag-js/react';
 import { useId, type JSX, type ReactNode } from 'react';
-import { useArkhe } from './ArkheProvider';
-import { useArkheEnvironment } from './ArkheEnvironment';
-import { Icon } from './Icon';
-import { usePortalContainer } from './usePortalContainer';
+import { useArkhe } from './ArkheProvider.js';
+import { useArkheEnvironment } from './ArkheEnvironment.js';
+import { Icon } from './Icon.js';
+import { usePortalContainer } from './usePortalContainer.js';
 
 /**
  * Props of Popover.

@@ -11,8 +11,8 @@
 
 import { ARKHE_CLASS, flag, partAttrs, resolveIcon } from '@arkhe/core';
 import { createElement, type JSX } from 'react';
-import { useArkhe } from './ArkheProvider';
-import { LUCIDE_ICONS } from './lucideIcons';
+import { useArkhe } from './ArkheProvider.js';
+import { LUCIDE_ICONS } from './lucideIcons.js';
 
 /**
  * Props of Icon.

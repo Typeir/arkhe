@@ -20,10 +20,10 @@ import {
 import * as numberInput from '@zag-js/number-input';
 import { mergeProps, normalizeProps, useMachine } from '@zag-js/react';
 import { useId, type JSX } from 'react';
-import { useArkhe } from './ArkheProvider';
-import { useArkheEnvironment } from './ArkheEnvironment';
-import { Icon } from './Icon';
-import { useNumericSync } from './useNumericSync';
+import { useArkhe } from './ArkheProvider.js';
+import { useArkheEnvironment } from './ArkheEnvironment.js';
+import { Icon } from './Icon.js';
+import { useNumericSync } from './useNumericSync.js';
 
 /**
  * Props of NumericInput.

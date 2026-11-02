@@ -15,7 +15,7 @@ import { ARKHE_CLASS, floatingMachineProps, type Placement } from '@arkhe/core';
 import { mergeProps, normalizeProps, useMachine } from '@zag-js/react';
 import * as tooltip from '@zag-js/tooltip';
 import { useId, type JSX, type ReactNode } from 'react';
-import { useArkheEnvironment } from './ArkheEnvironment';
+import { useArkheEnvironment } from './ArkheEnvironment.js';
 
 /**
  * Props of Tooltip.

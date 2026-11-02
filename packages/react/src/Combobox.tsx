@@ -29,11 +29,11 @@ import {
 import * as combobox from '@zag-js/combobox';
 import { Portal, mergeProps, normalizeProps, useMachine } from '@zag-js/react';
 import { useId, useMemo, useState, type JSX, type ReactNode } from 'react';
-import { useArkhe } from './ArkheProvider';
-import { useArkheEnvironment } from './ArkheEnvironment';
-import { Icon } from './Icon';
-import { Status } from './Status';
-import { usePortalContainer } from './usePortalContainer';
+import { useArkhe } from './ArkheProvider.js';
+import { useArkheEnvironment } from './ArkheEnvironment.js';
+import { Icon } from './Icon.js';
+import { Status } from './Status.js';
+import { usePortalContainer } from './usePortalContainer.js';
 
 /**
  * Props of Combobox.
