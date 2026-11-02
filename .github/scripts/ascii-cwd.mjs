@@ -2,7 +2,8 @@
  * @fileoverview Runs a command from an ASCII-only path. `svelte-package`
  * exits silently with code 127 when its working directory contains a
  * non-ASCII character, such as the `é` in `Arkhé`. Where the path has one,
- * this links the repo root into the temp directory and runs from the link.
+ * this links the repo root into a fresh private temp directory, runs from
+ * the link, and removes it afterwards.
  *
  * @module .github/scripts/ascii-cwd
  * @version 1.0.0
@@ -11,10 +12,17 @@
  */
 
 import { spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, symlinkSync } from 'node:fs';
+import {
+  lstatSync,
+  mkdtempSync,
+  realpathSync,
+  rmdirSync,
+  symlinkSync,
+  unlinkSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 const REPO_ROOT = resolve(import.meta.dirname, '../..');
 
@@ -30,30 +38,42 @@ export function isAscii(path) {
 }
 
 /**
- * Returns an ASCII path to `dir`: `dir` itself, or the same folder reached
- * through a junction to the repo root in the temp directory. The junction
- * is named after a hash of the root, so a moved repo gets a fresh one.
+ * Calls `run` with an ASCII path to `dir`: `dir` itself, or the same folder
+ * reached through a junction to the repo root. The junction lives in a new
+ * directory only this process created, is checked to resolve to the repo
+ * before use, and is removed once `run` returns or throws.
  *
- * @function asciiPath
+ * @function withAsciiPath
+ * @template T
  * @param {string} dir - Directory inside the repo.
- * @returns {string} ASCII path to the same directory.
+ * @param {(path: string) => T} run - Receives the ASCII path.
+ * @returns {T} What `run` returns.
+ * @throws {Error} When the junction does not resolve to the repo root.
  */
-export function asciiPath(dir) {
-  if (isAscii(dir)) return dir;
-  const links = join(tmpdir(), 'arkhe-ascii');
-  const hash = createHash('sha1').update(REPO_ROOT).digest('hex').slice(0, 10);
-  const link = join(links, `repo-${hash}`);
-  mkdirSync(links, { recursive: true });
-  if (!existsSync(link)) symlinkSync(REPO_ROOT, link, 'junction');
-  return join(link, relative(REPO_ROOT, dir));
+export function withAsciiPath(dir, run) {
+  if (isAscii(dir)) return run(dir);
+  const holder = mkdtempSync(join(tmpdir(), 'arkhe-ascii-'));
+  const link = join(holder, 'repo');
+  try {
+    symlinkSync(REPO_ROOT, link, 'junction');
+    if (realpathSync(link) !== realpathSync(REPO_ROOT)) {
+      throw new Error(`${link} does not resolve to ${REPO_ROOT}.`);
+    }
+    return run(join(link, relative(REPO_ROOT, dir)));
+  } finally {
+    if (lstatSync(link, { throwIfNoEntry: false })) unlinkSync(link);
+    rmdirSync(holder);
+  }
 }
 
-const [command, ...args] = process.argv.slice(2);
-if (command) {
-  const result = spawnSync(command, args, {
-    cwd: asciiPath(process.cwd()),
-    stdio: 'inherit',
-    shell: process.platform === 'win32',
-  });
+if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
+  const [command, ...args] = process.argv.slice(2);
+  const result = withAsciiPath(process.cwd(), (cwd) =>
+    spawnSync(command, args, {
+      cwd,
+      stdio: 'inherit',
+      shell: process.platform === 'win32',
+    }),
+  );
   process.exit(result.status ?? 1);
 }
