@@ -24,7 +24,13 @@ Svelte side of the parity scenes. Each scene must match its twin in
     TextInput,
     Tooltip,
   } from '@arkhe/svelte';
-  import { COMBO_ITEMS, MENU_ITEMS, TAB_ITEMS, TAB_TEXT } from './scenes';
+  import {
+    COMBO_ITEMS,
+    MENU_ITEMS,
+    TAB_ITEMS,
+    TAB_STAGES,
+    TAB_TEXT,
+  } from './scenes';
 
   /**
    * Props of SvelteCases.
@@ -38,6 +44,7 @@ Svelte side of the parity scenes. Each scene must match its twin in
 
   let { name }: Props = $props();
   let pressed = $state(false);
+  let stage = $state(0);
 </script>
 
 {#if name === 'buttons'}
@@ -89,6 +96,11 @@ Svelte side of the parity scenes. Each scene must match its twin in
   <NumericInput label="Speed" defaultValue={3} min={0} max={10} />
 {:else if name === 'tabs'}
   <Tabs items={TAB_ITEMS} label="Sheet">
+    {#snippet panel(key)}{TAB_TEXT[key]}{/snippet}
+  </Tabs>
+{:else if name === 'tabs-change'}
+  <Button onclick={() => (stage += 1)}>Change tabs</Button>
+  <Tabs items={TAB_STAGES[stage] ?? TAB_ITEMS} label="Sheet">
     {#snippet panel(key)}{TAB_TEXT[key]}{/snippet}
   </Tabs>
 {:else if name === 'modal'}

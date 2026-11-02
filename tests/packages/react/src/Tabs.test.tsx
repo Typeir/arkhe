@@ -1,5 +1,5 @@
 import { Tabs } from '@arkhe/react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -60,6 +60,50 @@ describe('Tabs', () => {
     expect(screen.getByRole('tab', { name: 'Stats' })).toHaveAttribute(
       'aria-selected',
       'true',
+    );
+  });
+
+  it('moves uncontrolled tabs off a selected tab that is removed or disabled', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const onValueChange = vi.fn();
+    const panels = (key: string) => `panel ${key}`;
+    const { rerender } = render(
+      <Tabs
+        items={ITEMS}
+        label='Sheet'
+        defaultValue='spell list'
+        onValueChange={onValueChange}
+        panels={panels}
+      />,
+    );
+    rerender(
+      <Tabs
+        items={ITEMS.slice(0, 2)}
+        label='Sheet'
+        defaultValue='spell list'
+        onValueChange={onValueChange}
+        panels={panels}
+      />,
+    );
+    expect(await screen.findByRole('tabpanel')).toHaveTextContent(
+      'panel stats',
+    );
+    expect(screen.getByRole('tab', { name: 'Stats' })).toHaveAttribute(
+      'tabindex',
+      '0',
+    );
+    expect(onValueChange).toHaveBeenLastCalledWith('stats');
+    rerender(
+      <Tabs
+        items={[{ ...ITEMS[0]!, disabled: true }, ITEMS[2]!]}
+        label='Sheet'
+        panels={panels}
+      />,
+    );
+    await waitFor(() =>
+      expect(screen.getByRole('tabpanel')).toHaveTextContent(
+        'panel spell list',
+      ),
     );
   });
 });

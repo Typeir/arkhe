@@ -22,6 +22,19 @@ export const TAB_ITEMS: readonly TabItem[] = [
 ];
 
 /**
+ * Tab sets the changing-tabs scene steps through: the shown tab is disabled,
+ * then the fallback tab is removed.
+ *
+ * @constant TAB_STAGES
+ * @type {readonly (readonly TabItem[])[]}
+ */
+export const TAB_STAGES: readonly (readonly TabItem[])[] = [
+  TAB_ITEMS,
+  [TAB_ITEMS[0]!, TAB_ITEMS[1]!, { ...TAB_ITEMS[2]!, disabled: true }],
+  [TAB_ITEMS[1]!, TAB_ITEMS[2]!],
+];
+
+/**
  * Panel text per tab.
  *
  * @constant TAB_TEXT
