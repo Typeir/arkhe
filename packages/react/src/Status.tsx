@@ -12,11 +12,12 @@
 
 import {
   ARKHE_CLASS,
+  announceOnMount,
   partAttrs,
   statusLook,
   type StatusKind,
 } from '@arkhe/core';
-import type { JSX, ReactNode } from 'react';
+import { useEffect, useRef, type JSX, type ReactNode } from 'react';
 import { useArkhe } from './ArkheProvider';
 import { Icon } from './Icon';
 
@@ -33,7 +34,8 @@ export interface StatusProps {
 }
 
 /**
- * Renders a status line.
+ * Renders a status line. A polite one re-inserts its text once mounted, so
+ * it is spoken even when the host mounts it already filled.
  *
  * @component
  * @param {StatusProps} props - Component props.
@@ -44,8 +46,14 @@ export interface StatusProps {
 export const Status = ({ kind, children }: StatusProps): JSX.Element => {
   const { labels } = useArkhe();
   const look = statusLook(kind, labels);
+  const region = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (look.role !== 'status' || !region.current) return undefined;
+    return announceOnMount(region.current);
+  }, [look.role]);
   return (
     <div
+      ref={region}
       className={ARKHE_CLASS}
       {...partAttrs('status', 'root')}
       data-kind={kind}

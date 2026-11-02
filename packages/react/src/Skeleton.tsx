@@ -10,8 +10,14 @@
 
 'use client';
 
-import { ARKHE_CLASS, partAttrs } from '@arkhe/core';
-import type { CSSProperties, JSX, ReactNode } from 'react';
+import { ARKHE_CLASS, announceOnMount, partAttrs } from '@arkhe/core';
+import {
+  useEffect,
+  useRef,
+  type CSSProperties,
+  type JSX,
+  type ReactNode,
+} from 'react';
 import { useArkhe } from './ArkheProvider';
 
 /**
@@ -69,7 +75,9 @@ export const Skeleton = ({
 };
 
 /**
- * Groups skeletons into one busy region announced with the `loading` label.
+ * Groups skeletons into one loading region. Its only text is the hidden
+ * `loading` label, re-inserted once mounted so it is spoken; the host
+ * removes the group when the content arrives.
  *
  * @component
  * @param {SkeletonGroupProps} props - Component props.
@@ -80,13 +88,19 @@ export const SkeletonGroup = ({
   children,
 }: SkeletonGroupProps): JSX.Element => {
   const { labels } = useArkhe();
+  const region = useRef<HTMLDivElement>(null);
+  useEffect(
+    () => (region.current ? announceOnMount(region.current) : undefined),
+    [],
+  );
   return (
     <div
+      ref={region}
       className={ARKHE_CLASS}
       {...partAttrs('skeleton', 'group')}
       role='status'
-      aria-busy
       aria-label={labels.loading}>
+      <span {...partAttrs('skeleton', 'label')}>{labels.loading}</span>
       {children}
     </div>
   );
