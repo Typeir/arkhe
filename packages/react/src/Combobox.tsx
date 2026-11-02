@@ -155,6 +155,7 @@ export const Combobox = <T extends ComboboxOption>(
               highlighted: () => api.highlightedValue,
               inputValue: () => api.inputValue,
               select: (value) => api.selectValue(value),
+              close: () => api.setOpen(false),
               submit: props.onSubmit,
             },
             REACT_EVENTS,

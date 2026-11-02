@@ -61,13 +61,23 @@ describe('Combobox', () => {
     expect(input).toHaveValue('');
   });
 
-  it('completes the highlighted option on Tab', async () => {
-    render(<Combobox label='Spell' items={SPELLS} />);
+  it('completes the highlighted option on Tab, then lets Tab leave', async () => {
+    render(
+      <>
+        <Combobox label='Spell' items={SPELLS} />
+        <button type='button'>Next</button>
+      </>,
+    );
     const input = screen.getByRole('combobox');
     await userEvent.type(input, 'fr');
     await userEvent.keyboard('{Tab}');
     expect(input).toHaveValue('Frost ray');
     expect(input).toHaveFocus();
+    await waitFor(() =>
+      expect(input).toHaveAttribute('aria-expanded', 'false'),
+    );
+    await userEvent.tab();
+    expect(input).not.toHaveFocus();
   });
 
   it('submits free text on Enter in search mode', async () => {

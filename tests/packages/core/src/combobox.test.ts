@@ -102,12 +102,14 @@ describe('guardComboboxKeys', () => {
   function setup(highlighted: string | null, submit?: (text: string) => void) {
     const zag = vi.fn();
     const select = vi.fn();
+    const close = vi.fn();
     const props = guardComboboxKeys(
       { onKeyDown: zag },
       {
         highlighted: () => highlighted,
         inputValue: () => 'fire',
         select,
+        close,
         submit,
       },
       REACT_EVENTS,
@@ -117,13 +119,17 @@ describe('guardComboboxKeys', () => {
       props.onKeyDown(event);
       return event;
     };
-    return { zag, select, press };
+    return { zag, select, close, press };
   }
 
-  it('completes the highlighted option on Tab', () => {
-    const { zag, select, press } = setup('fireball');
+  it('completes the highlighted option on Tab, then closes the list', () => {
+    const { zag, select, close, press } = setup('fireball');
     expect(press('Tab').preventDefault).toHaveBeenCalled();
     expect(select).toHaveBeenCalledWith('fireball');
+    expect(close).toHaveBeenCalledOnce();
+    expect(select.mock.invocationCallOrder[0]).toBeLessThan(
+      close.mock.invocationCallOrder[0] ?? 0,
+    );
     expect(zag).not.toHaveBeenCalled();
   });
 

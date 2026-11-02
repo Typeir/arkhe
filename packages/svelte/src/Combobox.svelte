@@ -120,6 +120,7 @@ next key, so Enter never acts on a stale list.
         highlighted: () => api.highlightedValue,
         inputValue: () => api.inputValue,
         select: (value) => api.selectValue(value),
+        close: () => api.setOpen(false),
         submit: props.onSubmit,
       },
       SVELTE_EVENTS,
