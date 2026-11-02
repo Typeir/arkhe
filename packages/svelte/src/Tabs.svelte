@@ -11,6 +11,7 @@ there too when the selected tab is removed or disabled.
     ARKHE_CLASS,
     staleTabFallback,
     tabsMachineProps,
+    uniqueByValue,
     type TabItem,
   } from '@arkhe/core';
   import { mergeProps, normalizeProps, useMachine } from '@zag-js/svelte';
@@ -22,7 +23,7 @@ there too when the selected tab is removed or disabled.
    * Props of Tabs. Extra props named after a value are that value's slot.
    *
    * @interface Props
-   * @property {readonly TabItem[]} items - Tabs, in order.
+   * @property {readonly TabItem[]} items - Tabs, in order; a repeated value is dropped.
    * @property {string} label - Accessible name of the tab list.
    * @property {string} [value] - Selected value; makes the tabs controlled.
    * @property {string} [defaultValue] - First value when uncontrolled.
@@ -50,21 +51,24 @@ there too when the selected tab is removed or disabled.
   }: Props = $props();
   const id = $props.id();
   const env = useArkheEnvironment();
+  const shown = $derived(uniqueByValue(items));
+  const warned = new Set<string>();
   const service = useMachine(tabs.machine, () =>
     tabsMachineProps({
       id,
-      items,
+      items: shown,
       label,
       value,
       defaultValue,
       onValueChange,
+      warned,
       getRootNode: env().getRootNode,
     }),
   );
   const api = $derived(tabs.connect(service, normalizeProps));
   $effect(() => {
     if (value !== undefined) return;
-    const fallback = staleTabFallback(api.value, items);
+    const fallback = staleTabFallback(api.value, shown);
     if (fallback !== undefined) api.setValue(fallback);
   });
   const slotFor = (key: string) => slots[key] as Snippet | undefined;
@@ -72,14 +76,14 @@ there too when the selected tab is removed or disabled.
 
 <div {...mergeProps(api.getRootProps(), { class: ARKHE_CLASS })}>
   <div {...api.getListProps()}>
-    {#each items as item (item.value)}
+    {#each shown as item (item.value)}
       <button
         {...api.getTriggerProps({ value: item.value, disabled: item.disabled })}
         >{item.label}</button>
     {/each}
     <div {...api.getIndicatorProps()}></div>
   </div>
-  {#each items as item (item.value)}
+  {#each shown as item (item.value)}
     <div {...api.getContentProps({ value: item.value })}>
       {#if panel}{@render panel(item.value)}{:else}{@render slotFor(
           item.value,

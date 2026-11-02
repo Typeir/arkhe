@@ -1,6 +1,6 @@
 import { ArkheProvider, NumericInput } from '@arkhe/react';
 import type { NumericValue } from '@arkhe/core';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -68,8 +68,40 @@ describe('NumericInput', () => {
     await userEvent.type(input, '71');
     expect(input).toHaveValue('71');
     await userEvent.tab();
-    expect(input).toHaveValue('10');
+    await waitFor(() => expect(input).toHaveValue('10'));
     expect(onCommit).toHaveBeenLastCalledWith(10);
+  });
+
+  it('does not echo outside values and applies each while focused', async () => {
+    const onValueChange = vi.fn();
+    const field = (value: NumericValue) => (
+      <NumericInput label='Speed' value={value} onValueChange={onValueChange} />
+    );
+    const { rerender } = render(field(1));
+    const input = screen.getByRole('spinbutton');
+    await userEvent.click(input);
+    fireEvent.input(input, { target: { value: '17' } });
+    await waitFor(() => expect(onValueChange).toHaveBeenCalledWith(17));
+    rerender(field(17));
+    onValueChange.mockClear();
+    rerender(field(42));
+    await waitFor(() => expect(input).toHaveValue('42'));
+    rerender(field(43));
+    await waitFor(() => expect(input).toHaveValue('43'));
+    expect(input).toHaveFocus();
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  it('snaps back to a parent that ignores the change, silently', async () => {
+    const onValueChange = vi.fn();
+    render(
+      <NumericInput label='Speed' value={5} onValueChange={onValueChange} />,
+    );
+    const input = screen.getByRole('spinbutton');
+    await userEvent.type(input, '7');
+    await userEvent.tab();
+    await waitFor(() => expect(input).toHaveValue('5'));
+    expect(onValueChange.mock.calls).toEqual([[57]]);
   });
 
   it('omits aria bounds it was not given', () => {

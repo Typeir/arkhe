@@ -41,7 +41,7 @@ import { usePortalContainer } from './usePortalContainer.js';
  * @interface ComboboxProps
  * @template {ComboboxOption} T
  * @property {string} label - Visible label.
- * @property {readonly T[]} items - Options.
+ * @property {readonly T[]} items - Options; a repeated value is dropped.
  * @property {string} [placeholder] - Input placeholder.
  * @property {string | null} [value] - Selected value; makes the selection controlled.
  * @property {string | null} [defaultValue] - First selection when uncontrolled.

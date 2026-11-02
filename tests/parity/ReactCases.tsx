@@ -28,6 +28,7 @@ import {
   TextInput,
   Tooltip,
 } from '@arkhe/react';
+import type { NumericValue } from '@arkhe/core';
 import { useState, type JSX, type ReactNode } from 'react';
 import {
   COMBO_ITEMS,
@@ -35,6 +36,8 @@ import {
   TAB_ITEMS,
   TAB_STAGES,
   TAB_TEXT,
+  TWIN_OPTIONS,
+  TWIN_TABS,
 } from './scenes';
 
 const Buttons = (): JSX.Element => {
@@ -72,6 +75,25 @@ const ChangingTabs = (): JSX.Element => {
         label='Sheet'
         panels={TAB_TEXT}
       />
+    </>
+  );
+};
+
+const ControlledNumeric = (): JSX.Element => {
+  const [value, setValue] = useState<NumericValue>(5);
+  const [log, setLog] = useState<readonly NumericValue[]>([]);
+  return (
+    <>
+      <NumericInput
+        label='Speed'
+        value={value}
+        onValueChange={(next) => {
+          setLog((entries) => [...entries, next]);
+          setValue(next === null ? null : Math.min(next, 10));
+        }}
+      />
+      <Button onClick={() => setValue(8)}>Set 8</Button>
+      <output>{log.join(' ')}</output>
     </>
   );
 };
@@ -140,8 +162,16 @@ const SCENES: Readonly<Record<string, () => ReactNode>> = {
   numeric: () => (
     <NumericInput label='Speed' defaultValue={3} min={0} max={10} />
   ),
+  'numeric-controlled': () => <ControlledNumeric />,
   tabs: () => <Tabs items={TAB_ITEMS} label='Sheet' panels={TAB_TEXT} />,
   'tabs-change': () => <ChangingTabs />,
+  duplicates: () => (
+    <>
+      <Progress value={5} max={10} label='Budget' markers={[2, 2]} />
+      <Tabs items={TWIN_TABS} label='Sheet' panels={TAB_TEXT} />
+      <Combobox label='Spell' items={TWIN_OPTIONS} />
+    </>
+  ),
   modal: () => (
     <Modal title='Rest' description='Recover.' trigger='Open'>
       Body

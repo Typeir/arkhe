@@ -15,11 +15,12 @@ import {
   ARKHE_CLASS,
   staleTabFallback,
   tabsMachineProps,
+  uniqueByValue,
   type TabItem,
 } from '@arkhe/core';
 import { mergeProps, normalizeProps, useMachine } from '@zag-js/react';
 import * as tabs from '@zag-js/tabs';
-import { useEffect, useId, type JSX, type ReactNode } from 'react';
+import { useEffect, useId, useState, type JSX, type ReactNode } from 'react';
 import { useArkheEnvironment } from './ArkheEnvironment.js';
 
 /**
@@ -34,7 +35,7 @@ export type TabPanels =
  * Props of Tabs.
  *
  * @interface TabsProps
- * @property {readonly TabItem[]} items - Tabs, in order.
+ * @property {readonly TabItem[]} items - Tabs, in order; a repeated value is dropped.
  * @property {string} label - Accessible name of the tab list.
  * @property {string} [value] - Selected value; makes the tabs controlled.
  * @property {string} [defaultValue] - First value when uncontrolled.
@@ -68,21 +69,24 @@ export const Tabs = ({
   panels,
 }: TabsProps): JSX.Element => {
   const env = useArkheEnvironment();
+  const shown = uniqueByValue(items);
+  const [warned] = useState(() => new Set<string>());
   const service = useMachine(
     tabs.machine,
     tabsMachineProps({
       id: useId(),
-      items,
+      items: shown,
       label,
       value,
       defaultValue,
       onValueChange,
+      warned,
       getRootNode: env.getRootNode,
     }),
   );
   const api = tabs.connect(service, normalizeProps);
   const fallback =
-    value === undefined ? staleTabFallback(api.value, items) : undefined;
+    value === undefined ? staleTabFallback(api.value, shown) : undefined;
   useEffect(() => {
     if (fallback !== undefined) api.setValue(fallback);
   }, [api, fallback]);
@@ -91,7 +95,7 @@ export const Tabs = ({
   return (
     <div {...mergeProps(api.getRootProps(), { className: ARKHE_CLASS })}>
       <div {...api.getListProps()}>
-        {items.map((item) => (
+        {shown.map((item) => (
           <button
             key={item.value}
             {...api.getTriggerProps({
@@ -103,7 +107,7 @@ export const Tabs = ({
         ))}
         <div {...api.getIndicatorProps()} />
       </div>
-      {items.map((item) => (
+      {shown.map((item) => (
         <div key={item.value} {...api.getContentProps({ value: item.value })}>
           {panelFor(item.value)}
         </div>

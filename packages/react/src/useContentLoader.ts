@@ -11,9 +11,38 @@
 'use client';
 
 import { ContentLoader, type LoadState } from '@arkhe/core';
-import { useState, useSyncExternalStore } from 'react';
+import { useCallback, useState, useSyncExternalStore } from 'react';
 
 const IDLE: LoadState<never> = { status: 'idle' };
+
+function unsubscribeNothing(): void {
+  return undefined;
+}
+
+/**
+ * A loader together with the source it was built from.
+ *
+ * @interface Held
+ * @template T
+ * @property {(() => Promise<T>) | undefined} source - Source the loader runs.
+ * @property {ContentLoader<T> | undefined} loader - Loader, if there is a source.
+ */
+interface Held<T> {
+  readonly source: (() => Promise<T>) | undefined;
+  readonly loader: ContentLoader<T> | undefined;
+}
+
+/**
+ * Builds a loader for `source`.
+ *
+ * @function hold
+ * @template T
+ * @param {(() => Promise<T>) | undefined} source - Fetches the content.
+ * @returns {Held<T>} Source and loader.
+ */
+function hold<T>(source: (() => Promise<T>) | undefined): Held<T> {
+  return { source, loader: source ? new ContentLoader(source) : undefined };
+}
 
 /**
  * What the hook returns.
@@ -29,7 +58,9 @@ export interface ContentLoaderHandle<T> {
 }
 
 /**
- * Keeps one loader for `source`. Without a source the state stays idle.
+ * Keeps one loader per `source`. A new `source` gets a new loader, so keep
+ * it stable (`useCallback`) unless what it loads changed. Without a source
+ * the state stays idle.
  *
  * @function useContentLoader
  * @template T
@@ -39,13 +70,19 @@ export interface ContentLoaderHandle<T> {
 export function useContentLoader<T>(
   source: (() => Promise<T>) | undefined,
 ): ContentLoaderHandle<T> {
-  const [loader] = useState(() =>
-    source ? new ContentLoader(source) : undefined,
+  const [held, setHeld] = useState(() => hold(source));
+  const current = held.source === source ? held : hold(source);
+  if (current !== held) setHeld(current);
+  const { loader } = current;
+  const subscribe = useCallback(
+    (listener: () => void) => loader?.subscribe(listener) ?? unsubscribeNothing,
+    [loader],
   );
   const state = useSyncExternalStore(
-    (listener) => loader?.subscribe(listener) ?? (() => undefined),
+    subscribe,
     () => loader?.snapshot() ?? IDLE,
     () => IDLE,
   );
-  return { state, load: () => void loader?.load() };
+  const load = useCallback(() => void loader?.load(), [loader]);
+  return { state, load };
 }

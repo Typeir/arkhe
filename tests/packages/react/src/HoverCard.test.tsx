@@ -82,4 +82,43 @@ describe('HoverCard', () => {
       screen.getByRole('button', { name: 'Unpin Charge' }),
     ).toHaveAttribute('aria-pressed', 'true');
   });
+
+  it('stays open under the pointer when unpinned, then closes on leave', async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <HoverCard title='Charge' content='Body' openDelay={0} closeDelay={0}>
+          charge
+        </HoverCard>
+        <span>elsewhere</span>
+      </>,
+    );
+    await user.hover(screen.getByRole('button', { name: 'charge' }));
+    await waitFor(() => expect(card('Charge')).toBeVisible());
+    await user.click(screen.getByRole('button', { name: 'Pin Charge' }));
+    await user.click(screen.getByRole('button', { name: 'Unpin Charge' }));
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    expect(card('Charge')).toBeVisible();
+    expect(card('Charge')).not.toHaveAttribute('data-pinned');
+    await user.hover(screen.getByText('elsewhere'));
+    await waitFor(() => expect(card('Charge')).not.toBeVisible());
+  });
+
+  it('loads afresh when load changes while open', async () => {
+    const view = (name: string) => (
+      <HoverCard
+        title='Who'
+        openDelay={0}
+        load={async () => name}
+        loaded={(text) => <p>{text}</p>}>
+        who
+      </HoverCard>
+    );
+    const { rerender } = render(view('Ada'));
+    await userEvent.hover(screen.getByRole('button', { name: 'who' }));
+    expect(await screen.findByText('Ada')).toBeInTheDocument();
+    rerender(view('Grace'));
+    expect(await screen.findByText('Grace')).toBeInTheDocument();
+    expect(screen.queryByText('Ada')).not.toBeInTheDocument();
+  });
 });

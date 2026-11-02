@@ -109,4 +109,25 @@ describe('Tabs', () => {
       ),
     );
   });
+
+  it('warns once per instance about an unknown value', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const view = <Tabs items={ITEMS} label='Sheet' value='lost' panels={{}} />;
+    const { rerender } = render(view);
+    rerender(<Tabs items={ITEMS} label='Sheet' value='lost' panels={{}} />);
+    expect(warn).toHaveBeenCalledOnce();
+    render(view);
+    expect(warn).toHaveBeenCalledTimes(2);
+  });
+
+  it('drops a tab that repeats an earlier value', () => {
+    render(
+      <Tabs
+        items={[...ITEMS, { value: 'stats', label: 'Stats again' }]}
+        label='Sheet'
+        panels={{}}
+      />,
+    );
+    expect(screen.queryByRole('tab', { name: 'Stats again' })).toBeNull();
+  });
 });

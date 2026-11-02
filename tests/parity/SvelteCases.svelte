@@ -24,12 +24,15 @@ Svelte side of the parity scenes. Each scene must match its twin in
     TextInput,
     Tooltip,
   } from '@arkhe/svelte';
+  import type { NumericValue } from '@arkhe/core';
   import {
     COMBO_ITEMS,
     MENU_ITEMS,
     TAB_ITEMS,
     TAB_STAGES,
     TAB_TEXT,
+    TWIN_OPTIONS,
+    TWIN_TABS,
   } from './scenes';
 
   /**
@@ -46,6 +49,12 @@ Svelte side of the parity scenes. Each scene must match its twin in
   let pressed = $state(false);
   let stage = $state(0);
   let described = $state(true);
+  let speed = $state<NumericValue>(5);
+  let speedLog = $state<NumericValue[]>([]);
+  const answerSpeed = (next: NumericValue) => {
+    speedLog.push(next);
+    speed = next === null ? null : Math.min(next, 10);
+  };
 </script>
 
 {#if name === 'buttons'}
@@ -95,6 +104,10 @@ Svelte side of the parity scenes. Each scene must match its twin in
   <Status kind="info">Two rolls left.</Status>
 {:else if name === 'numeric'}
   <NumericInput label="Speed" defaultValue={3} min={0} max={10} />
+{:else if name === 'numeric-controlled'}
+  <NumericInput label="Speed" value={speed} onValueChange={answerSpeed} />
+  <Button onclick={() => (speed = 8)}>Set 8</Button>
+  <output>{speedLog.join(' ')}</output>
 {:else if name === 'tabs'}
   <Tabs items={TAB_ITEMS} label="Sheet">
     {#snippet panel(key)}{TAB_TEXT[key]}{/snippet}
@@ -104,6 +117,12 @@ Svelte side of the parity scenes. Each scene must match its twin in
   <Tabs items={TAB_STAGES[stage] ?? TAB_ITEMS} label="Sheet">
     {#snippet panel(key)}{TAB_TEXT[key]}{/snippet}
   </Tabs>
+{:else if name === 'duplicates'}
+  <Progress value={5} max={10} label="Budget" markers={[2, 2]} />
+  <Tabs items={TWIN_TABS} label="Sheet">
+    {#snippet panel(key)}{TAB_TEXT[key]}{/snippet}
+  </Tabs>
+  <Combobox label="Spell" items={TWIN_OPTIONS} />
 {:else if name === 'modal'}
   <Modal title="Rest" description="Recover." trigger="Open">Body</Modal>
 {:else if name === 'modal-description'}

@@ -20,7 +20,7 @@ value text says by how much. Throws a RangeError when `max` is not positive.
    * @property {number} value - Current amount; may exceed `max`.
    * @property {number} max - Amount that fills the rail.
    * @property {string} label - Accessible name.
-   * @property {readonly number[]} [markers] - Thresholds, in the value's units.
+   * @property {readonly number[]} [markers] - Thresholds, in the value's units; repeats are dropped.
    * @property {boolean} [showValue] - Prints the value text above the rail.
    */
   interface Props {

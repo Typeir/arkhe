@@ -82,3 +82,27 @@ export const COMBO_ITEMS: readonly ComboboxOption[] = [
   { value: 'frost', label: 'Frost ray', group: 'Spells' },
   { value: 'goblin', label: 'Goblin', group: 'Creatures', disabled: true },
 ];
+
+/**
+ * Tabs whose values repeat, for the duplicates scene.
+ *
+ * @constant TWIN_TABS
+ * @type {readonly TabItem[]}
+ */
+export const TWIN_TABS: readonly TabItem[] = [
+  { value: 'stats', label: 'Stats' },
+  { value: 'stats', label: 'Stats again' },
+  { value: 'notes', label: 'Notes' },
+];
+
+/**
+ * Options whose values repeat, for the duplicates scene.
+ *
+ * @constant TWIN_OPTIONS
+ * @type {readonly ComboboxOption[]}
+ */
+export const TWIN_OPTIONS: readonly ComboboxOption[] = [
+  { value: 'frost', label: 'Frost ray' },
+  { value: 'frost', label: 'Frost ray again' },
+  { value: 'fireball', label: 'Fireball' },
+];

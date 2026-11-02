@@ -69,4 +69,28 @@ describe('Tabs', () => {
       expect(screen.getByRole('tabpanel')).toHaveTextContent('panel spells'),
     );
   });
+
+  it('warns once per instance about an unknown value', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const props = {
+      items: ITEMS,
+      label: 'Sheet',
+      value: 'lost',
+      panel: panelSnippet(),
+    };
+    const { rerender } = render(Tabs, props);
+    await rerender({ label: 'Sheet again' });
+    expect(warn).toHaveBeenCalledOnce();
+    render(Tabs, props);
+    expect(warn).toHaveBeenCalledTimes(2);
+  });
+
+  it('drops a tab that repeats an earlier value', () => {
+    render(Tabs, {
+      items: [...ITEMS, { value: 'stats', label: 'Stats again' }],
+      label: 'Sheet',
+      panel: panelSnippet(),
+    });
+    expect(screen.queryByRole('tab', { name: 'Stats again' })).toBeNull();
+  });
 });

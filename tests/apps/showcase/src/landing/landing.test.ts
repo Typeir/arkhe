@@ -67,6 +67,17 @@ describe('startLanding', () => {
     }
   });
 
+  it('points the open-alone links at the current settings', async () => {
+    mount();
+    await userEvent.click(screen.getByRole('button', { name: 'theme=light' }));
+    await userEvent.click(screen.getByRole('button', { name: 'scale=125' }));
+    expect(
+      screen
+        .getAllByRole('link', { name: 'Open alone' })
+        .map((link) => link.getAttribute('href')),
+    ).toEqual(TARGETS.map((target) => `${target.path}?theme=light&scale=125`));
+  });
+
   it('marks the active switches', async () => {
     mount();
     await userEvent.click(screen.getByRole('button', { name: 'scale=125' }));
