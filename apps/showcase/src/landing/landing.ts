@@ -95,19 +95,22 @@ export function startLanding(stage: HTMLElement, controls: HTMLElement): void {
     panel.dataset.target = target.id;
     const query = `?theme=${state.settings.theme}&scale=${state.settings.scale}`;
     panel.innerHTML = `<header><h2>${target.title}</h2><a href="${target.path}${query}" target="_blank" rel="noopener">Open alone</a></header>`;
+    const link = panel.querySelector('a') as HTMLAnchorElement;
     const frame = document.createElement('iframe');
     frame.title = `${target.title} target`;
     frame.src = `${target.path}${query}`;
     frame.addEventListener('load', () => fitHeight(frame));
     panel.append(frame);
     stage.append(panel);
-    return { target, panel, frame };
+    return { target, panel, frame, link };
   });
   const render = () => {
     applySettings(document.documentElement, state.settings);
     stage.dataset.layout = state.stacked ? 'stacked' : 'columns';
-    for (const { target, panel, frame } of frames) {
+    const query = `?theme=${state.settings.theme}&scale=${state.settings.scale}`;
+    for (const { target, panel, frame, link } of frames) {
       panel.hidden = state.hidden.has(target.id);
+      link.href = `${target.path}${query}`;
       frame.contentWindow?.postMessage(
         { type: SETTINGS_MESSAGE, settings: state.settings },
         location.origin,
