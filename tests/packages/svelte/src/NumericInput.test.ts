@@ -67,9 +67,14 @@ describe('NumericInput', () => {
     expect(onValueChange).not.toHaveBeenCalled();
   });
 
-  it('snaps back to a parent that ignores the change, silently', async () => {
+  it('snaps back to a function binding that refuses the change', async () => {
     const onValueChange = vi.fn();
-    render(NumericInput, { label: 'Speed', value: 5, onValueChange });
+    render(ClampedNumeric, {
+      onCommit: () => undefined,
+      refuse: true,
+      unbounded: true,
+      onChange: onValueChange,
+    });
     const input = screen.getByRole('spinbutton');
     await userEvent.type(input, '7');
     await userEvent.tab();

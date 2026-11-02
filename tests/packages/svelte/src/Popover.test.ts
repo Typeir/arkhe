@@ -1,9 +1,12 @@
 import { Popover } from '@arkhe/svelte';
+import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
 import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
 import { textSnippet } from '@tests/fixtures/svelte/snippets';
 import { render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
+
+const held = () => screen.getByText(/^held /).textContent;
 
 describe('Popover', () => {
   it('toggles a titled panel from its button', async () => {
@@ -47,4 +50,15 @@ describe('Popover', () => {
     const panel = await screen.findByRole('dialog', { name: 'Sort' });
     expect(panel).not.toHaveAttribute('aria-labelledby');
   });
+
+  it.each([false, true])(
+    'binds open; refused by a function binding: %s',
+    async (refuse) => {
+      render(BoundState, { kind: 'popover', refuse });
+      await userEvent.click(screen.getByRole('button', { name: 'Filters' }));
+      if (!refuse) await screen.findByRole('dialog', { name: 'Filter by' });
+      expect(held()).toBe(`held ${!refuse}`);
+      expect(screen.queryByRole('dialog') !== null).toBe(!refuse);
+    },
+  );
 });

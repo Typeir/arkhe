@@ -1,4 +1,5 @@
 import { Combobox } from '@arkhe/svelte';
+import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
 import { render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
@@ -12,6 +13,8 @@ const SPELLS = [
 
 const names = () =>
   screen.getAllByRole('option').map((option) => option.textContent?.trim());
+
+const held = () => screen.getByText(/^held /).textContent;
 
 describe('Combobox', () => {
   it('opens on click and filters as you type, ignoring accents', async () => {
@@ -97,4 +100,17 @@ describe('Combobox', () => {
       await screen.findByRole('group', { name: 'Fire spells' }),
     ).toBeInTheDocument();
   });
+
+  it.each([
+    [false, 'spells'],
+    [true, 'null'],
+  ])(
+    'binds the value; refused by a function binding: %s',
+    async (refuse, kept) => {
+      render(BoundState, { kind: 'combobox', refuse });
+      await userEvent.type(screen.getByRole('combobox'), 'spe');
+      await userEvent.keyboard('{Enter}');
+      await waitFor(() => expect(held()).toBe(`held ${kept}`));
+    },
+  );
 });

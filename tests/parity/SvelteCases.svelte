@@ -105,7 +105,7 @@ Svelte side of the parity scenes. Each scene must match its twin in
 {:else if name === 'numeric'}
   <NumericInput label="Speed" defaultValue={3} min={0} max={10} />
 {:else if name === 'numeric-controlled'}
-  <NumericInput label="Speed" value={speed} onValueChange={answerSpeed} />
+  <NumericInput label="Speed" bind:value={() => speed, answerSpeed} />
   <Button onclick={() => (speed = 8)}>Set 8</Button>
   <output>{speedLog.join(' ')}</output>
 {:else if name === 'tabs'}

@@ -1,11 +1,11 @@
 <!--
 @component
 Renders a number field on Zag's number-input machine. Outside it is a number
-or `null`. Without `onValueChange`, `value` binds, even from undefined. With
-it, the host owns `value` as in React: the field never writes it, so a host
-that rejects or clamps a change sees the field snap back on blur. A
-controlled value set while typing waits until blur, so a parent that clamps
-cannot eat keystrokes. The port keeps its own draft text: Zag hands the
+or `null`. `value` always binds, even from undefined; `onValueChange` only
+reports. A host that rejects or clamps a change uses a function binding, and
+the field snaps back to what the getter returns on blur. A controlled value
+set while typing waits until blur, so a parent that clamps cannot eat
+keystrokes. The port keeps its own draft text: Zag hands the
 input its formatted value, which Svelte would bind live and so erase a lone
 "-".
 -->
@@ -31,9 +31,9 @@ input its formatted value, which Svelte would bind live and so erase a lone
    *
    * @interface Props
    * @property {string} label - Visible label; also names the step buttons.
-   * @property {NumericValue} [value] - Controlled value; bindable when `onValueChange` is absent.
+   * @property {NumericValue} [value] - Value; bindable. A function binding vetoes or clamps.
    * @property {NumericValue} [defaultValue] - First value when uncontrolled.
-   * @property {(value: NumericValue) => void} [onValueChange] - Every draft change.
+   * @property {(value: NumericValue) => void} [onValueChange] - Reports every draft change.
    * @property {(value: NumericValue) => void} [onValueCommit] - Blur or Enter, clamped.
    * @property {number} [min] - Lowest value.
    * @property {number} [max] - Highest value.
@@ -72,8 +72,8 @@ input its formatted value, which Svelte would bind live and so erase a lone
   );
 
   const emit = (next: NumericValue) => {
-    if (onValueChange) onValueChange(next);
-    else value = next;
+    value = next;
+    onValueChange?.(next);
   };
 
   const service = useMachine(numberInput.machine, () => ({

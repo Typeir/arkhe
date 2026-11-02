@@ -28,9 +28,9 @@ outside clicks close it; focus returns to the button.
    * @interface Props
    * @property {string} trigger - Text of the open button.
    * @property {string} [title] - Heading; names the panel. Without it the trigger text does.
-   * @property {boolean} [open] - Open state; makes the popover controlled.
+   * @property {boolean} [open] - Open state; bindable. A function binding vetoes.
    * @property {boolean} [defaultOpen] - First open state when uncontrolled.
-   * @property {(open: boolean) => void} [onOpenChange] - Open-state callback.
+   * @property {(open: boolean) => void} [onOpenChange] - Reports open-state changes.
    * @property {Placement} [placement] - Side. Defaults to `bottom-start`.
    * @property {Snippet} [children] - Panel body.
    */
@@ -47,7 +47,7 @@ outside clicks close it; focus returns to the button.
   let {
     trigger,
     title,
-    open,
+    open = $bindable(),
     defaultOpen,
     onOpenChange,
     placement = 'bottom-start',
@@ -61,7 +61,10 @@ outside clicks close it; focus returns to the button.
       id,
       open,
       defaultOpen,
-      onOpenChange,
+      onOpenChange: (next: boolean) => {
+        open = next;
+        onOpenChange?.(next);
+      },
       placement,
       getRootNode: env().getRootNode,
     }),

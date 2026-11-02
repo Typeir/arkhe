@@ -32,9 +32,9 @@ machine is needed.
    * @property {string} title - Heading; names the dialog.
    * @property {string} [description] - Text under the heading; describes the dialog.
    * @property {string} [trigger] - Text of a built-in open button. Omit to open from state only.
-   * @property {boolean} [open] - Open state; makes the modal controlled.
+   * @property {boolean} [open] - Open state; bindable. A function binding vetoes.
    * @property {boolean} [defaultOpen] - First open state when uncontrolled.
-   * @property {(open: boolean) => void} [onOpenChange] - Open-state callback.
+   * @property {(open: boolean) => void} [onOpenChange] - Reports open-state changes.
    * @property {DialogRole} [role] - `alertdialog` for confirmations. Defaults to `dialog`.
    * @property {() => HTMLElement | null} [finalFocus] - Element to focus on close; for when the opener is gone.
    * @property {Snippet} [children] - Body.
@@ -55,7 +55,7 @@ machine is needed.
     title,
     description,
     trigger,
-    open,
+    open = $bindable(),
     defaultOpen,
     onOpenChange,
     role,
@@ -65,7 +65,7 @@ machine is needed.
   const id = $props.id();
   const arkhe = useArkhe();
   const env = useArkheEnvironment();
-  let inner = $state(untrack(() => defaultOpen ?? false));
+  const initial = untrack(() => defaultOpen ?? false);
   let mounted = $state(false);
 
   onMount(() => {
@@ -73,14 +73,14 @@ machine is needed.
   });
 
   const change = (next: boolean) => {
-    inner = next;
+    open = next;
     onOpenChange?.(next);
   };
 
   const service = useMachine(dialog.machine, () =>
     dialogMachineProps({
       id,
-      open: open ?? inner,
+      open: open ?? initial,
       ready: mounted,
       role,
       onOpenChange: change,

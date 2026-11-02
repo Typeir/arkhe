@@ -1,4 +1,5 @@
 import { Modal } from '@arkhe/svelte';
+import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
 import ShadowModal from '@tests/fixtures/svelte/ShadowModal.svelte';
 import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
 import { textSnippet } from '@tests/fixtures/svelte/snippets';
@@ -16,6 +17,8 @@ function shadowApp() {
   shadow.append(app, container);
   return { host, shadow, app, container };
 }
+
+const held = () => screen.getByText(/^held /).textContent;
 
 describe('Modal', () => {
   it('opens from its trigger, named and described', async () => {
@@ -100,4 +103,15 @@ describe('Modal', () => {
     expect(app).not.toHaveAttribute('aria-hidden');
     host.remove();
   });
+
+  it.each([false, true])(
+    'binds open; refused by a function binding: %s',
+    async (refuse) => {
+      render(BoundState, { kind: 'modal', refuse });
+      await userEvent.click(screen.getByRole('button', { name: 'Rest' }));
+      if (!refuse) await screen.findByRole('dialog', { name: 'Rest' });
+      expect(held()).toBe(`held ${!refuse}`);
+      expect(screen.queryByRole('dialog') !== null).toBe(!refuse);
+    },
+  );
 });

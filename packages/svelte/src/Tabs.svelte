@@ -2,9 +2,11 @@
 @component
 Renders a tab list and its panels on Zag's tabs machine. Panels come from the
 `panel` snippet, called per value, or, for Astro, which cannot pass a
-parameterised snippet, from one named slot per value. A value that matches no
-enabled tab shows the first enabled tab and warns once; uncontrolled tabs move
-there too when the selected tab is removed or disabled.
+parameterised snippet, from one named slot per value. `value` binds; a
+function binding vetoes. A value from the host that matches no enabled tab
+shows the first enabled tab and warns once. A value the tabs chose themselves
+moves there silently, and writes the binding, when its tab is removed or
+disabled.
 -->
 <script lang="ts">
   import {
@@ -25,9 +27,9 @@ there too when the selected tab is removed or disabled.
    * @interface Props
    * @property {readonly TabItem[]} items - Tabs, in order; a repeated value is dropped.
    * @property {string} label - Accessible name of the tab list.
-   * @property {string} [value] - Selected value; makes the tabs controlled.
+   * @property {string} [value] - Selected value; bindable.
    * @property {string} [defaultValue] - First value when uncontrolled.
-   * @property {(value: string) => void} [onValueChange] - Selection callback.
+   * @property {(value: string) => void} [onValueChange] - Reports selection changes.
    * @property {Snippet<[string]>} [panel] - Renders the panel for a value.
    */
   interface Props {
@@ -43,7 +45,7 @@ there too when the selected tab is removed or disabled.
   let {
     items,
     label,
-    value,
+    value = $bindable(),
     defaultValue,
     onValueChange,
     panel,
@@ -53,23 +55,36 @@ there too when the selected tab is removed or disabled.
   const env = useArkheEnvironment();
   const shown = $derived(uniqueByValue(items));
   const warned = new Set<string>();
+  let chosen = $state<string>();
+  const own = () => value === undefined || value === chosen;
+  const current = () => {
+    const held = value ?? chosen;
+    return held !== undefined && own()
+      ? (staleTabFallback(held, shown) ?? held)
+      : held;
+  };
+  const select = (next: string) => {
+    chosen = next;
+    value = next;
+    onValueChange?.(next);
+  };
   const service = useMachine(tabs.machine, () =>
     tabsMachineProps({
       id,
       items: shown,
       label,
-      value,
+      value: current(),
       defaultValue,
-      onValueChange,
+      onValueChange: select,
       warned,
       getRootNode: env().getRootNode,
     }),
   );
   const api = $derived(tabs.connect(service, normalizeProps));
   $effect(() => {
-    if (value !== undefined) return;
-    const fallback = staleTabFallback(api.value, shown);
-    if (fallback !== undefined) api.setValue(fallback);
+    if (!own()) return;
+    const fallback = staleTabFallback(value ?? chosen ?? api.value, shown);
+    if (fallback !== undefined) select(fallback);
   });
   const slotFor = (key: string) => slots[key] as Snippet | undefined;
 </script>

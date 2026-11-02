@@ -97,10 +97,9 @@ Svelte specimen: every Arkhé component with the shared specimen data.
       <NumericInput label="Speed" defaultValue={30} min={0} step={5} />
       <NumericInput
         label="Clamped 0 to 10"
-        value={clamped}
+        bind:value={() => clamped, (next) => (clamped = clampTen(next))}
         min={0}
-        max={10}
-        onValueChange={(next) => (clamped = clampTen(next))} />
+        max={10} />
       <NumericInput label="Unbounded" defaultValue={null} />
     </div>
   </section>

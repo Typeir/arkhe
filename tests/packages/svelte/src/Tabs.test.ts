@@ -1,4 +1,5 @@
 import { Tabs } from '@arkhe/svelte';
+import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
 import { panelSnippet, textSnippet } from '@tests/fixtures/svelte/snippets';
 import { render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
@@ -9,6 +10,8 @@ const ITEMS = [
   { value: 'gear', label: 'Gear', disabled: true },
   { value: 'spells', label: 'Spells' },
 ];
+
+const held = () => screen.getByText(/^held /).textContent;
 
 describe('Tabs', () => {
   it('names the list and shows the first enabled panel', () => {
@@ -40,8 +43,8 @@ describe('Tabs', () => {
     expect(screen.getByRole('tabpanel')).toHaveTextContent('Fireball');
   });
 
-  it('moves uncontrolled tabs off a selected tab that is removed or disabled', async () => {
-    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+  it('moves its own value off a selected tab that is removed or disabled', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const onValueChange = vi.fn();
     const { rerender } = render(Tabs, {
       items: ITEMS,
@@ -59,6 +62,7 @@ describe('Tabs', () => {
       '0',
     );
     expect(onValueChange).toHaveBeenLastCalledWith('stats');
+    warn.mockClear();
     await rerender({
       items: [
         { value: 'stats', label: 'Stats', disabled: true },
@@ -68,6 +72,8 @@ describe('Tabs', () => {
     await waitFor(() =>
       expect(screen.getByRole('tabpanel')).toHaveTextContent('panel spells'),
     );
+    expect(onValueChange).toHaveBeenLastCalledWith('spells');
+    expect(warn).not.toHaveBeenCalled();
   });
 
   it('warns once per instance about an unknown value', async () => {
@@ -83,6 +89,7 @@ describe('Tabs', () => {
     expect(warn).toHaveBeenCalledOnce();
     render(Tabs, props);
     expect(warn).toHaveBeenCalledTimes(2);
+    await new Promise(requestAnimationFrame);
   });
 
   it('drops a tab that repeats an earlier value', () => {
@@ -93,4 +100,17 @@ describe('Tabs', () => {
     });
     expect(screen.queryByRole('tab', { name: 'Stats again' })).toBeNull();
   });
+
+  it.each([
+    [false, 'spells'],
+    [true, 'stats'],
+  ])(
+    'binds the value; refused by a function binding: %s',
+    async (refuse, shown) => {
+      render(BoundState, { kind: 'tabs', refuse });
+      await userEvent.click(screen.getByRole('tab', { name: 'Spells' }));
+      await waitFor(() => expect(held()).toBe(`held ${shown}`));
+      expect(screen.getByRole('tabpanel')).toHaveTextContent(`panel ${shown}`);
+    },
+  );
 });

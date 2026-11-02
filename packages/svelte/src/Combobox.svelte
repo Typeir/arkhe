@@ -44,9 +44,9 @@ next key, so Enter never acts on a stale list.
    * @property {string} label - Visible label.
    * @property {readonly T[]} items - Options; a repeated value is dropped.
    * @property {string} [placeholder] - Input placeholder.
-   * @property {string | null} [value] - Selected value; makes the selection controlled.
+   * @property {string | null} [value] - Selected value; bindable. A function binding vetoes.
    * @property {string | null} [defaultValue] - First selection when uncontrolled.
-   * @property {(value: string | null) => void} [onValueChange] - Selection changes.
+   * @property {(value: string | null) => void} [onValueChange] - Reports selection changes.
    * @property {(item: T) => void} [onSelect] - Every choice, even a repeat.
    * @property {boolean} [clearOnSelect] - Picker mode: empties the input after a choice.
    * @property {(text: string) => void} [onInputChange] - Every edit of the text.
@@ -75,7 +75,7 @@ next key, so Enter never acts on a stale list.
     placement?: Placement;
   }
 
-  const props: Props = $props();
+  let { value = $bindable(), ...props }: Props = $props();
   const id = $props.id();
   const arkhe = useArkhe();
   const env = useArkheEnvironment();
@@ -87,7 +87,7 @@ next key, so Enter never acts on a stale list.
       id,
       label: props.label,
       labels: arkhe().labels,
-      value: props.value,
+      value,
       defaultValue: props.defaultValue,
       clearOnSelect: props.clearOnSelect,
       submits: props.onSubmit !== undefined,
@@ -103,8 +103,11 @@ next key, so Enter never acts on a stale list.
       void tick().then(() => (query = next));
       props.onInputChange?.(details.inputValue);
     },
-    onValueChange: (details: combobox.ValueChangeDetails<T>) =>
-      props.onValueChange?.(details.value[0] ?? null),
+    onValueChange: (details: combobox.ValueChangeDetails<T>) => {
+      const next = details.value[0] ?? null;
+      value = next;
+      props.onValueChange?.(next);
+    },
     onSelect: (details: combobox.SelectionDetails) => {
       const chosen = props.items.find(
         (option) => option.value === details.itemValue,
