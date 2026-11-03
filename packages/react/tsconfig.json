@@ -3,7 +3,10 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "noEmit": true,
-    "paths": { "@arkhe/core": ["../core/src/index.ts"] }
+    "paths": {
+      "@arkhe/core": ["../core/src/index.ts"],
+      "@arkhe/core/fx": ["../core/src/fx/index.ts"]
+    }
   },
   "include": ["src"]
 }

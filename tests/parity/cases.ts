@@ -107,6 +107,10 @@ export const PARITY_CASES: readonly ParityCase[] = [
   { name: 'icons' },
   { name: 'progress' },
   { name: 'skeleton' },
+  {
+    name: 'skeleton-loading',
+    steps: [click('Toggle loading'), click('Toggle loading')],
+  },
   { name: 'status' },
   {
     name: 'numeric',
