@@ -1,7 +1,10 @@
-import { HoverCard } from '@arkhe/react';
+import { ArkheProvider, HoverCard } from '@arkhe/react';
+import { tap } from '@tests/fixtures/tap';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import type { AnchorHTMLAttributes } from 'react';
+import { renderToString } from 'react-dom/server';
+import { describe, expect, it, vi } from 'vitest';
 
 function card(title: string) {
   return screen
@@ -120,5 +123,77 @@ describe('HoverCard', () => {
     rerender(view('Grace'));
     expect(await screen.findByText('Grace')).toBeInTheDocument();
     expect(screen.queryByText('Ada')).not.toBeInTheDocument();
+  });
+
+  it('server-renders the trigger alone and mounts the card on first open', async () => {
+    const html = renderToString(
+      <HoverCard title='Charge' content='Body'>
+        charge
+      </HoverCard>,
+    );
+    expect(html).not.toContain('data-part="positioner"');
+    const { container } = render(
+      <HoverCard title='Charge' content='Body' openDelay={0}>
+        charge
+      </HoverCard>,
+    );
+    expect(container.querySelector('[data-part="positioner"]')).toBeNull();
+    await userEvent.hover(screen.getByRole('button', { name: 'charge' }));
+    await waitFor(() => expect(card('Charge')).toBeVisible());
+  });
+
+  it("renders a link trigger through the provider's link", () => {
+    const Routed = (props: AnchorHTMLAttributes<HTMLAnchorElement>) => (
+      <a {...props} data-routed='' />
+    );
+    render(
+      <ArkheProvider link={Routed} effects={false}>
+        <HoverCard title='Charge' content='Body' href='/charge'>
+          charge
+        </HoverCard>
+      </ArkheProvider>,
+    );
+    const link = screen.getByRole('link', { name: 'charge' });
+    expect(link).toHaveAttribute('href', '/charge');
+    expect(link).toHaveAttribute('data-routed');
+  });
+
+  it('opens on tap and closes on a tap outside, unless pinned', async () => {
+    render(
+      <>
+        <HoverCard title='Charge' content='Body' inline closeDelay={0}>
+          charge
+        </HoverCard>
+        <p>elsewhere</p>
+      </>,
+    );
+    const trigger = screen.getByText('charge');
+    expect(trigger).toHaveAttribute('tabindex', '0');
+    await tap(trigger);
+    await waitFor(() => expect(card('Charge')).toBeVisible());
+    await tap(screen.getByText('elsewhere'));
+    await waitFor(() => expect(card('Charge')).not.toBeVisible());
+    await tap(trigger);
+    await waitFor(() => expect(card('Charge')).toBeVisible());
+    await userEvent.click(screen.getByRole('button', { name: 'Pin Charge' }));
+    await tap(screen.getByText('elsewhere'));
+    expect(card('Charge')).toBeVisible();
+  });
+
+  it('starts open with defaultOpen and reports changes', async () => {
+    const report = vi.fn();
+    render(
+      <HoverCard
+        title='Charge'
+        content='Body'
+        defaultOpen
+        onOpenChange={report}>
+        charge
+      </HoverCard>,
+    );
+    await waitFor(() => expect(card('Charge')).toBeVisible());
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(card('Charge')).not.toBeVisible());
+    expect(report).toHaveBeenCalledExactlyOnceWith(false);
   });
 });

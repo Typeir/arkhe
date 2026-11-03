@@ -14,7 +14,6 @@ import {
   Chip,
   Combobox,
   Field,
-  HoverCard,
   Icon,
   Menu,
   Modal,
@@ -27,7 +26,6 @@ import {
   Tabs,
   TextArea,
   TextInput,
-  Tooltip,
 } from '@arkhe/react';
 import type { NumericValue } from '@arkhe/core';
 import { useState, type JSX, type ReactNode } from 'react';
@@ -40,6 +38,7 @@ import {
   TWIN_OPTIONS,
   TWIN_TABS,
 } from './scenes';
+import { HINT_SCENES } from './ReactHintCases';
 
 const Buttons = (): JSX.Element => {
   const [pressed, setPressed] = useState(false);
@@ -213,16 +212,7 @@ const SCENES: Readonly<Record<string, () => ReactNode>> = {
     </Modal>
   ),
   'modal-description': () => <DescribedModal />,
-  tooltip: () => (
-    <Tooltip content='Halves damage.' openDelay={0} closeDelay={0}>
-      resistance
-    </Tooltip>
-  ),
-  'hover-card': () => (
-    <HoverCard title='Charge' openDelay={0} content='Spend to act twice.'>
-      charge
-    </HoverCard>
-  ),
+  ...HINT_SCENES,
   popover: () => (
     <Popover trigger='Filters' title='Filter by'>
       Body

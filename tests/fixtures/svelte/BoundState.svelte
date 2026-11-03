@@ -5,18 +5,25 @@ and shows what the binding holds. With `refuse` it binds through a function
 binding whose setter ignores every change.
 -->
 <script lang="ts">
-  import { Combobox, Modal, Popover, Tabs } from '@arkhe/svelte';
+  import {
+    Combobox,
+    HoverCard,
+    Modal,
+    Popover,
+    Tabs,
+    Tooltip,
+  } from '@arkhe/svelte';
   import { createRawSnippet } from 'svelte';
 
   /**
    * Props of BoundState.
    *
    * @interface Props
-   * @property {'tabs' | 'modal' | 'popover' | 'combobox'} kind - Component under test.
+   * @property {'tabs' | 'modal' | 'popover' | 'combobox' | 'tooltip' | 'hover-card'} kind - Component under test.
    * @property {boolean} [refuse] - Vetoes every change through a function binding.
    */
   interface Props {
-    kind: 'tabs' | 'modal' | 'popover' | 'combobox';
+    kind: 'tabs' | 'modal' | 'popover' | 'combobox' | 'tooltip' | 'hover-card';
     refuse?: boolean;
   }
 
@@ -54,6 +61,13 @@ binding whose setter ignores every change.
   <Popover trigger="Filters" title="Filter by" bind:open={() => open, setOpen}>
     {@render body()}
   </Popover>
+{:else if kind === 'tooltip'}
+  <Tooltip content="Hint" bind:open={() => open, setOpen}>word</Tooltip>
+{:else if kind === 'hover-card'}
+  <HoverCard title="Charge" bind:open={() => open, setOpen}>
+    charge
+    {#snippet content()}Body{/snippet}
+  </HoverCard>
 {:else}
   <Combobox label="Spell" {items} bind:value={() => pick, setPick} />
 {/if}

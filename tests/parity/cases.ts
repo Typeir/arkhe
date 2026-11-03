@@ -11,6 +11,7 @@
 
 import { fireEvent, screen } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
+import { tap } from '@tests/fixtures/tap';
 import { typeNumber } from '@tests/fixtures/typeNumber';
 import type { Tolerance } from './normalize';
 
@@ -82,17 +83,29 @@ function press(keys: string): ParityStep {
 }
 
 /**
- * Step: hover the button with accessible `name`.
+ * Step: hover the element with `role` and accessible `name`.
  *
  * @function hover
  * @param {string} name - Accessible name.
+ * @param {string} [role] - ARIA role. Defaults to `button`.
  * @returns {ParityStep} Step.
  */
-function hover(name: string): ParityStep {
+function hover(name: string, role = 'button'): ParityStep {
   return {
     label: `hover ${name}`,
-    run: () => userEvent.hover(screen.getByRole('button', { name })),
+    run: () => userEvent.hover(screen.getByRole(role, { name })),
   };
+}
+
+/**
+ * Step: tap, with a finger, the element whose own text is `text`.
+ *
+ * @function tapText
+ * @param {string} text - Text of the element.
+ * @returns {ParityStep} Step.
+ */
+function tapText(text: string): ParityStep {
+  return { label: `tap ${text}`, run: () => tap(screen.getByText(text)) };
 }
 
 /**
@@ -165,7 +178,17 @@ export const PARITY_CASES: readonly ParityCase[] = [
     steps: [click('Open'), click('Drop description')],
   },
   { name: 'tooltip', steps: [hover('resistance')] },
+  {
+    name: 'tooltip-reopen',
+    steps: [hover('resistance'), press('{Escape}'), tapText('resistance')],
+  },
+  { name: 'tooltip-link', steps: [hover('rule', 'link'), press('{Escape}')] },
+  { name: 'tooltip-inline', steps: [tapText('inner'), tapText('elsewhere')] },
   { name: 'hover-card', steps: [hover('charge'), click('Pin Charge')] },
+  {
+    name: 'hover-card-link',
+    steps: [hover('charge', 'link'), press('{Escape}')],
+  },
   { name: 'popover', steps: [click('Filters'), press('{Escape}')] },
   { name: 'popover-untitled', steps: [click('Sort')] },
   { name: 'menu', steps: [click('Actions'), press('{ArrowDown}')] },

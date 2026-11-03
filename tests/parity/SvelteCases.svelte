@@ -161,6 +161,22 @@ Svelte side of the parity scenes. Each scene must match its twin in
 {:else if name === 'tooltip'}
   <Tooltip content="Halves damage." openDelay={0} closeDelay={0}
     >resistance</Tooltip>
+{:else if name === 'tooltip-reopen'}
+  <Tooltip content="Halves damage." openDelay={0} closeDelay={0}
+    >resistance</Tooltip>
+{:else if name === 'tooltip-link'}
+  <Tooltip content="Halves damage." href="#rule" openDelay={0}>rule</Tooltip>
+{:else if name === 'tooltip-inline'}
+  <Tooltip content="Outer" inline closeDelay={0}
+    >outer <Tooltip inline closeDelay={0}
+      >inner{#snippet content()}<em>Inner</em>{/snippet}</Tooltip
+    ></Tooltip>
+  <p>elsewhere</p>
+{:else if name === 'hover-card-link'}
+  <HoverCard title="Charge" href="#charge" openDelay={0} closeDelay={0}>
+    charge
+    {#snippet content()}Spend to act twice.{/snippet}
+  </HoverCard>
 {:else if name === 'hover-card'}
   <HoverCard title="Charge" openDelay={0}>
     charge
