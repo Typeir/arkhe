@@ -7,6 +7,8 @@ describe('event names', () => {
       focus: 'onFocus',
       blur: 'onBlur',
       keydown: 'onKeyDown',
+      pointerdown: 'onPointerDown',
+      click: 'onClick',
     });
   });
 
@@ -15,6 +17,8 @@ describe('event names', () => {
       focus: 'onfocusin',
       blur: 'onfocusout',
       keydown: 'onkeydown',
+      pointerdown: 'onpointerdown',
+      click: 'onclick',
     });
   });
 });
