@@ -12,7 +12,14 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { cpSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  rmSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -36,6 +43,26 @@ export const PACKAGES = ['core', 'react', 'svelte'];
  */
 export function branches(name) {
   return { split: `split/${name}`, release: `release/${name}` };
+}
+
+/**
+ * Copies a directory tree file by file. Node 22's native `cpSync` exits the
+ * process with code 127, without an error, when a path has a non-ASCII
+ * character such as the `é` in `Arkhé`.
+ *
+ * @function copyTree
+ * @param {string} from - Source directory.
+ * @param {string} to - Target directory; created when missing.
+ * @returns {void}
+ */
+export function copyTree(from, to) {
+  mkdirSync(to, { recursive: true });
+  for (const entry of readdirSync(from, { withFileTypes: true })) {
+    const source = join(from, entry.name);
+    const target = join(to, entry.name);
+    if (entry.isDirectory()) copyTree(source, target);
+    else copyFileSync(source, target);
+  }
 }
 
 /**
@@ -76,7 +103,7 @@ export function splitPackage(name, run = git) {
   const tree = join(holder, name);
   try {
     run(['worktree', 'add', '--detach', tree, split]);
-    cpSync(dist, join(tree, 'dist'), { recursive: true });
+    copyTree(dist, join(tree, 'dist'));
     run(['add', '--force', 'dist'], tree);
     run(
       ['commit', '--quiet', '-m', `[build]: ${name} dist from ${head}`],

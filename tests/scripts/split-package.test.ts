@@ -1,7 +1,17 @@
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   PACKAGES,
   branches,
+  copyTree,
   splitPackage,
 } from '../../.github/scripts/split-package.mjs';
 
@@ -28,5 +38,24 @@ describe('splitPackage', () => {
       }),
     ).toThrow('Unknown package "showcase"');
     expect(calls).toEqual([]);
+  });
+});
+
+describe('copyTree', () => {
+  it('copies nested files, also under a non-ASCII path', () => {
+    const root = mkdtempSync(join(tmpdir(), 'arkhé-'));
+    try {
+      const from = join(root, 'dist');
+      mkdirSync(join(from, 'fx'), { recursive: true });
+      writeFileSync(join(from, 'index.js'), 'a');
+      writeFileSync(join(from, 'fx', 'index.js'), 'b');
+      copyTree(from, join(root, 'out', 'dist'));
+      const read = (path: string) =>
+        readFileSync(join(root, 'out', 'dist', path), 'utf8');
+      expect(read('index.js')).toBe('a');
+      expect(read(join('fx', 'index.js'))).toBe('b');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });
