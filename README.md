@@ -51,12 +51,10 @@ Each package splits into its own public repo with `git subtree`: [arkhe-core](ht
 npm install github:typeir/arkhe-react#v0.1.0   # core comes with it
 ```
 
-To publish, build, split, then push each package:
+To publish all three mirrors in one go (build, split core then the ports, push):
 
 ```bash
-npm run build
-node .github/scripts/split-package.mjs core   # also react, svelte
-git push https://github.com/typeir/arkhe-core.git split/core:main release/core:release release/core:refs/tags/v0.1.0
+npm run publish:mirrors
 ```
 
-`release` is rebuilt on every split, so pushing a new build to it needs `--force`; a released tag never moves.
+`main` only fast-forwards, so a commit made directly on a mirror stops the push. `release` is forced, because it is rebuilt on every split. A version's tag is pushed once and never moves; bump the version to release again.
