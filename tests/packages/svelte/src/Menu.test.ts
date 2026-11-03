@@ -41,8 +41,9 @@ describe('Menu', () => {
     render(Menu, { trigger: 'Actions', items: ITEMS, onSelect });
     screen.getByRole('button', { name: 'Actions' }).focus();
     await userEvent.keyboard('{Enter}');
-    await screen.findByRole('menu');
+    const menu = await screen.findByRole('menu');
+    await waitFor(() => expect(menu).toHaveFocus());
     await userEvent.keyboard('{ArrowDown}{Enter}');
-    expect(onSelect).toHaveBeenCalledWith('copy');
+    await waitFor(() => expect(onSelect).toHaveBeenCalledWith('copy'));
   });
 });

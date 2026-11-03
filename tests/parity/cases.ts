@@ -11,6 +11,7 @@
 
 import { fireEvent, screen } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
+import { typeNumber } from '@tests/fixtures/typeNumber';
 import type { Tolerance } from './normalize';
 
 /**
@@ -143,7 +144,7 @@ export const PARITY_CASES: readonly ParityCase[] = [
         run: async () => {
           const input = screen.getByRole('spinbutton');
           await userEvent.clear(input);
-          await userEvent.type(input, '2,5');
+          await typeNumber(input, '2,5', fireEvent.input);
           await userEvent.tab();
         },
       },

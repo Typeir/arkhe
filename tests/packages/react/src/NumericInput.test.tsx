@@ -1,5 +1,6 @@
 import { ArkheProvider, NumericInput } from '@arkhe/react';
 import type { NumericValue } from '@arkhe/core';
+import { typeNumber } from '@tests/fixtures/typeNumber';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
@@ -65,7 +66,7 @@ describe('NumericInput', () => {
     render(<Clamped onCommit={onCommit} />);
     const input = screen.getByRole('spinbutton');
     await userEvent.clear(input);
-    await userEvent.type(input, '71');
+    await typeNumber(input, '71', fireEvent.input);
     expect(input).toHaveValue('71');
     await userEvent.tab();
     await waitFor(() => expect(input).toHaveValue('10'));
@@ -125,7 +126,7 @@ describe('NumericInput', () => {
     const input = screen.getByRole('spinbutton');
     expect(input).toHaveValue('1 234,5');
     await userEvent.clear(input);
-    await userEvent.type(input, '1,5');
+    await typeNumber(input, '1,5', fireEvent.input);
     expect(onValueChange).toHaveBeenLastCalledWith(1.5);
     await userEvent.tab();
     await waitFor(() => expect(input).toHaveValue('1,5'));

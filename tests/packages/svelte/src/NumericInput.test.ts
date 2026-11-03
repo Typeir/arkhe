@@ -1,6 +1,7 @@
 import { NumericInput } from '@arkhe/svelte';
 import BoundNumeric from '@tests/fixtures/svelte/BoundNumeric.svelte';
 import ClampedNumeric from '@tests/fixtures/svelte/ClampedNumeric.svelte';
+import { typeNumber } from '@tests/fixtures/typeNumber';
 import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
@@ -39,7 +40,7 @@ describe('NumericInput', () => {
     render(ClampedNumeric, { onCommit });
     const input = screen.getByRole('spinbutton');
     await userEvent.clear(input);
-    await userEvent.type(input, '71');
+    await typeNumber(input, '71', fireEvent.input);
     expect(input).toHaveValue('71');
     await userEvent.tab();
     await waitFor(() => expect(input).toHaveValue('10'));
@@ -97,7 +98,8 @@ describe('NumericInput', () => {
   it('writes a binding that starts undefined', async () => {
     render(BoundNumeric);
     const input = screen.getByRole('spinbutton');
-    await userEvent.type(input, '42');
+    await userEvent.click(input);
+    await typeNumber(input, '42', fireEvent.input);
     await userEvent.tab();
     expect(screen.getByRole('status')).toHaveTextContent('42');
   });
@@ -112,7 +114,7 @@ describe('NumericInput', () => {
     const input = screen.getByRole('spinbutton');
     expect(input).toHaveValue('1 234,5');
     await userEvent.clear(input);
-    await userEvent.type(input, '1,5');
+    await typeNumber(input, '1,5', fireEvent.input);
     expect(onValueChange).toHaveBeenLastCalledWith(1.5);
     await userEvent.tab();
     await waitFor(() => expect(input).toHaveValue('1,5'));
