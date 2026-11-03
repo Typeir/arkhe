@@ -1,10 +1,10 @@
 # @arkhe/svelte
 
-Arkhé's Svelte 5 components on Zag state machines, shipped as `.svelte` sources and styled by `@arkhe/core/arkhe.css`. They render the same DOM as `@arkhe/react`.
+Arkhé's Svelte 5 components on Zag state machines, shipped as `.svelte` sources and styled by `@arkhe/svelte/arkhe.css`. They render the same DOM as `@arkhe/react`.
 
 ```svelte
 <script>
-  import '@arkhe/core/arkhe.css';
+  import '@arkhe/svelte/arkhe.css';
   import { ArkheProvider, Button } from '@arkhe/svelte';
 </script>
 
@@ -17,7 +17,7 @@ Arkhé's Svelte 5 components on Zag state machines, shipped as `.svelte` sources
 
 ## Source
 
-This repo is split from the Arkhé monorepo with `git subtree`. Changes go to the monorepo. The `release/svelte` branch carries the built `dist`; `split/svelte` carries only the sources. It depends on `@arkhe/core` at the same version.
+This repo is split from the Arkhé monorepo with `git subtree`. Changes go to the monorepo. The `release/svelte` branch carries the built `dist` with `@arkhe/core` bundled in `dist/core`, so it installs as one package; the stylesheet is `@arkhe/svelte/arkhe.css`. `split/svelte` carries only the sources and depends on `@arkhe/core`.
 
 ```bash
 npm install
