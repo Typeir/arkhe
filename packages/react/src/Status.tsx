@@ -1,6 +1,8 @@
 /**
  * @fileoverview Status line: empty, loading, error or info, with its icon.
- * The app announcer speaks its text; errors interrupt, the rest wait.
+ * The app announcer speaks its text; errors interrupt, the rest wait. The
+ * root is a `span`, so a status fits phrasing content such as a hover card
+ * inside a paragraph.
  *
  * @module packages/react/src/Status
  * @version 1.0.0
@@ -52,7 +54,7 @@ export interface StatusProps {
 export const Status = ({ kind, children }: StatusProps): JSX.Element => {
   const { labels, announcer } = useArkhe();
   const look = statusLook(kind, labels);
-  const region = useRef<HTMLDivElement>(null);
+  const region = useRef<HTMLSpanElement>(null);
   const politeness = useRef(look.politeness);
   useLayoutEffect(() => {
     politeness.current = look.politeness;
@@ -65,13 +67,13 @@ export const Status = ({ kind, children }: StatusProps): JSX.Element => {
     [announcer],
   );
   return (
-    <div
+    <span
       ref={region}
       className={ARKHE_CLASS}
       {...partAttrs('status', 'root')}
       data-kind={kind}>
       <Icon name={look.icon} />
       <span {...partAttrs('status', 'text')}>{children ?? look.text}</span>
-    </div>
+    </span>
   );
 };

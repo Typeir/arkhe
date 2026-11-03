@@ -2,6 +2,8 @@
 @component
 Renders a status line: empty, loading, error or info. The app announcer
 speaks its text on mount and on each change; errors interrupt, the rest wait.
+The root is a `span`, so a status fits phrasing content such as a hover card
+inside a paragraph.
 -->
 <script lang="ts">
   import {
@@ -30,7 +32,7 @@ speaks its text on mount and on each change; errors interrupt, the rest wait.
   let { kind, children }: Props = $props();
   const arkhe = useArkhe();
   const look = $derived(statusLook(kind, arkhe().labels));
-  let region = $state<HTMLDivElement>();
+  let region = $state<HTMLSpanElement>();
   $effect(() =>
     region
       ? announceText(region, arkhe().announcer, () => look.politeness)
@@ -38,7 +40,7 @@ speaks its text on mount and on each change; errors interrupt, the rest wait.
   );
 </script>
 
-<div
+<span
   bind:this={region}
   class={ARKHE_CLASS}
   {...partAttrs('status', 'root')}
@@ -47,4 +49,4 @@ speaks its text on mount and on each change; errors interrupt, the rest wait.
   <span {...partAttrs('status', 'text')}>
     {#if children}{@render children()}{:else}{look.text}{/if}
   </span>
-</div>
+</span>
