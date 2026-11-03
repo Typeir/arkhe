@@ -17,8 +17,10 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   readdirSync,
   rmSync,
+  writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -33,6 +35,29 @@ const REPO_ROOT = resolve(import.meta.dirname, '../..');
  * @type {readonly string[]}
  */
 export const PACKAGES = ['core', 'react', 'svelte'];
+
+/**
+ * GitHub owner of the split repos, each named `arkhe-<name>`.
+ *
+ * @constant OWNER
+ * @type {string}
+ */
+export const OWNER = 'typeir';
+
+/**
+ * Points a port manifest's `@arkhe/core` at the core release repo's tag for
+ * that version, so the port resolves core through git.
+ *
+ * @function pinCore
+ * @param {Record<string, any>} pkg - Port `package.json` contents.
+ * @param {string} version - Core version, tagged `v<version>`.
+ * @returns {Record<string, any>} The manifest, changed in place.
+ */
+export function pinCore(pkg, version) {
+  if (pkg.dependencies?.['@arkhe/core'] === undefined) return pkg;
+  pkg.dependencies['@arkhe/core'] = `github:${OWNER}/arkhe-core#v${version}`;
+  return pkg;
+}
 
 /**
  * Names the split and release branches of a package.
@@ -104,7 +129,14 @@ export function splitPackage(name, run = git) {
   try {
     run(['worktree', 'add', '--detach', tree, split]);
     copyTree(dist, join(tree, 'dist'));
-    run(['add', '--force', 'dist'], tree);
+    const manifest = join(tree, 'package.json');
+    const core = join(REPO_ROOT, 'packages', 'core', 'package.json');
+    const pkg = pinCore(
+      JSON.parse(readFileSync(manifest, 'utf8')),
+      JSON.parse(readFileSync(core, 'utf8')).version,
+    );
+    writeFileSync(manifest, `${JSON.stringify(pkg, null, 2)}\n`);
+    run(['add', '--force', 'dist', 'package.json'], tree);
     run(
       ['commit', '--quiet', '-m', `[build]: ${name} dist from ${head}`],
       tree,

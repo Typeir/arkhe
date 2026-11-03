@@ -12,8 +12,25 @@ import {
   PACKAGES,
   branches,
   copyTree,
+  pinCore,
   splitPackage,
 } from '../../.github/scripts/split-package.mjs';
+
+describe('pinCore', () => {
+  it("points a port's core dependency at the core repo's version tag", () => {
+    const pkg = { dependencies: { '@arkhe/core': '0.1.0', react: '19.3.1' } };
+    expect(pinCore(pkg, '0.1.0').dependencies).toEqual({
+      '@arkhe/core': 'github:typeir/arkhe-core#v0.1.0',
+      react: '19.3.1',
+    });
+  });
+
+  it('leaves a manifest without core alone', () => {
+    expect(pinCore({ name: '@arkhe/core' }, '0.1.0')).toEqual({
+      name: '@arkhe/core',
+    });
+  });
+});
 
 describe('branches', () => {
   it('names the split and release branches', () => {
