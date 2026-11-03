@@ -20,6 +20,7 @@ import {
   guardComboboxKeys,
   isGrouped,
   optionCollection,
+  partAttrs,
   queryAfterChange,
   slug,
   type ComboboxOption,
@@ -119,6 +120,7 @@ export const Combobox = <T extends ComboboxOption>(
     () => combobox.collection(optionCollection(shown)),
     [shown],
   );
+  const note = Boolean(loading) || shown.length === 0;
   const service = useMachine(combobox.machine, {
     ...comboboxMachineProps({
       ...props,
@@ -171,14 +173,22 @@ export const Combobox = <T extends ComboboxOption>(
       <Portal container={container} getRootNode={env.getRootNode}>
         <div className={ARKHE_CLASS}>
           <div {...api.getPositionerProps()}>
-            <div {...api.getContentProps()}>
-              {loading ? <Status kind='loading' /> : null}
-              {!loading && shown.length === 0 ? (
-                <div data-scope='combobox' data-part='empty'>
-                  {labels.comboboxEmpty}
-                </div>
-              ) : null}
-              {loading
+            {note ? (
+              <div {...partAttrs('combobox', 'note')} hidden={!api.open}>
+                {loading ? (
+                  <Status kind='loading' />
+                ) : (
+                  <div {...partAttrs('combobox', 'empty')}>
+                    {labels.comboboxEmpty}
+                  </div>
+                )}
+              </div>
+            ) : null}
+            <div
+              {...mergeProps(api.getContentProps(), {
+                hidden: note || !api.open,
+              })}>
+              {note
                 ? null
                 : isGrouped(shown)
                   ? collection.group().map(([group, members]) => (

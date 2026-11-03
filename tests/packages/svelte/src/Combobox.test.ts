@@ -81,10 +81,11 @@ describe('Combobox', () => {
     expect(onSubmit).toHaveBeenCalledWith('burning');
   });
 
-  it('says when nothing matches', async () => {
+  it('says when nothing matches, outside the listbox', async () => {
     render(Combobox, { label: 'Spell', items: SPELLS });
     await userEvent.type(screen.getByRole('combobox'), 'qqq');
-    expect(await screen.findByText('No matches.')).toBeInTheDocument();
+    const empty = await screen.findByText('No matches.');
+    expect(empty.closest('[role="listbox"]')).toBeNull();
   });
 
   it('shows group headings', async () => {

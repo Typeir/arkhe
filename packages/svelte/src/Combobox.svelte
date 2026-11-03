@@ -18,6 +18,7 @@ next key, so Enter never acts on a stale list.
     guardComboboxKeys,
     isGrouped,
     optionCollection,
+    partAttrs,
     queryAfterChange,
     slug,
     type ComboboxOption,
@@ -82,6 +83,7 @@ next key, so Enter never acts on a stale list.
   let query = $state('');
   const shown = $derived(filterOptions(props.items, query, props.filter));
   const collection = $derived(combobox.collection(optionCollection(shown)));
+  const note = $derived(Boolean(props.loading) || shown.length === 0);
   const service = useMachine(combobox.machine, () => ({
     ...comboboxMachineProps({
       id,
@@ -159,14 +161,20 @@ next key, so Enter never acts on a stale list.
       getRootNode: env().getRootNode,
     }}>
     <div {...api.getPositionerProps()}>
-      <div {...api.getContentProps()}>
-        {#if props.loading}
-          <Status kind="loading" />
-        {:else if shown.length === 0}
-          <div data-scope="combobox" data-part="empty">
-            {arkhe().labels.comboboxEmpty}
-          </div>
-        {:else if isGrouped(shown)}
+      {#if note}
+        <div {...partAttrs('combobox', 'note')} hidden={!api.open}>
+          {#if props.loading}
+            <Status kind="loading" />
+          {:else}
+            <div {...partAttrs('combobox', 'empty')}>
+              {arkhe().labels.comboboxEmpty}
+            </div>
+          {/if}
+        </div>
+      {/if}
+      <div
+        {...mergeProps(api.getContentProps(), { hidden: note || !api.open })}>
+        {#if note}{:else if isGrouped(shown)}
           {#each collection.group() as [group, members] (group)}
             <div {...api.getItemGroupProps({ id: slug(group) })}>
               <div {...api.getItemGroupLabelProps({ htmlFor: slug(group) })}>

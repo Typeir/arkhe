@@ -112,12 +112,14 @@ describe('Combobox', () => {
     expect(names()).toEqual(['FireballLevel 3']);
   });
 
-  it('says when nothing matches and when results are loading', async () => {
+  it('says when nothing matches and when results are loading, outside the listbox', async () => {
     const { rerender } = render(<Combobox label='Spell' items={SPELLS} />);
     await userEvent.type(screen.getByRole('combobox'), 'qqq');
-    expect(await screen.findByText('No matches.')).toBeInTheDocument();
+    const empty = await screen.findByText('No matches.');
+    expect(empty.closest('[role="listbox"]')).toBeNull();
     rerender(<Combobox label='Spell' items={SPELLS} loading />);
-    expect(await screen.findByText('Loading…')).toBeInTheDocument();
+    const loading = await screen.findByText('Loading…');
+    expect(loading.closest('[role="listbox"]')).toBeNull();
   });
 
   it('shows group headings', async () => {
