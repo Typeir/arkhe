@@ -2,8 +2,10 @@
  * @fileoverview Splits one package out of the monorepo for consumers.
  * `split/<name>` is the package's own history from `git subtree split`;
  * `release/<name>` is that history plus one commit holding its built
- * `dist`, so a repo installed from it needs no build tools. Build first
- * with `npm run build`. Usage: `node .github/scripts/split-package.mjs core`.
+ * `dist`, so a repo installed from it needs no build tools. A port's
+ * release also carries core (`vendor-core.mjs`), so it installs alone.
+ * Build first with `npm run build`. Usage:
+ * `node .github/scripts/split-package.mjs core`.
  *
  * @module .github/scripts/split-package
  * @version 1.0.0
@@ -23,6 +25,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { vendorCore } from './vendor-core.mjs';
 
 const REPO_ROOT = resolve(import.meta.dirname, '../..');
 
@@ -104,7 +107,8 @@ export function splitPackage(name, run = git) {
   try {
     run(['worktree', 'add', '--detach', tree, split]);
     copyTree(dist, join(tree, 'dist'));
-    run(['add', '--force', 'dist'], tree);
+    if (name !== 'core') vendorCore(tree, join(REPO_ROOT, 'packages', 'core'));
+    run(['add', '--force', 'dist', 'package.json'], tree);
     run(
       ['commit', '--quiet', '-m', `[build]: ${name} dist from ${head}`],
       tree,
