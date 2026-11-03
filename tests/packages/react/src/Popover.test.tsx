@@ -1,6 +1,7 @@
 import { ArkheProvider, Popover } from '@arkhe/react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderToString } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 
 describe('Popover', () => {
@@ -45,5 +46,16 @@ describe('Popover', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Sort' }));
     const panel = await screen.findByRole('dialog', { name: 'Sort' });
     expect(panel).not.toHaveAttribute('aria-labelledby');
+  });
+
+  it('server-renders the trigger alone, the panel once hydrated', () => {
+    const html = renderToString(
+      <Popover trigger='Filters' title='Filter by'>
+        Body
+      </Popover>,
+    );
+    expect(html).toContain('Filters');
+    expect(html).not.toContain('data-part="positioner"');
+    expect(html).not.toContain('Body');
   });
 });

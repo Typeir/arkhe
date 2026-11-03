@@ -1,6 +1,7 @@
 import { Combobox } from '@arkhe/react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderToString } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 
 const SPELLS = [
@@ -135,5 +136,12 @@ describe('Combobox', () => {
     expect(
       screen.getByRole('group', { name: 'Creatures' }),
     ).toBeInTheDocument();
+  });
+
+  it('server-renders the input alone, the list once hydrated', () => {
+    const html = renderToString(<Combobox label='Spell' items={SPELLS} />);
+    expect(html).toContain('Spell');
+    expect(html).not.toContain('data-part="positioner"');
+    expect(html).not.toContain('Fireball');
   });
 });

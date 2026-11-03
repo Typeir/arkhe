@@ -25,13 +25,13 @@ import {
   useId,
   useRef,
   useState,
-  useSyncExternalStore,
   type JSX,
   type ReactNode,
 } from 'react';
 import { useArkhe } from './ArkheProvider.js';
 import { useArkheEnvironment } from './ArkheEnvironment.js';
 import { Icon } from './Icon.js';
+import { useHydrated } from './useHydrated.js';
 import { usePortalContainer } from './usePortalContainer.js';
 
 /**
@@ -61,16 +61,6 @@ export interface ModalProps {
 }
 
 /**
- * Store subscription that never fires: hydration state only flips once.
- *
- * @function subscribeNever
- * @returns {() => void} No-op unsubscribe.
- */
-function subscribeNever(): () => void {
-  return () => undefined;
-}
-
-/**
  * Renders a modal dialog. The portal mounts after hydration so server HTML
  * matches the client; Zag stays closed until then, or its focus trap and
  * title check would run before the content exists.
@@ -92,11 +82,7 @@ export const Modal = ({
 }: ModalProps): JSX.Element => {
   const { labels } = useArkhe();
   const env = useArkheEnvironment();
-  const hydrated = useSyncExternalStore(
-    subscribeNever,
-    () => true,
-    () => false,
-  );
+  const hydrated = useHydrated();
   const [inner, setInner] = useState(defaultOpen ?? false);
   const [focusReturn] = useState(() => new FocusReturn());
   useEffect(() => focusReturn.watch(env.getRootNode()), [focusReturn, env]);

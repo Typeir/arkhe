@@ -1,7 +1,7 @@
 /**
  * @fileoverview Menu: a button that opens a list of actions, on Zag's menu
  * machine. Arrow keys, Home, End and typeahead move; focus returns to the
- * button on close.
+ * button on close. The list portals in once hydrated.
  *
  * @module packages/react/src/Menu
  * @version 1.0.0
@@ -24,6 +24,7 @@ import { Portal, mergeProps, normalizeProps, useMachine } from '@zag-js/react';
 import { useId, type JSX } from 'react';
 import { useArkheEnvironment } from './ArkheEnvironment.js';
 import { Icon } from './Icon.js';
+import { useHydrated } from './useHydrated.js';
 import { usePortalContainer } from './usePortalContainer.js';
 
 /**
@@ -57,6 +58,7 @@ export const Menu = ({
 }: MenuProps): JSX.Element => {
   const env = useArkheEnvironment();
   const container = usePortalContainer();
+  const hydrated = useHydrated();
   const service = useMachine(menu.machine, {
     ...floatingMachineProps({
       id: useId(),
@@ -73,33 +75,35 @@ export const Menu = ({
         {trigger}
         <Icon name='chevron-down' />
       </button>
-      <Portal container={container} getRootNode={env.getRootNode}>
-        <div className={ARKHE_CLASS}>
-          <div {...api.getPositionerProps()}>
-            <ul {...api.getContentProps()}>
-              {items.map((entry, index) =>
-                isSeparator(entry) ? (
-                  <li
-                    key={entryKey(entry, index)}
-                    {...api.getSeparatorProps()}
-                  />
-                ) : (
-                  <li
-                    key={entryKey(entry, index)}
-                    {...api.getItemProps({
-                      value: entry.value,
-                      disabled: entry.disabled,
-                    })}
-                    data-danger={entry.danger ? '' : undefined}>
-                    {entry.icon ? <Icon name={entry.icon} /> : null}
-                    {entry.label}
-                  </li>
-                ),
-              )}
-            </ul>
+      {hydrated ? (
+        <Portal container={container} getRootNode={env.getRootNode}>
+          <div className={ARKHE_CLASS}>
+            <div {...api.getPositionerProps()}>
+              <ul {...api.getContentProps()}>
+                {items.map((entry, index) =>
+                  isSeparator(entry) ? (
+                    <li
+                      key={entryKey(entry, index)}
+                      {...api.getSeparatorProps()}
+                    />
+                  ) : (
+                    <li
+                      key={entryKey(entry, index)}
+                      {...api.getItemProps({
+                        value: entry.value,
+                        disabled: entry.disabled,
+                      })}
+                      data-danger={entry.danger ? '' : undefined}>
+                      {entry.icon ? <Icon name={entry.icon} /> : null}
+                      {entry.label}
+                    </li>
+                  ),
+                )}
+              </ul>
+            </div>
           </div>
-        </div>
-      </Portal>
+        </Portal>
+      ) : null}
     </>
   );
 };

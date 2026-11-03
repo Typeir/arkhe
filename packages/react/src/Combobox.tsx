@@ -34,6 +34,7 @@ import { useArkhe } from './ArkheProvider.js';
 import { useArkheEnvironment } from './ArkheEnvironment.js';
 import { Icon } from './Icon.js';
 import { Status } from './Status.js';
+import { useHydrated } from './useHydrated.js';
 import { usePortalContainer } from './usePortalContainer.js';
 
 /**
@@ -111,6 +112,7 @@ export const Combobox = <T extends ComboboxOption>(
   const { labels, locale } = useArkhe();
   const env = useArkheEnvironment();
   const container = usePortalContainer();
+  const hydrated = useHydrated();
   const [query, setQuery] = useState('');
   const shown = useMemo(
     () => filterOptions(items, query, filter),
@@ -171,45 +173,47 @@ export const Combobox = <T extends ComboboxOption>(
           <Icon name='chevron-down' />
         </button>
       </div>
-      <Portal container={container} getRootNode={env.getRootNode}>
-        <div className={ARKHE_CLASS}>
-          <div {...api.getPositionerProps()}>
-            {note ? (
-              <div {...partAttrs('combobox', 'note')} hidden={!api.open}>
-                {loading ? (
-                  <Status kind='loading' />
-                ) : (
-                  <div {...partAttrs('combobox', 'empty')}>
-                    {labels.comboboxEmpty}
-                  </div>
-                )}
-              </div>
-            ) : null}
-            <div
-              {...mergeProps(api.getContentProps(), {
-                hidden: note || !api.open,
-              })}>
-              {note
-                ? null
-                : isGrouped(shown)
-                  ? collection.group().map(([group, members]) => (
-                      <div
-                        key={group}
-                        {...api.getItemGroupProps({ id: slug(group) })}>
+      {hydrated ? (
+        <Portal container={container} getRootNode={env.getRootNode}>
+          <div className={ARKHE_CLASS}>
+            <div {...api.getPositionerProps()}>
+              {note ? (
+                <div {...partAttrs('combobox', 'note')} hidden={!api.open}>
+                  {loading ? (
+                    <Status kind='loading' />
+                  ) : (
+                    <div {...partAttrs('combobox', 'empty')}>
+                      {labels.comboboxEmpty}
+                    </div>
+                  )}
+                </div>
+              ) : null}
+              <div
+                {...mergeProps(api.getContentProps(), {
+                  hidden: note || !api.open,
+                })}>
+                {note
+                  ? null
+                  : isGrouped(shown)
+                    ? collection.group().map(([group, members]) => (
                         <div
-                          {...api.getItemGroupLabelProps({
-                            htmlFor: slug(group),
-                          })}>
-                          {group}
+                          key={group}
+                          {...api.getItemGroupProps({ id: slug(group) })}>
+                          <div
+                            {...api.getItemGroupLabelProps({
+                              htmlFor: slug(group),
+                            })}>
+                            {group}
+                          </div>
+                          {members.map(option)}
                         </div>
-                        {members.map(option)}
-                      </div>
-                    ))
-                  : shown.map(option)}
+                      ))
+                    : shown.map(option)}
+              </div>
             </div>
           </div>
-        </div>
-      </Portal>
+        </Portal>
+      ) : null}
     </div>
   );
 };

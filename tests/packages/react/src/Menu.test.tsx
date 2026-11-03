@@ -2,6 +2,7 @@ import { Menu } from '@arkhe/react';
 import type { MenuEntry } from '@arkhe/core';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderToString } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 
 const ITEMS: readonly MenuEntry[] = [
@@ -55,5 +56,14 @@ describe('Menu', () => {
       await screen.findByRole('menuitem', { name: 'Locked' }),
     );
     expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it('server-renders the trigger alone, the list once hydrated', () => {
+    const html = renderToString(
+      <Menu trigger='Actions' items={ITEMS} onSelect={() => undefined} />,
+    );
+    expect(html).toContain('Actions');
+    expect(html).not.toContain('data-part="positioner"');
+    expect(html).not.toContain('Rename');
   });
 });

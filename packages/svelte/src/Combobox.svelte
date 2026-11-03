@@ -7,7 +7,8 @@ elsewhere and empties itself, and a search box whose host supplies results
 and takes free text on Enter. Tab completes the highlighted option. The list
 filters once Svelte has flushed the keystroke: a list change inside it makes
 Zag move the caret to the end of the text. The filter still lands before the
-next key, so Enter never acts on a stale list.
+next key, so Enter never acts on a stale list. The list portals in once
+mounted on the client, so server markup holds none.
 -->
 <script lang="ts" generics="T extends ComboboxOption">
   import {
@@ -32,7 +33,7 @@ next key, so Enter never acts on a stale list.
     portal,
     useMachine,
   } from '@zag-js/svelte';
-  import { tick, type Snippet } from 'svelte';
+  import { onMount, tick, type Snippet } from 'svelte';
   import { useArkhe } from './context.js';
   import { useArkheEnvironment } from './environment.js';
   import Icon from './Icon.svelte';
@@ -119,6 +120,10 @@ next key, so Enter never acts on a stale list.
     },
   }));
   const api = $derived(combobox.connect(service, normalizeProps));
+  let mounted = $state(false);
+  onMount(() => {
+    mounted = true;
+  });
   const inputProps = $derived(
     guardComboboxKeys(
       api.getInputProps(),
@@ -155,43 +160,47 @@ next key, so Enter never acts on a stale list.
     <button {...api.getClearTriggerProps()}><Icon name="x" /></button>
     <button {...api.getTriggerProps()}><Icon name="chevron-down" /></button>
   </div>
-  <div
-    class={ARKHE_CLASS}
-    use:portal={{
-      container: env().container(),
-      getRootNode: env().getRootNode,
-    }}>
-    <div {...api.getPositionerProps()}>
-      {#if note}
-        <div {...partAttrs('combobox', 'note')} hidden={!api.open}>
-          {#if props.loading}
-            <Status kind="loading" />
+  {#if mounted}
+    <div
+      class={ARKHE_CLASS}
+      use:portal={{
+        container: env().container(),
+        getRootNode: env().getRootNode,
+      }}>
+      <div {...api.getPositionerProps()}>
+        {#if note}
+          <div {...partAttrs('combobox', 'note')} hidden={!api.open}>
+            {#if props.loading}
+              <Status kind="loading" />
+            {:else}
+              <div {...partAttrs('combobox', 'empty')}>
+                {arkhe().labels.comboboxEmpty}
+              </div>
+            {/if}
+          </div>
+        {/if}
+        <div
+          {...mergeProps(api.getContentProps(), {
+            hidden: note || !api.open,
+          })}>
+          {#if note}{:else if isGrouped(shown)}
+            {#each collection.group() as [group, members] (group)}
+              <div {...api.getItemGroupProps({ id: slug(group) })}>
+                <div {...api.getItemGroupLabelProps({ htmlFor: slug(group) })}>
+                  {group}
+                </div>
+                {#each members as entry (entry.value)}
+                  {@render option(entry)}
+                {/each}
+              </div>
+            {/each}
           {:else}
-            <div {...partAttrs('combobox', 'empty')}>
-              {arkhe().labels.comboboxEmpty}
-            </div>
+            {#each shown as entry (entry.value)}
+              {@render option(entry)}
+            {/each}
           {/if}
         </div>
-      {/if}
-      <div
-        {...mergeProps(api.getContentProps(), { hidden: note || !api.open })}>
-        {#if note}{:else if isGrouped(shown)}
-          {#each collection.group() as [group, members] (group)}
-            <div {...api.getItemGroupProps({ id: slug(group) })}>
-              <div {...api.getItemGroupLabelProps({ htmlFor: slug(group) })}>
-                {group}
-              </div>
-              {#each members as entry (entry.value)}
-                {@render option(entry)}
-              {/each}
-            </div>
-          {/each}
-        {:else}
-          {#each shown as entry (entry.value)}
-            {@render option(entry)}
-          {/each}
-        {/if}
       </div>
     </div>
-  </div>
+  {/if}
 </div>

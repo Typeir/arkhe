@@ -1,8 +1,9 @@
 <!--
 @component
 Renders a button that toggles a non-modal panel anchored to it, on Zag's
-popover machine, portalled into the environment's container. Escape and
-outside clicks close it; focus returns to the button.
+popover machine, portalled into the environment's container once mounted on
+the client, so server markup holds the trigger alone. Escape and outside
+clicks close it; focus returns to the button.
 -->
 <script lang="ts">
   import {
@@ -17,7 +18,7 @@ outside clicks close it; focus returns to the button.
     portal,
     useMachine,
   } from '@zag-js/svelte';
-  import type { Snippet } from 'svelte';
+  import { onMount, type Snippet } from 'svelte';
   import { useArkhe } from './context.js';
   import { useArkheEnvironment } from './environment.js';
   import Icon from './Icon.svelte';
@@ -70,24 +71,35 @@ outside clicks close it; focus returns to the button.
     }),
   );
   const api = $derived(popover.connect(service, normalizeProps));
+  let mounted = $state(false);
+  onMount(() => {
+    mounted = true;
+  });
 </script>
 
 <button {...mergeProps(api.getTriggerProps(), { class: ARKHE_CLASS })}
   >{trigger}<Icon name="chevron-down" /></button>
-<div
-  class={ARKHE_CLASS}
-  use:portal={{ container: env().container(), getRootNode: env().getRootNode }}>
-  <div {...api.getPositionerProps()}>
-    <div
-      {...api.getContentProps()}
-      aria-label={title === undefined ? trigger : undefined}>
-      <div data-scope="popover" data-part="header">
-        {#if title !== undefined}<h2 {...api.getTitleProps()}>{title}</h2>{/if}
-        <button
-          {...api.getCloseTriggerProps()}
-          aria-label={arkhe().labels.close}><Icon name="x" /></button>
+{#if mounted}
+  <div
+    class={ARKHE_CLASS}
+    use:portal={{
+      container: env().container(),
+      getRootNode: env().getRootNode,
+    }}>
+    <div {...api.getPositionerProps()}>
+      <div
+        {...api.getContentProps()}
+        aria-label={title === undefined ? trigger : undefined}>
+        <div data-scope="popover" data-part="header">
+          {#if title !== undefined}<h2 {...api.getTitleProps()}>
+              {title}
+            </h2>{/if}
+          <button
+            {...api.getCloseTriggerProps()}
+            aria-label={arkhe().labels.close}><Icon name="x" /></button>
+        </div>
+        <div data-scope="popover" data-part="body">{@render children?.()}</div>
       </div>
-      <div data-scope="popover" data-part="body">{@render children?.()}</div>
     </div>
   </div>
-</div>
+{/if}

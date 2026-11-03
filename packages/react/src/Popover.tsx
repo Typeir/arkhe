@@ -1,6 +1,7 @@
 /**
  * @fileoverview Popover: a non-modal panel anchored to its trigger, on Zag's
- * popover machine. Portalled into the environment's container.
+ * popover machine. Portalled into the environment's container once
+ * hydrated, so server markup holds the trigger alone.
  *
  * @module packages/react/src/Popover
  * @version 1.0.0
@@ -17,6 +18,7 @@ import { useId, type JSX, type ReactNode } from 'react';
 import { useArkhe } from './ArkheProvider.js';
 import { useArkheEnvironment } from './ArkheEnvironment.js';
 import { Icon } from './Icon.js';
+import { useHydrated } from './useHydrated.js';
 import { usePortalContainer } from './usePortalContainer.js';
 
 /**
@@ -61,6 +63,7 @@ export const Popover = ({
   const { labels } = useArkhe();
   const env = useArkheEnvironment();
   const container = usePortalContainer();
+  const hydrated = useHydrated();
   const service = useMachine(
     popover.machine,
     floatingMachineProps({
@@ -80,29 +83,31 @@ export const Popover = ({
         {trigger}
         <Icon name='chevron-down' />
       </button>
-      <Portal container={container} getRootNode={env.getRootNode}>
-        <div className={ARKHE_CLASS}>
-          <div {...api.getPositionerProps()}>
-            <div
-              {...api.getContentProps()}
-              aria-label={title === undefined ? trigger : undefined}>
-              <div data-scope='popover' data-part='header'>
-                {title === undefined ? null : (
-                  <h2 {...api.getTitleProps()}>{title}</h2>
-                )}
-                <button
-                  {...api.getCloseTriggerProps()}
-                  aria-label={labels.close}>
-                  <Icon name='x' />
-                </button>
-              </div>
-              <div data-scope='popover' data-part='body'>
-                {children}
+      {hydrated ? (
+        <Portal container={container} getRootNode={env.getRootNode}>
+          <div className={ARKHE_CLASS}>
+            <div {...api.getPositionerProps()}>
+              <div
+                {...api.getContentProps()}
+                aria-label={title === undefined ? trigger : undefined}>
+                <div data-scope='popover' data-part='header'>
+                  {title === undefined ? null : (
+                    <h2 {...api.getTitleProps()}>{title}</h2>
+                  )}
+                  <button
+                    {...api.getCloseTriggerProps()}
+                    aria-label={labels.close}>
+                    <Icon name='x' />
+                  </button>
+                </div>
+                <div data-scope='popover' data-part='body'>
+                  {children}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </Portal>
+        </Portal>
+      ) : null}
     </>
   );
 };

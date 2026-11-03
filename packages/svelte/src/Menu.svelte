@@ -1,8 +1,8 @@
 <!--
 @component
 Renders a menu button and its action list, on Zag's menu machine, portalled
-into the environment's container. Arrow keys, Home, End and typeahead move;
-focus returns to the button on close.
+into the environment's container once mounted on the client. Arrow keys,
+Home, End and typeahead move; focus returns to the button on close.
 -->
 <script lang="ts">
   import {
@@ -20,6 +20,7 @@ focus returns to the button on close.
     portal,
     useMachine,
   } from '@zag-js/svelte';
+  import { onMount } from 'svelte';
   import { useArkheEnvironment } from './environment.js';
   import Icon from './Icon.svelte';
 
@@ -56,29 +57,38 @@ focus returns to the button on close.
     onSelect: (details: menu.SelectionDetails) => onSelect(details.value),
   }));
   const api = $derived(menu.connect(service, normalizeProps));
+  let mounted = $state(false);
+  onMount(() => {
+    mounted = true;
+  });
 </script>
 
 <button {...mergeProps(api.getTriggerProps(), { class: ARKHE_CLASS })}
   >{trigger}<Icon name="chevron-down" /></button>
-<div
-  class={ARKHE_CLASS}
-  use:portal={{ container: env().container(), getRootNode: env().getRootNode }}>
-  <div {...api.getPositionerProps()}>
-    <ul {...api.getContentProps()}>
-      {#each items as entry, index (entryKey(entry, index))}
-        {#if isSeparator(entry)}
-          <li {...api.getSeparatorProps()}></li>
-        {:else}
-          <li
-            {...api.getItemProps({
-              value: entry.value,
-              disabled: entry.disabled,
-            })}
-            data-danger={entry.danger ? '' : undefined}>
-            {#if entry.icon}<Icon name={entry.icon} />{/if}{entry.label}
-          </li>
-        {/if}
-      {/each}
-    </ul>
+{#if mounted}
+  <div
+    class={ARKHE_CLASS}
+    use:portal={{
+      container: env().container(),
+      getRootNode: env().getRootNode,
+    }}>
+    <div {...api.getPositionerProps()}>
+      <ul {...api.getContentProps()}>
+        {#each items as entry, index (entryKey(entry, index))}
+          {#if isSeparator(entry)}
+            <li {...api.getSeparatorProps()}></li>
+          {:else}
+            <li
+              {...api.getItemProps({
+                value: entry.value,
+                disabled: entry.disabled,
+              })}
+              data-danger={entry.danger ? '' : undefined}>
+              {#if entry.icon}<Icon name={entry.icon} />{/if}{entry.label}
+            </li>
+          {/if}
+        {/each}
+      </ul>
+    </div>
   </div>
-</div>
+{/if}
