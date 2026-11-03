@@ -15,6 +15,7 @@ import { defineConfig } from 'vitest/config';
 
 const alias = {
   '@arkhe/core/styles': resolve('packages/core/styles'),
+  '@arkhe/core/fx': resolve('packages/core/src/fx/index.ts'),
   '@arkhe/core': resolve('packages/core/src/index.ts'),
   '@arkhe/react': resolve('packages/react/src/index.ts'),
   '@arkhe/svelte': resolve('packages/svelte/src/index.ts'),
