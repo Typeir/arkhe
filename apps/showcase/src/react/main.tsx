@@ -11,12 +11,12 @@ import '@arkhe/core/styles/arkhe.scss';
 import '../showcase.scss';
 import { ArkheProvider } from '@arkhe/react';
 import { createRoot } from 'react-dom/client';
-import { bootTarget } from '../target';
+import { bootTarget, effectsFromQuery } from '../target';
 import { Specimen } from './Specimen';
 
 bootTarget();
 createRoot(document.getElementById('app') as HTMLElement).render(
-  <ArkheProvider>
+  <ArkheProvider effects={effectsFromQuery(location.search)}>
     <Specimen />
   </ArkheProvider>,
 );

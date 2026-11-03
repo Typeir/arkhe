@@ -6,6 +6,7 @@
     "types": ["vite/client"],
     "paths": {
       "@arkhe/core": ["../../packages/core/src/index.ts"],
+      "@arkhe/core/fx": ["../../packages/core/src/fx/index.ts"],
       "@arkhe/react": ["../../packages/react/src/index.ts"],
       "@arkhe/svelte": ["../../packages/svelte/src/index.ts"]
     }

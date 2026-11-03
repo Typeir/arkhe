@@ -147,6 +147,53 @@ body {
     flex: 1 1 100%;
   }
 
+  .reveal {
+    display: grid;
+    gap: var(--space-4);
+    flex: 1 1 100%;
+
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h3 {
+      font-family: var(--font-headings);
+      font-weight: 400;
+      font-size: 1rem;
+      line-height: 1.5rem;
+    }
+
+    p {
+      line-height: 1.25rem;
+    }
+  }
+
+  .reveal-article > [data-scope='skeleton'] {
+    block-size: 6.5rem;
+  }
+
+  .reveal-card > [data-scope='skeleton'] {
+    block-size: 9rem;
+    padding: var(--space-3);
+    border: var(--border-width-xs) solid var(--color-border);
+  }
+
+  .reveal-list {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .reveal-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    align-items: center;
+    gap: var(--space-2);
+    block-size: 1.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
   .icon-cell {
     display: inline-flex;
     align-items: center;

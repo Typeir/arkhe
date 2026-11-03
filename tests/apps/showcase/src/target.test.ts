@@ -1,8 +1,11 @@
+import { FxLoader } from '@arkhe/core';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   SETTINGS_MESSAGE,
   applySettings,
   bootTarget,
+  effectsFromQuery,
+  exposeEffects,
   settingsFromQuery,
 } from '../../../../apps/showcase/src/target';
 
@@ -56,5 +59,25 @@ describe('bootTarget', () => {
     );
     send({ type: 'other', settings: { theme: 'light', scale: 90 } });
     expect(root.dataset.theme).toBe('dark');
+  });
+});
+
+describe('effectsFromQuery', () => {
+  it('turns effects off, pins a surface, or keeps the defaults', () => {
+    expect(effectsFromQuery('?fx=off')).toBe(false);
+    expect(effectsFromQuery('?fx=viewport')).toEqual({ surface: 'viewport' });
+    expect(effectsFromQuery('?fx=grouped')).toEqual({ surface: 'grouped' });
+    expect(effectsFromQuery('?fx=nope')).toEqual({});
+    expect(effectsFromQuery('')).toEqual({});
+  });
+});
+
+describe('exposeEffects', () => {
+  it('puts the engine handle on the window', () => {
+    const loader = new FxLoader(false, () => Promise.reject(new Error('no')));
+    exposeEffects(loader);
+    const exposed = (window as Window & { arkheEffects?: FxLoader })
+      .arkheEffects;
+    expect(exposed).toBe(loader);
   });
 });
