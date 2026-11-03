@@ -45,4 +45,18 @@ The showcase frames the React, Svelte and static HTML targets side by side, all 
 
 ## Splits
 
-Each package splits into its own repo with `git subtree`. Build, then run `node .github/scripts/split-package.mjs <core|react|svelte>`. That updates two local branches: `split/<name>` (the package's own history) and `release/<name>` (the same plus a commit holding its built `dist`, so consumers install without build tools).
+Each package splits into its own public repo with `git subtree`: [arkhe-core](https://github.com/typeir/arkhe-core), [arkhe-react](https://github.com/typeir/arkhe-react) and [arkhe-svelte](https://github.com/typeir/arkhe-svelte). In each, `main` holds the package's source history, `release` holds the same plus the built `dist`, and a `v<version>` tag marks each release. A port's release pins core to the matching tag through git.
+
+```bash
+npm install github:typeir/arkhe-react#v0.1.0   # core comes with it
+```
+
+To publish, build, split, then push each package:
+
+```bash
+npm run build
+node .github/scripts/split-package.mjs core   # also react, svelte
+git push https://github.com/typeir/arkhe-core.git split/core:main release/core:release release/core:refs/tags/v0.1.0
+```
+
+`release` is rebuilt on every split, so pushing a new build to it needs `--force`; a released tag never moves.
