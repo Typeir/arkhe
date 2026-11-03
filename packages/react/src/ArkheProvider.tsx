@@ -1,7 +1,8 @@
 /**
  * @fileoverview App-wide adapters: translated labels, icon sets, the link
- * component and the announcer. Components read them through `useArkhe`.
- * Without a provider the announcer makes its regions on first use.
+ * component, the announcer and the canvas effect engine. Components read
+ * them through `useArkhe`. Without a provider the announcer makes its
+ * regions on first use, and a shared default engine is used.
  *
  * @module packages/react/src/ArkheProvider
  * @version 1.0.0
@@ -13,8 +14,11 @@
 
 import {
   Announcer,
+  FxLoader,
   resolveLabels,
   type ArkheLabels,
+  type EffectsSetting,
+  type FxModule,
   type IconSet,
 } from '@arkhe/core';
 import {
@@ -55,12 +59,24 @@ export type LinkComponent =
  * @property {readonly IconSet<IconComponent>[]} icons - App icon sets; Icon falls back to Lucide after them.
  * @property {LinkComponent} link - Link renderer.
  * @property {Announcer} announcer - Speaks text through the app's live regions.
+ * @property {FxLoader} effects - The canvas effect engine, loaded on first use.
  */
 export interface ArkheContextValue {
   readonly labels: ArkheLabels;
   readonly icons: readonly IconSet<IconComponent>[];
   readonly link: LinkComponent;
   readonly announcer: Announcer;
+  readonly effects: FxLoader;
+}
+
+/**
+ * Imports the effect engine, a chunk of its own.
+ *
+ * @function loadFx
+ * @returns {Promise<FxModule>} Engine module.
+ */
+function loadFx(): Promise<FxModule> {
+  return import('@arkhe/core/fx');
 }
 
 const DEFAULT_CONTEXT: ArkheContextValue = {
@@ -68,6 +84,7 @@ const DEFAULT_CONTEXT: ArkheContextValue = {
   icons: [],
   link: 'a',
   announcer: new Announcer(),
+  effects: new FxLoader({}, loadFx),
 };
 
 const ArkheContext = createContext<ArkheContextValue>(DEFAULT_CONTEXT);
@@ -79,24 +96,28 @@ const ArkheContext = createContext<ArkheContextValue>(DEFAULT_CONTEXT);
  * @property {Partial<ArkheLabels>} [labels] - Translated label templates.
  * @property {IconSet<IconComponent>} [icons] - Icons by Lucide name; win over Lucide.
  * @property {LinkComponent} [link] - Link renderer. Defaults to `a`.
+ * @property {EffectsSetting} [effects] - Canvas effect options, or `false` for CSS skeletons everywhere. Read once.
  * @property {ReactNode} children - App subtree.
  */
 export interface ArkheProviderProps {
   readonly labels?: Partial<ArkheLabels>;
   readonly icons?: IconSet<IconComponent>;
   readonly link?: LinkComponent;
+  readonly effects?: EffectsSetting;
   readonly children: ReactNode;
 }
 
 /**
- * Supplies labels, icons, the link renderer and the announcer to every Arkhé
- * component below. Mounts the announcer's live regions with itself.
+ * Supplies labels, icons, the link renderer, the announcer and the effect
+ * engine to every Arkhé component below. Mounts the announcer's live
+ * regions with itself, and destroys its engine with itself.
  *
  * @component
  * @param {ArkheProviderProps} props - Component props.
  * @param {Partial<ArkheLabels>} [props.labels] - Translated label templates.
  * @param {IconSet<IconComponent>} [props.icons] - Icons by Lucide name.
  * @param {LinkComponent} [props.link] - Link renderer.
+ * @param {EffectsSetting} [props.effects] - Canvas effect options, or `false`.
  * @param {ReactNode} props.children - App subtree.
  * @returns {JSX.Element} Provider.
  */
@@ -104,18 +125,22 @@ export const ArkheProvider = ({
   labels,
   icons,
   link,
+  effects,
   children,
 }: ArkheProviderProps): JSX.Element => {
   const [announcer] = useState(() => new Announcer());
+  const [engine] = useState(() => new FxLoader(effects ?? {}, loadFx));
   useLayoutEffect(() => announcer.mount(), [announcer]);
+  useLayoutEffect(() => engine.mount(), [engine]);
   const value = useMemo<ArkheContextValue>(
     () => ({
       labels: resolveLabels(labels),
       icons: icons ? [icons] : [],
       link: link ?? 'a',
       announcer,
+      effects: engine,
     }),
-    [labels, icons, link, announcer],
+    [labels, icons, link, announcer, engine],
   );
   return (
     <ArkheContext.Provider value={value}>{children}</ArkheContext.Provider>
@@ -123,8 +148,8 @@ export const ArkheProvider = ({
 };
 
 /**
- * Returns the nearest provider's labels, icons and link renderer, or the
- * defaults outside any provider.
+ * Returns the nearest provider's adapters, or the defaults outside any
+ * provider.
  *
  * @function useArkhe
  * @returns {ArkheContextValue} Adapters.

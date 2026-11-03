@@ -1,4 +1,4 @@
-import { DEFAULT_LABELS } from '@arkhe/core';
+import { DEFAULT_LABELS, FxLoader } from '@arkhe/core';
 import type { ArkheContextValue } from '@arkhe/svelte';
 import ContextProbe from '@tests/fixtures/svelte/ContextProbe.svelte';
 import {
@@ -6,7 +6,12 @@ import {
   type ProviderProps,
 } from '@tests/fixtures/svelte/renderWithProvider';
 import { render } from '@testing-library/svelte';
-import { describe, expect, it } from 'vitest';
+import { FX_LOG, resetFx } from '@tests/fixtures/fakeFx';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+vi.mock('@arkhe/core/fx', () => import('@tests/fixtures/fakeFx'));
+
+beforeEach(resetFx);
 
 const Own = (() =>
   undefined) as unknown as ArkheContextValue['icons'][number]['x'];
@@ -36,5 +41,33 @@ describe('ArkheProvider', () => {
 
   it('carries only the app icon set', () => {
     expect(capture({ icons: { x: Own } }).icons).toEqual([{ x: Own }]);
+  });
+
+  it('serves a shared default engine handle outside any provider', () => {
+    const seen: { value?: ArkheContextValue } = {};
+    render(ContextProbe, { onread: (value) => (seen.value = value) });
+    expect(seen.value?.effects).toBeInstanceOf(FxLoader);
+  });
+
+  it('owns one engine, made on request with its options', async () => {
+    const value = capture({ effects: { maxFps: 60 } });
+    expect(value.effects.setting).toEqual({ maxFps: 60 });
+    expect(value.effects.engine).toBeNull();
+    const engine = await value.effects.request();
+    expect(value.effects.engine).toBe(engine);
+  });
+
+  it('never loads an engine with effects off', async () => {
+    expect(await capture({ effects: false }).effects.request()).toBeNull();
+  });
+
+  it('destroys its engine when it unmounts', async () => {
+    const seen: { value?: ArkheContextValue } = {};
+    const { unmount } = renderWithProvider({}, ContextProbe, {
+      onread: (value: ArkheContextValue) => (seen.value = value),
+    });
+    await seen.value?.effects.request();
+    unmount();
+    expect(FX_LOG).toEqual(['destroy']);
   });
 });

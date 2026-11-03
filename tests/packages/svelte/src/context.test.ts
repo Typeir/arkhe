@@ -1,4 +1,4 @@
-import { Announcer, resolveLabels } from '@arkhe/core';
+import { Announcer, FxLoader, resolveLabels } from '@arkhe/core';
 import type { ArkheContextValue } from '@arkhe/svelte';
 import ContextProbe from '@tests/fixtures/svelte/ContextProbe.svelte';
 import { render } from '@testing-library/svelte';
@@ -11,6 +11,7 @@ describe('useArkhe', () => {
       icons: [],
       link: undefined,
       announcer: new Announcer(),
+      effects: new FxLoader(false, () => Promise.reject(new Error('unused'))),
     };
     const seen: { value?: ArkheContextValue } = {};
     render(ContextProbe, {

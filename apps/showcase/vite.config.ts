@@ -25,6 +25,10 @@ export default defineConfig({
         find: /^@arkhe\/core\/styles\/(.*)$/,
         replacement: pkg('core/styles/$1'),
       },
+      {
+        find: /^@arkhe\/core\/fx$/,
+        replacement: pkg('core/src/fx/index.ts'),
+      },
       { find: /^@arkhe\/core$/, replacement: pkg('core/src/index.ts') },
       { find: /^@arkhe\/react$/, replacement: pkg('react/src/index.ts') },
       { find: /^@arkhe\/svelte$/, replacement: pkg('svelte/src/index.ts') },

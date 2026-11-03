@@ -9,6 +9,7 @@
  */
 
 import {
+  ArkheProvider,
   Button,
   Chip,
   Combobox,
@@ -110,6 +111,28 @@ const DescribedModal = (): JSX.Element => {
   );
 };
 
+const LoadingSkeleton = (): JSX.Element => {
+  const [loading, setLoading] = useState(true);
+  const [revealed, setRevealed] = useState(0);
+  return (
+    <>
+      <Button onClick={() => setLoading(!loading)}>Toggle loading</Button>
+      <output>{revealed}</output>
+      <SkeletonGroup
+        loading={loading}
+        onRevealed={() => setRevealed((n) => n + 1)}
+        skeleton={
+          <>
+            <Skeleton width='40%' />
+            <Skeleton shape='block' height='3rem' />
+          </>
+        }>
+        <p>Loaded.</p>
+      </SkeletonGroup>
+    </>
+  );
+};
+
 const SCENES: Readonly<Record<string, () => ReactNode>> = {
   buttons: () => <Buttons />,
   chips: () => (
@@ -146,11 +169,17 @@ const SCENES: Readonly<Record<string, () => ReactNode>> = {
     </>
   ),
   skeleton: () => (
-    <SkeletonGroup>
-      <Skeleton width='40%' />
-      <Skeleton shape='block' height='3rem' />
-    </SkeletonGroup>
+    <SkeletonGroup
+      loading
+      skeleton={
+        <>
+          <Skeleton width='40%' />
+          <Skeleton shape='block' height='3rem' />
+        </>
+      }
+    />
   ),
+  'skeleton-loading': () => <LoadingSkeleton />,
   status: () => (
     <>
       <Status kind='empty' />
@@ -201,12 +230,24 @@ const SCENES: Readonly<Record<string, () => ReactNode>> = {
 };
 
 /**
- * Renders the named scene.
+ * Renders the named scene. Skeleton scenes sit under a provider whose
+ * canvas effect is off unless `fx`.
  *
  * @component
- * @param {{ name: string }} props - Scene name.
+ * @param {{ name: string; fx?: boolean }} props - Scene name, effect on.
  * @returns {JSX.Element} Scene.
  */
-export const ReactCases = ({ name }: { name: string }): JSX.Element => (
-  <>{SCENES[name]?.() ?? `missing scene ${name}`}</>
-);
+export const ReactCases = ({
+  name,
+  fx = false,
+}: {
+  name: string;
+  fx?: boolean;
+}): JSX.Element => {
+  const scene = SCENES[name]?.() ?? `missing scene ${name}`;
+  return name.startsWith('skeleton') ? (
+    <ArkheProvider effects={fx ? {} : false}>{scene}</ArkheProvider>
+  ) : (
+    <>{scene}</>
+  );
+};

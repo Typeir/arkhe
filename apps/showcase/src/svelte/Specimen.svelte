@@ -14,8 +14,6 @@ Svelte specimen: every Arkhé component with the shared specimen data.
     NumericInput,
     Popover,
     Progress,
-    Skeleton,
-    SkeletonGroup,
     Status,
     Tabs,
     TextArea,
@@ -37,6 +35,7 @@ Svelte specimen: every Arkhé component with the shared specimen data.
     nameReadout,
   } from '../specimen';
   import ComboboxSection from './ComboboxSection.svelte';
+  import SkeletonSection from './SkeletonSection.svelte';
 
   let pressed = $state(false);
   let name = $state('Rhomus');
@@ -142,19 +141,7 @@ Svelte specimen: every Arkhé component with the shared specimen data.
     </div>
   </section>
 
-  <section class="specimen" id="skeleton">
-    <h2>{SPECIMEN_SECTIONS.skeleton}</h2>
-    <div class="row">
-      <div class="stack">
-        <SkeletonGroup>
-          <Skeleton width="40%" />
-          <Skeleton />
-          <Skeleton width="70%" />
-          <Skeleton shape="block" />
-        </SkeletonGroup>
-      </div>
-    </div>
-  </section>
+  <SkeletonSection />
 
   <section class="specimen" id="status">
     <h2>{SPECIMEN_SECTIONS.status}</h2>

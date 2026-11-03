@@ -19,8 +19,6 @@ import {
   NumericInput,
   Popover,
   Progress,
-  Skeleton,
-  SkeletonGroup,
   Status,
   Tabs,
   TextArea,
@@ -44,6 +42,7 @@ import {
   nameReadout,
 } from '../specimen';
 import { ComboboxSection } from './ComboboxSection';
+import { SkeletonSection } from './SkeletonSection';
 
 const Section = ({
   id,
@@ -166,16 +165,7 @@ export const Specimen = (): JSX.Element => {
           </div>
         </div>
       </Section>
-      <Section id='skeleton'>
-        <div className='stack'>
-          <SkeletonGroup>
-            <Skeleton width='40%' />
-            <Skeleton />
-            <Skeleton width='70%' />
-            <Skeleton shape='block' />
-          </SkeletonGroup>
-        </div>
-      </Section>
+      <SkeletonSection />
       <Section id='status'>
         <div className='stack'>
           <Status kind='empty' />

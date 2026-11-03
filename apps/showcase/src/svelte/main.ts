@@ -11,7 +11,7 @@ import '@arkhe/core/styles/arkhe.scss';
 import '../showcase.scss';
 import { mount } from 'svelte';
 import { bootTarget } from '../target';
-import Specimen from './Specimen.svelte';
+import Target from './Target.svelte';
 
 bootTarget();
-mount(Specimen, { target: document.getElementById('app') as HTMLElement });
+mount(Target, { target: document.getElementById('app') as HTMLElement });

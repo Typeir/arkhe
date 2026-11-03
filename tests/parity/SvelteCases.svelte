@@ -5,6 +5,7 @@ Svelte side of the parity scenes. Each scene must match its twin in
 -->
 <script lang="ts">
   import {
+    ArkheProvider,
     Button,
     Chip,
     Combobox,
@@ -40,12 +41,16 @@ Svelte side of the parity scenes. Each scene must match its twin in
    *
    * @interface Props
    * @property {string} name - Scene name.
+   * @property {boolean} [fx] - Canvas effect on for skeleton scenes.
    */
   interface Props {
     name: string;
+    fx?: boolean;
   }
 
-  let { name }: Props = $props();
+  let { name, fx = false }: Props = $props();
+  let loading = $state(true);
+  let revealed = $state(0);
   let pressed = $state(false);
   let stage = $state(0);
   let described = $state(true);
@@ -93,10 +98,26 @@ Svelte side of the parity scenes. Each scene must match its twin in
   <Progress value={5} max={10} label="Budget" markers={[2, 8]} showValue />
   <Progress value={13} max={10} label="Load" />
 {:else if name === 'skeleton'}
-  <SkeletonGroup>
-    <Skeleton width="40%" />
-    <Skeleton shape="block" height="3rem" />
-  </SkeletonGroup>
+  <ArkheProvider effects={fx ? {} : false}>
+    <SkeletonGroup loading>
+      {#snippet skeleton()}
+        <Skeleton width="40%" />
+        <Skeleton shape="block" height="3rem" />
+      {/snippet}
+    </SkeletonGroup>
+  </ArkheProvider>
+{:else if name === 'skeleton-loading'}
+  <ArkheProvider effects={fx ? {} : false}>
+    <Button onclick={() => (loading = !loading)}>Toggle loading</Button>
+    <output>{revealed}</output>
+    <SkeletonGroup {loading} onRevealed={() => (revealed += 1)}>
+      {#snippet skeleton()}
+        <Skeleton width="40%" />
+        <Skeleton shape="block" height="3rem" />
+      {/snippet}
+      <p>Loaded.</p>
+    </SkeletonGroup>
+  </ArkheProvider>
 {:else if name === 'status'}
   <Status kind="empty" />
   <Status kind="loading" />

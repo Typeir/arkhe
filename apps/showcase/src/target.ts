@@ -9,6 +9,8 @@
  * @since 0.1.0
  */
 
+import type { EffectsSetting, FxLoader } from '@arkhe/core';
+
 /**
  * Settings the landing page sends to every target.
  *
@@ -59,6 +61,34 @@ export function settingsFromQuery(search: string): ShowcaseSettings {
     theme: query.get('theme') === 'light' ? 'light' : 'dark',
     scale: scale >= 50 && scale <= 200 ? scale : 100,
   };
+}
+
+/**
+ * Reads the effect setting from a query string: `fx=off` for CSS
+ * skeletons, `fx=grouped|viewport|auto` to pin the surface.
+ *
+ * @function effectsFromQuery
+ * @param {string} search - `location.search`.
+ * @returns {EffectsSetting} Provider `effects`.
+ */
+export function effectsFromQuery(search: string): EffectsSetting {
+  const fx = new URLSearchParams(search).get('fx');
+  if (fx === 'off') return false;
+  return fx === 'grouped' || fx === 'viewport' || fx === 'auto'
+    ? { surface: fx }
+    : {};
+}
+
+/**
+ * Puts the app's effect engine on `window.arkheEffects`, for the browser
+ * checks to read its stats.
+ *
+ * @function exposeEffects
+ * @param {FxLoader} loader - The provider's engine handle.
+ * @returns {void}
+ */
+export function exposeEffects(loader: FxLoader): void {
+  (window as Window & { arkheEffects?: FxLoader }).arkheEffects = loader;
 }
 
 /**

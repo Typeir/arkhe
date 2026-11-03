@@ -188,6 +188,35 @@ export const SPECIMEN_TAB_TEXT: Readonly<Record<string, string>> = {
 };
 
 /**
+ * Content the skeleton demo reveals: an article, a card and a list.
+ *
+ * @constant SPECIMEN_REVEAL
+ * @type {{ readonly title: string; readonly text: string; readonly card: string; readonly cardText: string }}
+ */
+export const SPECIMEN_REVEAL = {
+  title: 'The ferryman',
+  text: 'He waits at the landing each dusk, counts the fare twice and never speaks of the far shore. Those who cross come back quieter.',
+  card: 'Lantern',
+  cardText: 'Burns for six hours on one flask of oil.',
+} as const;
+
+/**
+ * Rows of the skeleton demo's list: name, kind, weight.
+ *
+ * @constant SPECIMEN_REVEAL_ROWS
+ * @type {readonly (readonly [string, string, string])[]}
+ */
+export const SPECIMEN_REVEAL_ROWS: readonly (readonly [
+  string,
+  string,
+  string,
+])[] = Array.from({ length: 30 }, (_, i) => [
+  `Item ${i + 1}`,
+  ['tool', 'food', 'cloth'][i % 3] ?? 'tool',
+  `${(i % 5) + 1} kg`,
+]);
+
+/**
  * Keeps a number inside [0, 10]; null passes through.
  *
  * @function clampTen
