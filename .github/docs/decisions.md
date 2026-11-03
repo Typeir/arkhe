@@ -74,7 +74,13 @@ Rulings are David's. Proposals are Claude's and stay marked until David rules. N
 
 ## Proposed (Claude, pending David)
 
-None.
+| #   | Proposal                                                                                                                                                                                                                                                                                                                                                        | Date  |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| P41 | Canvas fx attribute names: owner `data-painted` once a canvas has painted it (the PoC's `data-fx-live`); engine-made nodes `data-canvas-tile`, `data-canvas-sentinel`, `data-canvas-viewport`, all `aria-hidden`; `SkeletonGroup` root `data-loading` while loading                                                                                             | 3 Nov |
+| P42 | `SkeletonGroup` lays out as grid with `--space-2` gaps only while loading; loaded, it is a plain block, so the content's own layout and margins hold                                                                                                                                                                                                            | 3 Nov |
+| P43 | New tokens: `--skeleton-bg` (cover behind revealed content, defaults to `--color-bg`) and `--skeleton-glyph-font` (defaults to `--font-headings` until R8's glyph font exists)                                                                                                                                                                                  | 3 Nov |
+| P44 | Reveals settle on a timer once nothing in view animates: the PoC finished a partly visible tile only on the next scroll, which would hold `onRevealed` open. Rows that have not started still wait to come into view, so `onRevealed` on a long owner waits until the reader has seen every row                                                                 | 3 Nov |
+| P45 | Known limits kept from the PoC, for a later ruling: a scroll container inside an owner is not split into its own owner (an owner inside one is handled); content whose height differs from the skeleton ends the reveal at once; `effects` on `ArkheProvider` is read once; the Svelte prop `effect` is bound locally as `animated` (it clashes with `$effect`) | 3 Nov |
 
 ## Open
 
