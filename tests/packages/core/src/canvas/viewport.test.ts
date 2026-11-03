@@ -64,6 +64,24 @@ describe('ViewportSurface', () => {
     expect(canvas()?.width).toBe(0);
   });
 
+  it('settles started regions on a timer once nothing animates, in view or not', async () => {
+    vi.useFakeTimers();
+    const { ctx, step, done } = testContext();
+    const surface = new ViewportSurface(ctx);
+    const slice = mockSlice();
+    slice.animating = () => false;
+    slice.settlesAt = () => performance.now() + 100;
+    const region = mockRegion(host, 100, slice);
+    surface.add(region);
+    reportAll(host, true);
+    step(16);
+    slice.busy = false;
+    await vi.advanceTimersByTimeAsync(200);
+    expect(done).toHaveBeenCalledWith(region);
+    surface.destroy();
+    vi.useRealTimers();
+  });
+
   it('is not near once reported outside its margin', () => {
     const { ctx } = testContext();
     const surface = new ViewportSurface(ctx);

@@ -88,6 +88,30 @@ describe('CanvasTile', () => {
     expect(tile.done).toBe(true);
   });
 
+  it('finishes on screen on a timer once nothing in view animates, without waiting for a scroll', async () => {
+    vi.useFakeTimers();
+    const { tile, slice, surface, step } = tileOf();
+    const done = vi.spyOn(surface, 'tileDone');
+    tile.visible = true;
+    tile.wake(0);
+    slice.animating = () => false;
+    slice.settlesAt = () => performance.now() + 100;
+    step(16);
+    slice.busy = false;
+    await vi.advanceTimersByTimeAsync(200);
+    expect(done).toHaveBeenCalled();
+  });
+
+  it('waits for unstarted rows to come into view', async () => {
+    vi.useFakeTimers();
+    const { tile, slice } = tileOf();
+    tile.wake(0);
+    tile.setVisible(false);
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(tile.done).toBe(false);
+    expect(slice.settlesAt()).toBe(Infinity);
+  });
+
   it('removes its sentinel on destroy', () => {
     const { tile } = tileOf();
     tile.destroy();
