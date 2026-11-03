@@ -18,16 +18,24 @@ Every component renders `class="arkhe"` and `data-scope` / `data-part` attribute
 import '@arkhe/core/arkhe.css';
 import { ArkheProvider, Button } from '@arkhe/react';
 
-<ArkheProvider labels={{ chipRemove: 'Poista {label}' }} icons={{ x: MyX }}>
+<ArkheProvider
+  locale='fi'
+  labels={{
+    chipRemove: 'Poista {label}',
+    results: { one: '{count} tulos', other: '{count} tulosta' },
+  }}
+  icons={{ x: MyX }}>
   <Button icon='plus'>New</Button>
 </ArkheProvider>;
 ```
 
-The provider takes three adapters, all optional:
+The provider's props are all optional:
 
-- `labels` sets translated templates, with `{name}` placeholders.
+- `locale` (BCP 47, default `en`) picks plural forms through `Intl.PluralRules` and formats numbers: number fields show and accept `1 234,5` in `fi`.
+- `labels` sets translated templates, with `{name}` placeholders. A counted label is a plural set (`one`, `few`, `many`, `other`…, with `other` required) and is replaced whole.
 - `icons` sets the app's own art, by Lucide name. Lucide fills any gap.
 - `link` sets the app router's link component.
+- `effects` sets the canvas skeleton options, or `false` for CSS skeletons everywhere.
 
 Theme: dark by default; `data-theme="light"` on `<html>` switches.
 

@@ -14,6 +14,7 @@ describe('value mapping', () => {
     expect(formatDraft(null)).toBe('');
     expect(formatDraft(undefined)).toBe('');
     expect(formatDraft(1.5)).toBe('1.5');
+    expect(formatDraft(1234.5, 'fi')).toBe('1 234,5');
   });
 
   it('clamps into the given bounds', () => {
@@ -42,6 +43,14 @@ describe('numericMachineProps', () => {
       '9',
     );
     expect(numericMachineProps({ ...base, value: null }).defaultValue).toBe('');
+  });
+
+  it('formats and parses in the locale', () => {
+    const props = numericMachineProps({ ...base, locale: 'fi', value: 1234.5 });
+    expect(props.locale).toBe('fi');
+    expect(props.formatOptions).toEqual({ maximumFractionDigits: 20 });
+    expect(props.defaultValue).toBe('1 234,5');
+    expect(numericMachineProps(base).locale).toBe('en');
   });
 
   it('leaves missing bounds to Zag', () => {

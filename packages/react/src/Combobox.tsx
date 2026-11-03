@@ -108,7 +108,7 @@ export const Combobox = <T extends ComboboxOption>(
   props: ComboboxProps<T>,
 ): JSX.Element => {
   const { label, items, filter, loading, renderItem = defaultItem } = props;
-  const { labels } = useArkhe();
+  const { labels, locale } = useArkhe();
   const env = useArkheEnvironment();
   const container = usePortalContainer();
   const [query, setQuery] = useState('');
@@ -126,6 +126,7 @@ export const Combobox = <T extends ComboboxOption>(
       ...props,
       id: useId(),
       labels,
+      locale,
       submits: props.onSubmit !== undefined,
       getRootNode: env.getRootNode,
     }),

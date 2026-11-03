@@ -15,6 +15,7 @@
 import {
   Announcer,
   FxLoader,
+  DEFAULT_LOCALE,
   resolveLabels,
   type ArkheLabels,
   type EffectsSetting,
@@ -56,6 +57,7 @@ export type LinkComponent =
  *
  * @interface ArkheContextValue
  * @property {ArkheLabels} labels - Complete label templates.
+ * @property {string} locale - BCP 47 locale for plurals and numbers.
  * @property {readonly IconSet<IconComponent>[]} icons - App icon sets; Icon falls back to Lucide after them.
  * @property {LinkComponent} link - Link renderer.
  * @property {Announcer} announcer - Speaks text through the app's live regions.
@@ -63,6 +65,7 @@ export type LinkComponent =
  */
 export interface ArkheContextValue {
   readonly labels: ArkheLabels;
+  readonly locale: string;
   readonly icons: readonly IconSet<IconComponent>[];
   readonly link: LinkComponent;
   readonly announcer: Announcer;
@@ -81,6 +84,7 @@ function loadFx(): Promise<FxModule> {
 
 const DEFAULT_CONTEXT: ArkheContextValue = {
   labels: resolveLabels(),
+  locale: DEFAULT_LOCALE,
   icons: [],
   link: 'a',
   announcer: new Announcer(),
@@ -94,6 +98,7 @@ const ArkheContext = createContext<ArkheContextValue>(DEFAULT_CONTEXT);
  *
  * @interface ArkheProviderProps
  * @property {Partial<ArkheLabels>} [labels] - Translated label templates.
+ * @property {string} [locale] - BCP 47 locale for plurals and numbers. Defaults to `en`.
  * @property {IconSet<IconComponent>} [icons] - Icons by Lucide name; win over Lucide.
  * @property {LinkComponent} [link] - Link renderer. Defaults to `a`.
  * @property {EffectsSetting} [effects] - Canvas effect options, or `false` for CSS skeletons everywhere. Read once.
@@ -101,6 +106,7 @@ const ArkheContext = createContext<ArkheContextValue>(DEFAULT_CONTEXT);
  */
 export interface ArkheProviderProps {
   readonly labels?: Partial<ArkheLabels>;
+  readonly locale?: string;
   readonly icons?: IconSet<IconComponent>;
   readonly link?: LinkComponent;
   readonly effects?: EffectsSetting;
@@ -115,6 +121,7 @@ export interface ArkheProviderProps {
  * @component
  * @param {ArkheProviderProps} props - Component props.
  * @param {Partial<ArkheLabels>} [props.labels] - Translated label templates.
+ * @param {string} [props.locale] - BCP 47 locale for plurals and numbers.
  * @param {IconSet<IconComponent>} [props.icons] - Icons by Lucide name.
  * @param {LinkComponent} [props.link] - Link renderer.
  * @param {EffectsSetting} [props.effects] - Canvas effect options, or `false`.
@@ -123,6 +130,7 @@ export interface ArkheProviderProps {
  */
 export const ArkheProvider = ({
   labels,
+  locale,
   icons,
   link,
   effects,
@@ -135,12 +143,13 @@ export const ArkheProvider = ({
   const value = useMemo<ArkheContextValue>(
     () => ({
       labels: resolveLabels(labels),
+      locale: locale ?? DEFAULT_LOCALE,
       icons: icons ? [icons] : [],
       link: link ?? 'a',
       announcer,
       effects: engine,
     }),
-    [labels, icons, link, announcer, engine],
+    [labels, locale, icons, link, announcer, engine],
   );
   return (
     <ArkheContext.Provider value={value}>{children}</ArkheContext.Provider>

@@ -9,6 +9,7 @@
  */
 
 import {
+  ArkheProvider,
   Button,
   Chip,
   Field,
@@ -120,6 +121,9 @@ export const Specimen = (): JSX.Element => {
           onValueChange={(next) => setClamped(clampTen(next))}
         />
         <NumericInput label='Unbounded' defaultValue={null} />
+        <ArkheProvider locale='fi' effects={false}>
+          <NumericInput label='Suomeksi (fi)' defaultValue={1234.5} />
+        </ArkheProvider>
       </Section>
       <Section id='chips'>
         {SPECIMEN_TONES.map((tone) => (

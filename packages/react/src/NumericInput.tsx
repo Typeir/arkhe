@@ -59,7 +59,7 @@ export interface NumericInputProps {
  */
 export const NumericInput = (props: NumericInputProps): JSX.Element => {
   const { label, value, onValueChange, onValueCommit, min, max } = props;
-  const { labels } = useArkhe();
+  const { labels, locale } = useArkhe();
   const env = useArkheEnvironment();
   const { sync, track } = useNumericSync(value);
   const service = useMachine(numberInput.machine, {
@@ -67,6 +67,7 @@ export const NumericInput = (props: NumericInputProps): JSX.Element => {
       ...props,
       id: useId(),
       labels,
+      locale,
       getRootNode: env.getRootNode,
     }),
     onValueChange: (details) => sync.emit(details.valueAsNumber, onValueChange),

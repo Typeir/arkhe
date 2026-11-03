@@ -31,12 +31,17 @@ describe('ArkheProvider', () => {
     expect(seen.value?.labels).toEqual(DEFAULT_LABELS);
     expect(seen.value?.icons).toEqual([]);
     expect(seen.value?.link).toBeUndefined();
+    expect(seen.value?.locale).toBe('en');
   });
 
   it('merges label overrides over the defaults', () => {
     const value = capture({ labels: { loading: 'Ladataan' } });
     expect(value.labels.loading).toBe('Ladataan');
     expect(value.labels.statusError).toBe(DEFAULT_LABELS.statusError);
+  });
+
+  it('carries the locale', () => {
+    expect(capture({ locale: 'fi' }).locale).toBe('fi');
   });
 
   it('carries only the app icon set', () => {

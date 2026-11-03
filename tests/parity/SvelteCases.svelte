@@ -129,6 +129,11 @@ Svelte side of the parity scenes. Each scene must match its twin in
   <NumericInput label="Speed" bind:value={() => speed, answerSpeed} />
   <Button onclick={() => (speed = 8)}>Set 8</Button>
   <output>{speedLog.join(' ')}</output>
+{:else if name === 'locale'}
+  <ArkheProvider locale="fi" effects={false}>
+    <NumericInput label="Nopeus" defaultValue={1234.5} />
+    <Progress value={1234.5} max={2000} label="Budjetti" />
+  </ArkheProvider>
 {:else if name === 'tabs'}
   <Tabs items={TAB_ITEMS} label="Sheet">
     {#snippet panel(key)}{TAB_TEXT[key]}{/snippet}

@@ -28,6 +28,7 @@ describe('ArkheProvider', () => {
     expect(value.labels).toEqual(DEFAULT_LABELS);
     expect(value.icons).toEqual([]);
     expect(value.link).toBe('a');
+    expect(value.locale).toBe('en');
   });
 
   it('merges label overrides over the defaults', () => {
@@ -36,6 +37,13 @@ describe('ArkheProvider', () => {
     ));
     expect(value.labels.loading).toBe('Ladataan');
     expect(value.labels.statusError).toBe(DEFAULT_LABELS.statusError);
+  });
+
+  it('carries the locale', () => {
+    const value = capture((probe) => (
+      <ArkheProvider locale='fi'>{probe}</ArkheProvider>
+    ));
+    expect(value.locale).toBe('fi');
   });
 
   it('carries only the app icon set', () => {

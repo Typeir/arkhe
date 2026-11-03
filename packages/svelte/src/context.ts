@@ -14,6 +14,7 @@
 import {
   Announcer,
   FxLoader,
+  DEFAULT_LOCALE,
   resolveLabels,
   type ArkheLabels,
   type FxModule,
@@ -43,6 +44,7 @@ export type LinkComponent = Component<Record<string, unknown>> | undefined;
  *
  * @interface ArkheContextValue
  * @property {ArkheLabels} labels - Complete label templates.
+ * @property {string} locale - BCP 47 locale for plurals and numbers.
  * @property {readonly IconSet<IconComponent>[]} icons - App icon sets; Icon falls back to Lucide after them.
  * @property {LinkComponent} link - Link renderer.
  * @property {Announcer} announcer - Speaks text through the app's live regions.
@@ -50,6 +52,7 @@ export type LinkComponent = Component<Record<string, unknown>> | undefined;
  */
 export interface ArkheContextValue {
   readonly labels: ArkheLabels;
+  readonly locale: string;
   readonly icons: readonly IconSet<IconComponent>[];
   readonly link: LinkComponent;
   readonly announcer: Announcer;
@@ -70,6 +73,7 @@ export function loadFx(): Promise<FxModule> {
 
 const DEFAULT_CONTEXT: ArkheContextValue = {
   labels: resolveLabels(),
+  locale: DEFAULT_LOCALE,
   icons: [],
   link: undefined,
   announcer: new Announcer(),

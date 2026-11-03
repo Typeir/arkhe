@@ -8,6 +8,7 @@ describe('useArkhe', () => {
   it('reads published adapters through the shared key', () => {
     const published: ArkheContextValue = {
       labels: resolveLabels({ loading: 'Ladataan' }),
+      locale: 'fi',
       icons: [],
       link: undefined,
       announcer: new Announcer(),

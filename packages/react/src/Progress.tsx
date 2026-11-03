@@ -59,9 +59,9 @@ export const Progress = ({
   markers,
   showValue,
 }: ProgressProps): JSX.Element => {
-  const { labels } = useArkhe();
+  const { labels, locale } = useArkhe();
   const state = progressState(value, max, markers);
-  const text = progressValueText(state, max, labels);
+  const text = progressValueText(state, max, labels, locale);
   return (
     <div
       className={ARKHE_CLASS}

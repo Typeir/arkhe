@@ -4,6 +4,7 @@ Svelte specimen: every Arkhé component with the shared specimen data.
 -->
 <script lang="ts">
   import {
+    ArkheProvider,
     Button,
     Chip,
     Field,
@@ -100,6 +101,9 @@ Svelte specimen: every Arkhé component with the shared specimen data.
         min={0}
         max={10} />
       <NumericInput label="Unbounded" defaultValue={null} />
+      <ArkheProvider locale="fi" effects={false}>
+        <NumericInput label="Suomeksi (fi)" defaultValue={1234.5} />
+      </ArkheProvider>
     </div>
   </section>
 

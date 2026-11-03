@@ -68,7 +68,9 @@ input its formatted value, which Svelte would bind live and so erase a lone
     () => api,
   );
   let draft = $state(
-    untrack(() => formatDraft(value !== undefined ? value : defaultValue)),
+    untrack(() =>
+      formatDraft(value !== undefined ? value : defaultValue, arkhe().locale),
+    ),
   );
 
   const emit = (next: NumericValue) => {
@@ -81,6 +83,7 @@ input its formatted value, which Svelte would bind live and so erase a lone
       id,
       label,
       labels: arkhe().labels,
+      locale: arkhe().locale,
       value,
       defaultValue,
       min,

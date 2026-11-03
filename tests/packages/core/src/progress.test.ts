@@ -69,6 +69,17 @@ describe('progressValueText', () => {
     expect(text(10.2)).toBe('10.2 of 10, 0.2 over');
   });
 
+  it('reads the numbers in the locale', () => {
+    expect(
+      progressValueText(
+        progressState(1234.5, 2000),
+        2000,
+        DEFAULT_LABELS,
+        'fi',
+      ),
+    ).toBe('1 234,5 of 2 000');
+  });
+
   it('reads a non-finite value as the bar draws it', () => {
     expect(text(Number.NaN)).toBe('0 of 10');
   });

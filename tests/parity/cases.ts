@@ -134,6 +134,21 @@ export const PARITY_CASES: readonly ParityCase[] = [
       press('{Tab}'),
     ],
   },
+  {
+    name: 'locale',
+    steps: [
+      click('Increase Nopeus'),
+      {
+        label: 'type "2,5" and leave',
+        run: async () => {
+          const input = screen.getByRole('spinbutton');
+          await userEvent.clear(input);
+          await userEvent.type(input, '2,5');
+          await userEvent.tab();
+        },
+      },
+    ],
+  },
   { name: 'tabs', steps: [click('Notes', 'tab')] },
   {
     name: 'tabs-change',

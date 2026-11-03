@@ -103,6 +103,20 @@ describe('comboboxMachineProps', () => {
     expect(translations.resultsCount(1)).toBe('1 result');
     expect(translations.resultsCount(4)).toBe('4 results');
   });
+
+  it('announces the count as a plural in the locale', () => {
+    const labels = {
+      ...base.labels,
+      results: { one: '{count} tulos', other: '{count} tulosta' },
+    };
+    const { translations } = comboboxMachineProps({
+      ...base,
+      labels,
+      locale: 'fi',
+    });
+    expect(translations.resultsCount(1)).toBe('1 tulos');
+    expect(translations.resultsCount(1500)).toBe('1 500 tulosta');
+  });
 });
 
 describe('guardComboboxKeys', () => {

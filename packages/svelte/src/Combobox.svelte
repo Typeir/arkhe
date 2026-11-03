@@ -89,6 +89,7 @@ next key, so Enter never acts on a stale list.
       id,
       label: props.label,
       labels: arkhe().labels,
+      locale: arkhe().locale,
       value,
       defaultValue: props.defaultValue,
       clearOnSelect: props.clearOnSelect,

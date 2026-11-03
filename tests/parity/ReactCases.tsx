@@ -192,6 +192,12 @@ const SCENES: Readonly<Record<string, () => ReactNode>> = {
     <NumericInput label='Speed' defaultValue={3} min={0} max={10} />
   ),
   'numeric-controlled': () => <ControlledNumeric />,
+  locale: () => (
+    <ArkheProvider locale='fi' effects={false}>
+      <NumericInput label='Nopeus' defaultValue={1234.5} />
+      <Progress value={1234.5} max={2000} label='Budjetti' />
+    </ArkheProvider>
+  ),
   tabs: () => <Tabs items={TAB_ITEMS} label='Sheet' panels={TAB_TEXT} />,
   'tabs-change': () => <ChangingTabs />,
   duplicates: () => (

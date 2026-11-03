@@ -111,6 +111,26 @@ describe('NumericInput', () => {
     expect(input).toHaveAttribute('aria-valuemax', '9');
   });
 
+  it('formats and parses in the provider locale', async () => {
+    const onValueChange = vi.fn();
+    render(
+      <ArkheProvider locale='fi'>
+        <NumericInput
+          label='Nopeus'
+          defaultValue={1234.5}
+          onValueChange={onValueChange}
+        />
+      </ArkheProvider>,
+    );
+    const input = screen.getByRole('spinbutton');
+    expect(input).toHaveValue('1 234,5');
+    await userEvent.clear(input);
+    await userEvent.type(input, '1,5');
+    expect(onValueChange).toHaveBeenLastCalledWith(1.5);
+    await userEvent.tab();
+    await waitFor(() => expect(input).toHaveValue('1,5'));
+  });
+
   it('uses translated step labels', () => {
     render(
       <ArkheProvider labels={{ numericIncrement: 'Lisää {label}' }}>
