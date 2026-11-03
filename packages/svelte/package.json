@@ -14,7 +14,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "node ../../.github/scripts/ascii-cwd.mjs svelte-package -i src -o dist",
+    "build": "svelte-package -i src -o dist",
     "typecheck": "svelte-check --tsconfig ./tsconfig.json --fail-on-warnings"
   },
   "dependencies": {
@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "@sveltejs/package": "3.0.1",
-    "svelte": "5.57.3"
+    "svelte": "5.57.3",
+    "typescript": "6.0.3"
   }
 }

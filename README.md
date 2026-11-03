@@ -42,3 +42,7 @@ npm run health:check
 ```
 
 The showcase frames the React, Svelte and static HTML targets side by side, all from one origin. Its toolbar changes theme, text size and layout in every frame at once.
+
+## Splits
+
+Each package splits into its own repo with `git subtree`. Build, then run `node .github/scripts/split-package.mjs <core|react|svelte>`. That updates two local branches: `split/<name>` (the package's own history) and `release/<name>` (the same plus a commit holding its built `dist`, so consumers install without build tools).

@@ -63,6 +63,6 @@ Any failure → no completion. Node 22.23.4 (`.node-version`, fnm).
 
 ## Documentation Rules
 
-Root markdown: `AGENTS.md`, `CLAUDE.md`, `README.md` only. Docs → `.github/docs/`. Task files → `.ignore/tasks/`. Reports → `.ignore/reports/`.
+Root markdown: `AGENTS.md`, `CLAUDE.md`, `README.md` only; each package has its own `README.md` for its split repo. Docs → `.github/docs/`. Task files → `.ignore/tasks/`. Reports → `.ignore/reports/`.
 
 Commit messages: `[action]: imperative text`, e.g. `[feat]: add tabs`. Commit only when David asks.

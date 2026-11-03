@@ -12,7 +12,7 @@
     "apps/showcase"
   ],
   "scripts": {
-    "build": "npm run build -w @arkhe/core && npm run build -w @arkhe/react && npm run build -w @arkhe/svelte && npm run build -w showcase",
+    "build": "npm run build -w @arkhe/core && npm run build -w @arkhe/react && node .github/scripts/ascii-cwd.mjs npm run build -w @arkhe/svelte && npm run build -w showcase",
     "typecheck": "npm run typecheck --workspaces --if-present && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
     "lint": "eslint .",
     "format": "prettier --write .",
