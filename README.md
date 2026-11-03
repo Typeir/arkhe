@@ -45,4 +45,4 @@ The showcase frames the React, Svelte and static HTML targets side by side, all 
 
 ## Splits
 
-Each package splits into its own repo with `git subtree`. Build, then run `node .github/scripts/split-package.mjs <core|react|svelte>`. That updates two local branches: `split/<name>` (the package's own history) and `release/<name>` (the same plus a commit holding its built `dist`, so consumers install without build tools). A port's release also bundles core in `dist/core`, so React or Svelte installs as one package with its stylesheet at `@arkhe/react/arkhe.css` or `@arkhe/svelte/arkhe.css`.
+Each package splits into its own repo with `git subtree`. Build, then run `node .github/scripts/split-package.mjs <core|react|svelte>`. That updates two local branches: `split/<name>` (the package's own history) and `release/<name>` (the same plus a commit holding its built `dist`, so consumers install without build tools).
