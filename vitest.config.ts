@@ -77,6 +77,18 @@ export default defineConfig({
           ],
         },
       },
+      {
+        extends: true,
+        plugins: [react(), svelte()],
+        resolve: { conditions: ['browser'] },
+        test: {
+          name: 'mdx',
+          environment: 'jsdom',
+          setupFiles: ['tests/setup/react.ts', 'tests/setup/svelte.ts'],
+          server: { deps: { inline: ['@lucide/svelte', '@zag-js/svelte'] } },
+          include: ['tests/mdx/**/*.test.{ts,tsx}'],
+        },
+      },
     ],
   },
 });
