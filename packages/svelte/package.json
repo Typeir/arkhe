@@ -1,6 +1,6 @@
 {
   "name": "@arkhe/svelte",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -19,7 +19,7 @@
     "typecheck": "svelte-check --tsconfig ./tsconfig.json --fail-on-warnings"
   },
   "dependencies": {
-    "@arkhe/core": "0.1.0",
+    "@arkhe/core": "0.2.0",
     "@lucide/svelte": "1.64.0",
     "@zag-js/combobox": "1.47.0",
     "@zag-js/dialog": "1.47.0",
