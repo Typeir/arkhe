@@ -14,5 +14,7 @@ A keyword linking to its rule, with a card that loads on first open.
   title={display ?? term}
   href={`/en/library/keywords/${term.replaceAll(' ', '-')}`}
   {load}
-  >{display ?? term}{#snippet loaded(text: string)}<span>{text}</span
-    >{/snippet}</HoverCard>
+  >{display ?? term}{#snippet loaded(text: string)}<div>
+      <h3>{display ?? term}</h3>
+      <p>{text}</p>
+    </div>{/snippet}</HoverCard>

@@ -1,8 +1,9 @@
 /**
  * @fileoverview HoverCard: a rich reference card on Zag's hover-card machine.
  * Cards nest (a card's content may hold more cards), load content on first
- * open, and pin open until unpinned. The card mounts on first open, so
- * server markup holds the trigger alone.
+ * open, and pin open until unpinned. The card mounts on first open,
+ * portalled into the environment's container, so server markup holds the
+ * trigger alone and the body may hold any content.
  *
  * @module packages/react/src/HoverCard
  * @version 1.0.0
@@ -19,14 +20,21 @@ import {
   type Placement,
 } from '@arkhe/core';
 import * as hoverCard from '@zag-js/hover-card';
-import { mergeProps, normalizeProps, useMachine } from '@zag-js/react';
+import { Portal, mergeProps, normalizeProps, useMachine } from '@zag-js/react';
 import { useEffect, useId, useState, type JSX, type ReactNode } from 'react';
 import { useArkhe } from './ArkheProvider.js';
 import { useArkheEnvironment } from './ArkheEnvironment.js';
 import { Button } from './Button.js';
-import { HintTrigger, useHint, useOpenState } from './HintTrigger.js';
+import {
+  HintContext,
+  HintTrigger,
+  useHint,
+  useHintNode,
+  useOpenState,
+} from './HintTrigger.js';
 import { Status } from './Status.js';
 import { useContentLoader } from './useContentLoader.js';
+import { usePortalContainer } from './usePortalContainer.js';
 
 /**
  * Props of HoverCard. Give `content`, or `load` with `loaded`.
@@ -35,7 +43,7 @@ import { useContentLoader } from './useContentLoader.js';
  * @template T
  * @property {string} title - Card heading; also names the pin button.
  * @property {ReactNode} children - Trigger content.
- * @property {string} [href] - Makes the trigger the provider's link to this address.
+ * @property {string} [href] - Makes the trigger the provider's link to this address, and adds the link to the card's header.
  * @property {boolean} [inline] - Makes the trigger inline text with a tab stop; it may hold other triggers.
  * @property {ReactNode} [content] - Card body.
  * @property {() => Promise<T>} [load] - Fetches the body on first open. A new function loads afresh; keep it stable.
@@ -67,9 +75,10 @@ export interface HoverCardProps<T> {
 
 /**
  * Renders a trigger that opens a reference card on hover, focus or tap. A
- * tap outside or Escape closes it, unless pinned. The card renders in
- * place, so a nested card stays inside its parent's layer. Unpinning hands
- * the card back to hover: it stays open while the pointer is over it.
+ * tap outside or Escape closes it, unless pinned. A tap on a link trigger
+ * opens the card; the header's link follows it. A card stays open while
+ * a card nested in it is open. Unpinning hands the card back to hover: it
+ * stays open while the pointer is over it.
  *
  * @component
  * @param {HoverCardProps<T>} props - Title, trigger, body, open state, timing.
@@ -93,6 +102,8 @@ export const HoverCard = <T,>({
 }: HoverCardProps<T>): JSX.Element => {
   const { labels } = useArkhe();
   const env = useArkheEnvironment();
+  const container = usePortalContainer();
+  const node = useHintNode();
   const [pinned, setPinned] = useState(false);
   const { shown, change } = useOpenState(open, defaultOpen, onOpenChange);
   const body = useContentLoader(load);
@@ -102,8 +113,9 @@ export const HoverCard = <T,>({
       open: shown,
       hold: pinned,
       placement,
-      strategy: 'fixed',
-      onOpenChange: change,
+      onOpenChange: (next: boolean) => {
+        if (node.request(next)) change(next);
+      },
       getRootNode: env.getRootNode,
     }),
     openDelay,
@@ -118,6 +130,8 @@ export const HoverCard = <T,>({
     },
     trigger: api.getTriggerProps(),
     positionerId: positioner.id ?? '',
+    node,
+    leaving: () => service.state.matches('closing'),
   });
   const { state, load: start } = body;
   useEffect(() => {
@@ -133,34 +147,50 @@ export const HoverCard = <T,>({
         {children}
       </HintTrigger>
       {hint.mounted ? (
-        <span {...mergeProps(positioner, { hidden: !api.open })}>
-          <span
-            {...api.getContentProps()}
-            data-pinned={pinned ? '' : undefined}>
-            <span data-scope='hover-card' data-part='header'>
-              <span data-scope='hover-card' data-part='title'>
-                {title}
-              </span>
-              {pinnable ? (
-                <Button
-                  variant='ghost'
-                  icon={pinned ? 'pin-off' : 'pin'}
-                  label={formatLabel(pinned ? labels.unpin : labels.pin, {
-                    label: title,
-                  })}
-                  pressed={pinned}
-                  onClick={togglePin}
-                />
-              ) : null}
-            </span>
-            <span data-scope='hover-card' data-part='body'>
-              {content}
-              {state.status === 'loading' ? <Status kind='loading' /> : null}
-              {state.status === 'error' ? <Status kind='error' /> : null}
-              {state.status === 'ready' ? loaded?.(state.value) : null}
-            </span>
-          </span>
-        </span>
+        <Portal container={container} getRootNode={env.getRootNode}>
+          <div className={ARKHE_CLASS}>
+            <div {...mergeProps(positioner, { hidden: !api.open })}>
+              <div
+                {...api.getContentProps()}
+                data-pinned={pinned ? '' : undefined}>
+                <div data-scope='hover-card' data-part='header'>
+                  <span data-scope='hover-card' data-part='title'>
+                    {title}
+                  </span>
+                  {href !== undefined ? (
+                    <Button
+                      variant='ghost'
+                      icon='external-link'
+                      label={formatLabel(labels.openLink, { label: title })}
+                      href={href}
+                    />
+                  ) : null}
+                  {pinnable ? (
+                    <Button
+                      variant='ghost'
+                      icon={pinned ? 'pin-off' : 'pin'}
+                      label={formatLabel(pinned ? labels.unpin : labels.pin, {
+                        label: title,
+                      })}
+                      pressed={pinned}
+                      onClick={togglePin}
+                    />
+                  ) : null}
+                </div>
+                <div data-scope='hover-card' data-part='body'>
+                  <HintContext value={node}>
+                    {content}
+                    {state.status === 'loading' ? (
+                      <Status kind='loading' />
+                    ) : null}
+                    {state.status === 'error' ? <Status kind='error' /> : null}
+                    {state.status === 'ready' ? loaded?.(state.value) : null}
+                  </HintContext>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Portal>
       ) : null}
     </span>
   );

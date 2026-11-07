@@ -1,4 +1,5 @@
 import { ArkheProvider, HoverCard } from '@arkhe/react';
+import { NestedCards } from '@tests/fixtures/react/NestedCards';
 import { tap } from '@tests/fixtures/tap';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -11,6 +12,45 @@ function card(title: string) {
     .getAllByText(title, { selector: '[data-part="title"]' })[0]
     .closest('[data-part="content"]') as HTMLElement;
 }
+
+const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+describe('HoverCard nesting through the portal', () => {
+  it('keeps the parent open while the pointer is in the nested card', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<NestedCards />);
+    await user.hover(screen.getByRole('button', { name: 'charge' }));
+    await waitFor(() => expect(card('Charge')).toBeVisible());
+    await user.hover(
+      within(card('Charge')).getByRole('button', { name: 'act' }),
+    );
+    await waitFor(() => expect(card('Action')).toBeVisible());
+    expect(container.contains(card('Charge'))).toBe(false);
+    expect(card('Charge').contains(card('Action'))).toBe(false);
+    await user.hover(screen.getByText('One per turn.'));
+    await pause(150);
+    expect(card('Charge')).toBeVisible();
+    expect(card('Action')).toBeVisible();
+    await user.hover(screen.getByText('elsewhere'));
+    await waitFor(() => expect(card('Charge')).not.toBeVisible());
+    await waitFor(() => expect(card('Action')).not.toBeVisible());
+  });
+
+  it('a tap in the nested card keeps both open; one outside closes both', async () => {
+    render(<NestedCards />);
+    await tap(screen.getByRole('button', { name: 'charge' }));
+    await waitFor(() => expect(card('Charge')).toBeVisible());
+    await tap(within(card('Charge')).getByRole('button', { name: 'act' }));
+    await waitFor(() => expect(card('Action')).toBeVisible());
+    await tap(screen.getByText('One per turn.'));
+    await pause(100);
+    expect(card('Charge')).toBeVisible();
+    expect(card('Action')).toBeVisible();
+    await tap(screen.getByText('elsewhere'));
+    await waitFor(() => expect(card('Charge')).not.toBeVisible());
+    expect(card('Action')).not.toBeVisible();
+  });
+});
 
 describe('HoverCard', () => {
   it('opens on hover with its title and body', async () => {
@@ -156,6 +196,29 @@ describe('HoverCard', () => {
     const link = screen.getByRole('link', { name: 'charge' });
     expect(link).toHaveAttribute('href', '/charge');
     expect(link).toHaveAttribute('data-routed');
+  });
+
+  it("a tap on a link trigger opens the card; the header's link follows it", async () => {
+    const Routed = (props: AnchorHTMLAttributes<HTMLAnchorElement>) => (
+      <a {...props} data-routed='' />
+    );
+    render(
+      <ArkheProvider link={Routed} effects={false}>
+        <HoverCard title='Charge' content='Body' href='/charge'>
+          charge
+        </HoverCard>
+      </ArkheProvider>,
+    );
+    const trigger = screen.getByRole('link', { name: 'charge' });
+    await tap(trigger);
+    await waitFor(() => expect(card('Charge')).toBeVisible());
+    const follow = within(card('Charge')).getByRole('link', {
+      name: 'Open Charge',
+    });
+    expect(follow).toHaveAttribute('href', '/charge');
+    expect(follow).toHaveAttribute('data-routed');
+    await tap(trigger);
+    await waitFor(() => expect(card('Charge')).not.toBeVisible());
   });
 
   it('opens on tap and closes on a tap outside, unless pinned', async () => {

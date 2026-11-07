@@ -126,6 +126,16 @@ describe('MDX pipeline: server render and hydration (React)', () => {
     expect(SHARD_LOADS).toEqual(['charmed']);
   });
 
+  it('Keyword: the card portals out of the paragraph, so its body may hold blocks', async () => {
+    const page = await open(LINEAGE_MDX);
+    await tap(screen.getByRole('link', { name: 'Charmed' }));
+    const body = await screen.findByText('charmed is defined here.');
+    expect(body.tagName).toBe('P');
+    expect(body.parentElement?.closest('p')).toBeNull();
+    expect(page.container.contains(body)).toBe(false);
+    expect(page.errors.map(String)).toEqual([]);
+  });
+
   it('Keyword: a tap opens the card, Escape closes it', async () => {
     await open(LINEAGE_MDX);
     const link = screen.getByRole('link', { name: 'Frightened' });

@@ -1,10 +1,13 @@
+import { HintNode } from '@arkhe/core';
 import { ArkheProvider } from '@arkhe/react';
 import { act, render, renderHook, screen } from '@testing-library/react';
-import type { AnchorHTMLAttributes } from 'react';
+import type { AnchorHTMLAttributes, ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import {
+  HintContext,
   HintTrigger,
   useHint,
+  useHintNode,
   useOpenState,
 } from '../../../../packages/react/src/HintTrigger';
 
@@ -66,8 +69,23 @@ describe('useOpenState', () => {
   });
 });
 
+describe('useHintNode', () => {
+  it('is a child of the node in context, stable across renders', () => {
+    const parent = new HintNode();
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <HintContext value={parent}>{children}</HintContext>
+    );
+    const { result, rerender } = renderHook(() => useHintNode(), { wrapper });
+    const first = result.current;
+    rerender();
+    expect(result.current).toBe(first);
+    expect(first.parent).toBe(parent);
+  });
+});
+
 describe('useHint', () => {
   it('mounts the body on first open and keeps it after', () => {
+    const node = new HintNode();
     const { result, rerender } = renderHook(
       ({ open }) =>
         useHint({
@@ -75,6 +93,8 @@ describe('useHint', () => {
           setOpen: () => undefined,
           trigger: { id: 'trigger' },
           positionerId: 'positioner',
+          node,
+          leaving: () => false,
         }),
       { initialProps: { open: false } },
     );
@@ -88,7 +108,14 @@ describe('useHint', () => {
   it('closes on a touch outside while open', () => {
     const setOpen = vi.fn();
     renderHook(() =>
-      useHint({ open: true, setOpen, trigger: {}, positionerId: 'none' }),
+      useHint({
+        open: true,
+        setOpen,
+        trigger: {},
+        positionerId: 'none',
+        node: new HintNode(),
+        leaving: () => false,
+      }),
     );
     act(() => {
       document.body.dispatchEvent(

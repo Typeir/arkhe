@@ -91,7 +91,12 @@ export const Keyword = ({
       title={display ?? term}
       href={`/en/${href}`}
       load={load}
-      loaded={(text: string) => <span>{text}</span>}>
+      loaded={(text: string) => (
+        <div>
+          <h3>{display ?? term}</h3>
+          <p>{text}</p>
+        </div>
+      )}>
       {display ?? term}
     </HoverCard>
   );

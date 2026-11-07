@@ -95,6 +95,15 @@ describe('Islands: server render and hydration (Svelte)', () => {
     expect(SHARD_LOADS).toEqual(['charmed']);
   });
 
+  it('Keyword: the card portals out of the paragraph, so its body may hold blocks', async () => {
+    const page = await open('lineage');
+    await tap(screen.getByRole('link', { name: 'Charmed' }));
+    const body = await screen.findByText('charmed is defined here.');
+    expect(body.tagName).toBe('P');
+    expect(body.parentElement?.closest('p')).toBeNull();
+    expect(page.container.contains(body)).toBe(false);
+  });
+
   it('Popover: opens after hydration', async () => {
     await open('sheet');
     await userEvent.click(screen.getByRole('button', { name: 'Rings' }));

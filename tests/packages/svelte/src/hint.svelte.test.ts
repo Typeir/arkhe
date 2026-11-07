@@ -1,3 +1,4 @@
+import { HintNode } from '@arkhe/core';
 import { flushSync } from 'svelte';
 import { describe, expect, it, vi } from 'vitest';
 import { useHint } from '../../../../packages/svelte/src/hint.svelte';
@@ -13,6 +14,8 @@ describe('useHint', () => {
         trigger: { id: 'trigger' },
         positionerId: 'positioner',
         getRootNode: () => document,
+        node: new HintNode(),
+        leaving: () => false,
       }));
     });
     flushSync();
@@ -36,6 +39,8 @@ describe('useHint', () => {
         trigger: { id: 'trigger' },
         positionerId: 'positioner',
         getRootNode: () => document,
+        node: new HintNode(),
+        leaving: () => false,
       }));
     });
     flushSync();

@@ -12,6 +12,7 @@ import type { ArkheIconName } from '@arkhe/core';
 import {
   Check,
   ChevronDown,
+  ExternalLink,
   Inbox,
   Info,
   Loader,
@@ -42,4 +43,5 @@ export const LUCIDE_ICONS: Readonly<Record<ArkheIconName, IconComponent>> = {
   info: Info,
   pin: Pin,
   'pin-off': PinOff,
+  'external-link': ExternalLink,
 };

@@ -1,6 +1,6 @@
 /**
  * @fileoverview React side of the Tooltip and HoverCard parity scenes:
- * button, link and inline triggers, and a hint closed after its first open.
+ * button, inline and card link triggers, and a hint closed after its first open.
  * Each must match its twin in `SvelteCases.svelte`.
  *
  * @module tests/parity/ReactHintCases
@@ -27,11 +27,6 @@ export const HINT_SCENES: Readonly<Record<string, () => ReactNode>> = {
   'tooltip-reopen': () => (
     <Tooltip content='Halves damage.' openDelay={0} closeDelay={0}>
       resistance
-    </Tooltip>
-  ),
-  'tooltip-link': () => (
-    <Tooltip content='Halves damage.' href='#rule' openDelay={0}>
-      rule
     </Tooltip>
   ),
   'tooltip-inline': () => (

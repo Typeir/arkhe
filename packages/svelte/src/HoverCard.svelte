@@ -2,12 +2,13 @@
 @component
 Renders a trigger that opens a rich reference card on hover, focus or tap,
 on Zag's hover-card machine; a tap outside or Escape closes it, unless
-pinned. Cards nest, load content on first open, and pin open until unpinned;
+pinned. A tap on a link trigger opens the card; the header's link follows
+it. Cards nest, load content on first open, and pin open until unpinned;
 unpinning hands the card back to hover, so it stays open while the pointer
-is over it. A new `load` loads afresh. The card renders in place, so a
-nested card stays inside its parent's layer, and mounts on first open, so
-server markup holds the trigger alone. Give `content`, or `load` with
-`loaded`.
+is over it. A card stays open while a card nested in it is open. A new
+`load` loads afresh. The card mounts on first open, portalled into the
+environment's container, so server markup holds the trigger alone and the
+body may hold any content. Give `content`, or `load` with `loaded`.
 -->
 <script lang="ts" generics="T">
   import {
@@ -17,13 +18,19 @@ server markup holds the trigger alone. Give `content`, or `load` with
     type Placement,
   } from '@arkhe/core';
   import * as hoverCard from '@zag-js/hover-card';
-  import { mergeProps, normalizeProps, useMachine } from '@zag-js/svelte';
+  import {
+    mergeProps,
+    normalizeProps,
+    portal,
+    useMachine,
+  } from '@zag-js/svelte';
   import { untrack, type Snippet } from 'svelte';
   import Button from './Button.svelte';
   import { useContentLoader } from './contentLoader.svelte.js';
   import { useArkhe } from './context.js';
   import { useArkheEnvironment } from './environment.js';
-  import { useHint } from './hint.svelte.js';
+  import { useHint, useHintNode } from './hint.svelte.js';
+  import HintScope from './HintScope.svelte';
   import HintTrigger from './HintTrigger.svelte';
   import Status from './Status.svelte';
 
@@ -33,7 +40,7 @@ server markup holds the trigger alone. Give `content`, or `load` with
    * @interface Props
    * @property {string} title - Card heading; also names the pin button.
    * @property {Snippet} children - Trigger content.
-   * @property {string} [href] - Makes the trigger the provider's link to this address.
+   * @property {string} [href] - Makes the trigger the provider's link to this address, and adds the link to the card's header.
    * @property {boolean} [inline] - Makes the trigger inline text with a tab stop; it may hold other triggers.
    * @property {Snippet} [content] - Card body.
    * @property {() => Promise<T>} [load] - Fetches the body on first open.
@@ -82,6 +89,7 @@ server markup holds the trigger alone. Give `content`, or `load` with
   const id = $props.id();
   const arkhe = useArkhe();
   const env = useArkheEnvironment();
+  const node = useHintNode();
   const body = useContentLoader(() => load);
   const initial = untrack(() => defaultOpen ?? false);
   const shown = $derived(open ?? initial);
@@ -97,8 +105,9 @@ server markup holds the trigger alone. Give `content`, or `load` with
       open: shown,
       hold: pinned,
       placement,
-      strategy: 'fixed',
-      onOpenChange: change,
+      onOpenChange: (next: boolean) => {
+        if (node.request(next)) change(next);
+      },
       getRootNode: env().getRootNode,
     }),
     openDelay,
@@ -113,6 +122,8 @@ server markup holds the trigger alone. Give `content`, or `load` with
     trigger: api.getTriggerProps(),
     positionerId: api.getPositionerProps().id ?? '',
     getRootNode: env().getRootNode,
+    node,
+    leaving: () => service.state.matches('closing'),
   }));
   $effect(() => {
     if (api.open) body.load();
@@ -126,34 +137,52 @@ server markup holds the trigger alone. Give `content`, or `load` with
       label: title,
     }),
   );
+  const linkLabel = $derived(
+    formatLabel(arkhe().labels.openLink, { label: title }),
+  );
 </script>
 
 <span class={ARKHE_CLASS} data-scope="hover-card" data-part="root"
   ><HintTrigger attrs={hint.trigger} {href} {inline}
     >{@render children()}</HintTrigger
-  >{#if hint.mounted}<span
-      {...mergeProps(api.getPositionerProps(), { hidden: !api.open })}>
-      <span {...api.getContentProps()} data-pinned={pinned ? '' : undefined}>
-        <span data-scope="hover-card" data-part="header">
-          <span data-scope="hover-card" data-part="title">{title}</span>
-          {#if pinnable}
-            <Button
-              variant="ghost"
-              icon={pinned ? 'pin-off' : 'pin'}
-              label={pinLabel}
-              pressed={pinned}
-              onclick={togglePin} />
-          {/if}
-        </span>
-        <span data-scope="hover-card" data-part="body">
-          {@render content?.()}
-          {#if body.state.status === 'loading'}
-            <Status kind="loading" />
-          {:else if body.state.status === 'error'}
-            <Status kind="error" />
-          {:else if body.state.status === 'ready'}
-            {@render loaded?.(body.state.value)}
-          {/if}
-        </span>
-      </span>
-    </span>{/if}</span>
+  >{#if hint.mounted}<div
+      class={ARKHE_CLASS}
+      use:portal={{
+        container: env().container(),
+        getRootNode: env().getRootNode,
+      }}>
+      <div {...mergeProps(api.getPositionerProps(), { hidden: !api.open })}>
+        <div {...api.getContentProps()} data-pinned={pinned ? '' : undefined}>
+          <div data-scope="hover-card" data-part="header">
+            <span data-scope="hover-card" data-part="title">{title}</span>
+            {#if href !== undefined}
+              <Button
+                variant="ghost"
+                icon="external-link"
+                label={linkLabel}
+                {href} />
+            {/if}
+            {#if pinnable}
+              <Button
+                variant="ghost"
+                icon={pinned ? 'pin-off' : 'pin'}
+                label={pinLabel}
+                pressed={pinned}
+                onclick={togglePin} />
+            {/if}
+          </div>
+          <div data-scope="hover-card" data-part="body">
+            <HintScope {node}>
+              {@render content?.()}
+              {#if body.state.status === 'loading'}
+                <Status kind="loading" />
+              {:else if body.state.status === 'error'}
+                <Status kind="error" />
+              {:else if body.state.status === 'ready'}
+                {@render loaded?.(body.state.value)}
+              {/if}
+            </HintScope>
+          </div>
+        </div>
+      </div>
+    </div>{/if}</span>

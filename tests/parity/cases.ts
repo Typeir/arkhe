@@ -182,7 +182,6 @@ export const PARITY_CASES: readonly ParityCase[] = [
     name: 'tooltip-reopen',
     steps: [hover('resistance'), press('{Escape}'), tapText('resistance')],
   },
-  { name: 'tooltip-link', steps: [hover('rule', 'link'), press('{Escape}')] },
   { name: 'tooltip-inline', steps: [tapText('inner'), tapText('elsewhere')] },
   { name: 'hover-card', steps: [hover('charge'), click('Pin Charge')] },
   {

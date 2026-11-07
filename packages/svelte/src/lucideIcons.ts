@@ -11,6 +11,7 @@
 import type { ArkheIconName } from '@arkhe/core';
 import Check from '@lucide/svelte/icons/check';
 import ChevronDown from '@lucide/svelte/icons/chevron-down';
+import ExternalLink from '@lucide/svelte/icons/external-link';
 import Inbox from '@lucide/svelte/icons/inbox';
 import Info from '@lucide/svelte/icons/info';
 import Loader from '@lucide/svelte/icons/loader';
@@ -40,4 +41,5 @@ export const LUCIDE_ICONS: Readonly<Record<ArkheIconName, IconComponent>> = {
   info: Info,
   pin: Pin,
   'pin-off': PinOff,
+  'external-link': ExternalLink,
 };

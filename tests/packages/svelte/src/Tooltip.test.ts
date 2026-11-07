@@ -1,13 +1,11 @@
 import { Tooltip } from '@arkhe/svelte';
 import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
 import NestedTips from '@tests/fixtures/svelte/NestedTips.svelte';
-import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
-import RouterLink from '@tests/fixtures/svelte/RouterLink.svelte';
 import { textSnippet } from '@tests/fixtures/svelte/snippets';
 import { tap } from '@tests/fixtures/tap';
 import { render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
-import { createRawSnippet, type Component } from 'svelte';
+import { createRawSnippet } from 'svelte';
 import { describe, expect, it } from 'vitest';
 
 const held = () => screen.getByText(/^held /).textContent;
@@ -54,9 +52,10 @@ describe('Tooltip', () => {
     await userEvent.keyboard('{Escape}');
     await waitFor(() =>
       expect(
-        container.querySelector('[data-part="positioner"]'),
+        document.body.querySelector('[data-part="positioner"]'),
       ).toHaveAttribute('hidden'),
     );
+    expect(container.querySelector('[data-part="positioner"]')).toBeNull();
   });
 
   it('takes a snippet as rich phrasing content', async () => {
@@ -66,26 +65,6 @@ describe('Tooltip', () => {
       children: textSnippet('word'),
     });
     expect(await screen.findByRole('tooltip')).toContainHTML('<em>very</em>');
-  });
-
-  it("renders a link trigger through the provider's link, else an a", () => {
-    renderWithProvider(
-      { link: RouterLink as Component<Record<string, unknown>> },
-      Tooltip,
-      { content: 'Hint', href: '/rule', children: textSnippet('rule') },
-    );
-    const link = screen.getByRole('link', { name: 'rule' });
-    expect(link).toHaveAttribute('href', '/rule');
-    expect(link).toHaveAttribute('data-router-link');
-    render(Tooltip, {
-      content: 'Hint',
-      href: '/plain',
-      children: textSnippet('plain'),
-    });
-    expect(screen.getByRole('link', { name: 'plain' })).toHaveAttribute(
-      'data-part',
-      'trigger',
-    );
   });
 
   it('renders an inline trigger that holds another trigger', async () => {

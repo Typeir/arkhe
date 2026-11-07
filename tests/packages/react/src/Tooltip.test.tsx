@@ -1,14 +1,10 @@
-import { ArkheProvider, Tooltip } from '@arkhe/react';
+import { Tooltip } from '@arkhe/react';
 import { tap } from '@tests/fixtures/tap';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useState, type AnchorHTMLAttributes } from 'react';
+import { useState } from 'react';
 import { renderToString } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
-
-const Routed = (props: AnchorHTMLAttributes<HTMLAnchorElement>) => (
-  <a {...props} data-routed='' />
-);
 
 describe('Tooltip', () => {
   it('shows its hint on hover and describes the trigger', async () => {
@@ -50,9 +46,10 @@ describe('Tooltip', () => {
     await userEvent.keyboard('{Escape}');
     await waitFor(() =>
       expect(
-        container.querySelector('[data-part="positioner"]'),
+        document.body.querySelector('[data-part="positioner"]'),
       ).toHaveAttribute('hidden'),
     );
+    expect(container.querySelector('[data-part="positioner"]')).toBeNull();
   });
 
   it('server-renders the trigger alone', () => {
@@ -68,20 +65,6 @@ describe('Tooltip', () => {
       </Tooltip>,
     );
     expect(await screen.findByRole('tooltip')).toContainHTML('<em>very</em>');
-  });
-
-  it("renders a link trigger through the provider's link", () => {
-    render(
-      <ArkheProvider link={Routed} effects={false}>
-        <Tooltip content='Hint' href='/rule'>
-          rule
-        </Tooltip>
-      </ArkheProvider>,
-    );
-    const link = screen.getByRole('link', { name: 'rule' });
-    expect(link).toHaveAttribute('href', '/rule');
-    expect(link).toHaveAttribute('data-routed');
-    expect(link).toHaveAttribute('data-part', 'trigger');
   });
 
   it('renders an inline trigger that holds another trigger', async () => {

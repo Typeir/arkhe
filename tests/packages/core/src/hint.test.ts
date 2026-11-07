@@ -112,7 +112,7 @@ describe('hintTriggerProps', () => {
     expect(setOpen).toHaveBeenCalledWith(false);
   });
 
-  it('opens a link trigger on the first tap and follows it on the second', () => {
+  it('never follows a link trigger on tap', () => {
     const link = trigger('a', 'hover-card');
     link.setAttribute('href', '#rule');
     const closed = setup(false);
@@ -123,8 +123,8 @@ describe('hintTriggerProps', () => {
     const opened = setup(true);
     const second = event('click', link, 'touch');
     opened.fire('onClick', second);
-    expect(second.prevented).toBe(false);
-    expect(opened.setOpen).not.toHaveBeenCalled();
+    expect(second.prevented).toBe(true);
+    expect(opened.setOpen).toHaveBeenCalledWith(false);
   });
 
   it('ignores a tap that started on a nested trigger', () => {
@@ -150,7 +150,7 @@ describe('watchOutsideTap', () => {
     const outside = document.createElement('p');
     document.body.append(outside);
     const close = vi.fn();
-    const stop = watchOutsideTap(document, ['own', 'missing'], close);
+    const stop = watchOutsideTap(document, () => ['own', 'missing'], close);
     touch(own);
     touch(outside, 'mouse');
     expect(close).not.toHaveBeenCalled();

@@ -3,8 +3,10 @@
 Renders a trigger that shows a short description on hover, keyboard focus
 and tap, on Zag's tooltip machine; a tap outside or Escape closes it. One is
 open at a time. The content is phrasing only, never links or controls (an
-ARIA tooltip); anything interactive belongs in a HoverCard. The body mounts
-on first open, so server markup holds the trigger alone.
+ARIA tooltip); anything interactive, a link trigger included, belongs in a
+HoverCard. The body mounts
+on first open, portalled into the environment's container, so server markup
+holds the trigger alone.
 -->
 <script lang="ts">
   import {
@@ -13,11 +15,16 @@ on first open, so server markup holds the trigger alone.
     type Placement,
   } from '@arkhe/core';
   import * as tooltip from '@zag-js/tooltip';
-  import { mergeProps, normalizeProps, useMachine } from '@zag-js/svelte';
+  import {
+    mergeProps,
+    normalizeProps,
+    portal,
+    useMachine,
+  } from '@zag-js/svelte';
   import { untrack, type Snippet } from 'svelte';
   import type { HTMLAttributes } from 'svelte/elements';
   import { useArkheEnvironment } from './environment.js';
-  import { useHint } from './hint.svelte.js';
+  import { useHint, useHintNode } from './hint.svelte.js';
   import HintTrigger from './HintTrigger.svelte';
 
   /**
@@ -26,7 +33,6 @@ on first open, so server markup holds the trigger alone.
    * @interface Props
    * @property {string | Snippet} content - Description; non-interactive phrasing content.
    * @property {Snippet} children - Trigger content.
-   * @property {string} [href] - Makes the trigger the provider's link to this address.
    * @property {boolean} [inline] - Makes the trigger inline text with a tab stop; it may hold other triggers.
    * @property {boolean} [open] - Open state; bindable. A function binding vetoes.
    * @property {boolean} [defaultOpen] - First open state when uncontrolled.
@@ -38,7 +44,6 @@ on first open, so server markup holds the trigger alone.
   interface Props {
     content: string | Snippet;
     children: Snippet;
-    href?: string;
     inline?: boolean;
     open?: boolean;
     defaultOpen?: boolean;
@@ -51,7 +56,6 @@ on first open, so server markup holds the trigger alone.
   let {
     content,
     children,
-    href,
     inline,
     open = $bindable(),
     defaultOpen,
@@ -62,6 +66,7 @@ on first open, so server markup holds the trigger alone.
   }: Props = $props();
   const id = $props.id();
   const env = useArkheEnvironment();
+  const node = useHintNode();
   const initial = untrack(() => defaultOpen ?? false);
   const shown = $derived(open ?? initial);
   const change = (next: boolean) => {
@@ -73,9 +78,10 @@ on first open, so server markup holds the trigger alone.
     ...floatingMachineProps({
       id,
       open: shown,
-      onOpenChange: change,
+      onOpenChange: (next: boolean) => {
+        if (node.request(next)) change(next);
+      },
       placement,
-      strategy: 'fixed',
       getRootNode: env().getRootNode,
     }),
     openDelay,
@@ -88,14 +94,22 @@ on first open, so server markup holds the trigger alone.
     trigger: api.getTriggerProps() as HTMLAttributes<HTMLElement>,
     positionerId: api.getPositionerProps().id ?? '',
     getRootNode: env().getRootNode,
+    node,
+    leaving: () => service.state.matches('closing'),
   }));
 </script>
 
 <span class={ARKHE_CLASS} data-scope="tooltip" data-part="root"
-  ><HintTrigger attrs={hint.trigger} {href} {inline}
-    >{@render children()}</HintTrigger
-  >{#if hint.mounted}<span
-      {...mergeProps(api.getPositionerProps(), { hidden: !api.open })}>
-      <span {...api.getContentProps()}
-        >{#if typeof content === 'string'}{content}{:else}{@render content()}{/if}</span>
-    </span>{/if}</span>
+  ><HintTrigger attrs={hint.trigger} {inline}>{@render children()}</HintTrigger
+  >{#if hint.mounted}<div
+      class={ARKHE_CLASS}
+      use:portal={{
+        container: env().container(),
+        getRootNode: env().getRootNode,
+      }}>
+      <div {...mergeProps(api.getPositionerProps(), { hidden: !api.open })}>
+        <div {...api.getContentProps()}>
+          {#if typeof content === 'string'}{content}{:else}{@render content()}{/if}
+        </div>
+      </div>
+    </div>{/if}</span>
