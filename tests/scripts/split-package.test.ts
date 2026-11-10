@@ -20,7 +20,7 @@ describe('pinCore', () => {
   it("points a port's core dependency at the core repo's version tag", () => {
     const pkg = { dependencies: { '@arkhe/core': '0.1.0', react: '19.3.1' } };
     expect(pinCore(pkg, '0.1.0').dependencies).toEqual({
-      '@arkhe/core': 'github:typeir/arkhe-core#v0.1.0',
+      '@arkhe/core': 'github:Typeir/arkhe-core#v0.1.0',
       react: '19.3.1',
     });
   });

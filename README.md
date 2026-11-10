@@ -4,15 +4,15 @@
 
 | Package         | Mirror                                                        |
 | --------------- | ------------------------------------------------------------- |
-| `@arkhe/core`   | [typeir/arkhe-core](https://github.com/typeir/arkhe-core)     |
-| `@arkhe/react`  | [typeir/arkhe-react](https://github.com/typeir/arkhe-react)   |
-| `@arkhe/svelte` | [typeir/arkhe-svelte](https://github.com/typeir/arkhe-svelte) |
+| `@arkhe/core`   | [Typeir/arkhe-core](https://github.com/Typeir/arkhe-core)     |
+| `@arkhe/react`  | [Typeir/arkhe-react](https://github.com/Typeir/arkhe-react)   |
+| `@arkhe/svelte` | [Typeir/arkhe-svelte](https://github.com/Typeir/arkhe-svelte) |
 
 ## Install
 
 ```bash
-npm install github:typeir/arkhe-react#v0.1.0
-npm install github:typeir/arkhe-svelte#v0.1.0
+npm install github:Typeir/arkhe-react#v0.2.0
+npm install github:Typeir/arkhe-svelte#v0.2.0
 ```
 
 ## Use

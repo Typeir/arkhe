@@ -1,6 +1,6 @@
 # @arkhe/react
 
-[typeir/arkhe](https://github.com/typeir/arkhe)
+[Typeir/arkhe](https://github.com/Typeir/arkhe)
 
 ## Use
 

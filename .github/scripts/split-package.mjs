@@ -42,7 +42,7 @@ export const PACKAGES = ['core', 'react', 'svelte'];
  * @constant OWNER
  * @type {string}
  */
-export const OWNER = 'typeir';
+export const OWNER = 'Typeir';
 
 /**
  * Points a port manifest's `@arkhe/core` at the core release repo's tag for
