@@ -6,10 +6,10 @@ binding whose setter ignores every change.
 -->
 <script lang="ts">
   import {
-    Combobox,
     HoverCard,
     Modal,
     Popover,
+    Select,
     Tabs,
     Tooltip,
   } from '@arkhe/svelte';
@@ -19,11 +19,18 @@ binding whose setter ignores every change.
    * Props of BoundState.
    *
    * @interface Props
-   * @property {'tabs' | 'modal' | 'popover' | 'combobox' | 'tooltip' | 'hover-card'} kind - Component under test.
+   * @property {'tabs' | 'modal' | 'popover' | 'select' | 'search-select' | 'tooltip' | 'hover-card'} kind - Component under test.
    * @property {boolean} [refuse] - Vetoes every change through a function binding.
    */
   interface Props {
-    kind: 'tabs' | 'modal' | 'popover' | 'combobox' | 'tooltip' | 'hover-card';
+    kind:
+      | 'tabs'
+      | 'modal'
+      | 'popover'
+      | 'select'
+      | 'search-select'
+      | 'tooltip'
+      | 'hover-card';
     refuse?: boolean;
   }
 
@@ -68,9 +75,11 @@ binding whose setter ignores every change.
     charge
     {#snippet content()}Body{/snippet}
   </HoverCard>
+{:else if kind === 'select'}
+  <Select label="Spell" {items} bind:value={() => pick, setPick} />
 {:else}
-  <Combobox label="Spell" {items} bind:value={() => pick, setPick} />
+  <Select label="Spell" {items} searchable bind:value={() => pick, setPick} />
 {/if}
 <pre>held {String(
-    kind === 'tabs' ? tab : kind === 'combobox' ? pick : open,
+    kind === 'tabs' ? tab : kind.endsWith('select') ? pick : open,
   )}</pre>

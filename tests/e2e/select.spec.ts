@@ -4,7 +4,7 @@ const TARGETS = ['react', 'svelte'] as const;
 const BOXES = ['Spell', 'Learn spell', 'Search'] as const;
 
 for (const target of TARGETS) {
-  test.describe(`${target} combobox`, () => {
+  test.describe(`${target} select family`, () => {
     test.beforeEach(async ({ page }) => {
       await page.goto(`targets/${target}/`);
     });
@@ -51,6 +51,27 @@ for (const target of TARGETS) {
       await page.keyboard.press('Tab');
       await expect(input).toHaveValue('Goblin');
       await expect(input).toBeFocused();
+    });
+
+    test('plain select: keys choose, the list is as wide as the button', async ({
+      page,
+    }) => {
+      const trigger = page.getByRole('combobox', {
+        name: 'School',
+        exact: true,
+      });
+      await trigger.focus();
+      await page.keyboard.press('Enter');
+      const list = page.getByRole('listbox');
+      await expect(list).toBeVisible();
+      const button = await trigger.boundingBox();
+      const box = await list.boundingBox();
+      expect(box?.width ?? 0).toBeGreaterThanOrEqual((button?.width ?? 0) - 1);
+      await page.keyboard.press('ArrowDown');
+      await page.keyboard.press('Enter');
+      await expect(trigger).toHaveText('Divination');
+      await expect(page.getByText('School: divination')).toBeVisible();
+      await expect(trigger).toBeFocused();
     });
 
     test('the list is at least as wide as the input', async ({ page }) => {

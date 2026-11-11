@@ -20,9 +20,13 @@ export {
   useArkheEnvironment,
   type ArkheEnvironmentProps,
 } from './ArkheEnvironment.js';
-export { Button, type ButtonProps, type ButtonVariant } from './Button.js';
+export {
+  Button,
+  type ButtonProps,
+  type ButtonSize,
+  type ButtonVariant,
+} from './Button.js';
 export { Chip, type ChipProps, type ChipTone } from './Chip.js';
-export { Combobox, type ComboboxProps } from './Combobox.js';
 export { Field, type FieldProps } from './Field.js';
 export { HoverCard, type HoverCardProps } from './HoverCard.js';
 export { Icon, type IconProps } from './Icon.js';
@@ -30,8 +34,11 @@ export { LUCIDE_ICONS } from './lucideIcons.js';
 export { Menu, type MenuProps } from './Menu.js';
 export { Modal, type ModalProps } from './Modal.js';
 export { NumericInput, type NumericInputProps } from './NumericInput.js';
+export { Picker, type PickerProps } from './Picker.js';
 export { Popover, type PopoverProps } from './Popover.js';
 export { Progress, type ProgressProps } from './Progress.js';
+export { Search, type SearchProps } from './Search.js';
+export { Select, type SelectProps } from './Select.js';
 export {
   Skeleton,
   SkeletonGroup,

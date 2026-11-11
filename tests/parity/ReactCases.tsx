@@ -12,14 +12,15 @@ import {
   ArkheProvider,
   Button,
   Chip,
-  Combobox,
   Field,
   Icon,
   Menu,
   Modal,
   NumericInput,
+  Picker,
   Popover,
   Progress,
+  Select,
   Skeleton,
   SkeletonGroup,
   Status,
@@ -54,6 +55,10 @@ const Buttons = (): JSX.Element => {
       </Button>
       <Button icon='x' label='Close' />
       <Button icon='plus' label='Add' shape='rhombus' />
+      <Button icon='x' label='Shut' size='xl' />
+      <Button icon='plus' shape='rhombus' size='s'>
+        Add spell
+      </Button>
       <Button pressed={pressed} onClick={() => setPressed(!pressed)}>
         Toggle
       </Button>
@@ -203,7 +208,7 @@ const SCENES: Readonly<Record<string, () => ReactNode>> = {
     <>
       <Progress value={5} max={10} label='Budget' markers={[2, 2]} />
       <Tabs items={TWIN_TABS} label='Sheet' panels={TAB_TEXT} />
-      <Combobox label='Spell' items={TWIN_OPTIONS} />
+      <Select label='Spell' items={TWIN_OPTIONS} searchable />
     </>
   ),
   modal: () => (
@@ -222,7 +227,13 @@ const SCENES: Readonly<Record<string, () => ReactNode>> = {
   menu: () => (
     <Menu trigger='Actions' items={MENU_ITEMS} onSelect={() => undefined} />
   ),
-  combobox: () => <Combobox label='Spell' items={COMBO_ITEMS} />,
+  select: () => <Select label='Spell' items={COMBO_ITEMS} placeholder='Any' />,
+  'select-searchable': () => (
+    <Select label='Spell' items={COMBO_ITEMS} searchable />
+  ),
+  picker: () => (
+    <Picker label='Spell' items={COMBO_ITEMS} onSelect={() => undefined} />
+  ),
 };
 
 /**

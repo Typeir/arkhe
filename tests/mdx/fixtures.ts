@@ -29,7 +29,7 @@ A creature that is [# kw:condition:Charmed #] or [# kw:condition:Frightened #] c
 `;
 
 /**
- * Creature sheet: keywords in a trait, then Popover, Menu and Combobox.
+ * Creature sheet: keywords in a trait, then Popover, Menu and Select.
  *
  * @constant SHEET_MDX
  * @type {string}
@@ -44,7 +44,7 @@ It wears <Popover trigger="Rings" title="Ring list">Only the rings it carries.</
 
 <Menu trigger="Actions" items={[{ value: 'rename', label: 'Rename' }, { separator: true }, { value: 'drop', label: 'Drop', danger: true }]} />
 
-<Combobox label="Ring" items={[{ value: 'ward', label: 'Ward' }, { value: 'blink', label: 'Blink' }]} />
+<Select label="Ring" items={[{ value: 'ward', label: 'Ward' }, { value: 'blink', label: 'Blink' }]} />
 `;
 
 /**

@@ -1,10 +1,9 @@
 /**
- * @fileoverview Combobox: a text input that filters a list of options, on
- * Zag's combobox machine. Serves three jobs: a searchable select, a picker
- * that adds the chosen option elsewhere and empties itself, and a search box
- * whose host supplies results and takes free text on Enter.
+ * @fileoverview ComboboxField: a text input that filters a list of options,
+ * on Zag's combobox machine. Not exported: it is the body of the searchable
+ * Select, of Picker and of Search.
  *
- * @module packages/react/src/Combobox
+ * @module packages/react/src/ComboboxField
  * @version 1.0.0
  * @author Typeir
  * @since 0.1.0
@@ -38,9 +37,9 @@ import { useHydrated } from './useHydrated.js';
 import { usePortalContainer } from './usePortalContainer.js';
 
 /**
- * Props of Combobox.
+ * Props of ComboboxField.
  *
- * @interface ComboboxProps
+ * @interface ComboboxFieldProps
  * @template {ComboboxOption} T
  * @property {string} label - Visible label.
  * @property {readonly T[]} items - Options; a repeated value is dropped.
@@ -58,7 +57,7 @@ import { usePortalContainer } from './usePortalContainer.js';
  * @property {boolean} [disabled] - Blocks input.
  * @property {Placement} [placement] - Side of the list. Defaults to `bottom-start`.
  */
-export interface ComboboxProps<T extends ComboboxOption> {
+export interface ComboboxFieldProps<T extends ComboboxOption> {
   readonly label: string;
   readonly items: readonly T[];
   readonly placeholder?: string;
@@ -79,18 +78,22 @@ export interface ComboboxProps<T extends ComboboxOption> {
 /**
  * Renders the default option body: label, then a muted description.
  *
- * @function defaultItem
+ * @function optionBody
  * @param {ComboboxOption} item - Option.
+ * @param {'combobox' | 'select'} scope - Zag scope of the list.
  * @returns {ReactNode} Body.
  */
-function defaultItem(item: ComboboxOption): ReactNode {
+export function optionBody(
+  item: ComboboxOption,
+  scope: 'combobox' | 'select',
+): ReactNode {
   return (
     <>
-      <span data-scope='combobox' data-part='item-label'>
+      <span data-scope={scope} data-part='item-label'>
         {item.label}
       </span>
       {item.description ? (
-        <span data-scope='combobox' data-part='item-description'>
+        <span data-scope={scope} data-part='item-description'>
           {item.description}
         </span>
       ) : null}
@@ -102,13 +105,15 @@ function defaultItem(item: ComboboxOption): ReactNode {
  * Renders a labelled combobox and its portalled option list.
  *
  * @component
- * @param {ComboboxProps<T>} props - Label, options, selection, search hooks.
+ * @param {ComboboxFieldProps<T>} props - Label, options, selection, search hooks.
  * @returns {JSX.Element} Combobox.
  */
-export const Combobox = <T extends ComboboxOption>(
-  props: ComboboxProps<T>,
+export const ComboboxField = <T extends ComboboxOption>(
+  props: ComboboxFieldProps<T>,
 ): JSX.Element => {
-  const { label, items, filter, loading, renderItem = defaultItem } = props;
+  const { label, items, filter, loading } = props;
+  const renderItem =
+    props.renderItem ?? ((item: T) => optionBody(item, 'combobox'));
   const { labels, locale } = useArkhe();
   const env = useArkheEnvironment();
   const container = usePortalContainer();

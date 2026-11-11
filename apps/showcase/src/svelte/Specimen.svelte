@@ -23,6 +23,7 @@ Svelte specimen: every Arkhé component with the shared specimen data.
     type NumericValue,
   } from '@arkhe/svelte';
   import {
+    SPECIMEN_BUTTON_SIZES,
     SPECIMEN_CHIPS,
     SPECIMEN_ICONS,
     SPECIMEN_MENU,
@@ -35,7 +36,7 @@ Svelte specimen: every Arkhé component with the shared specimen data.
     loadSpecimenCard,
     nameReadout,
   } from '../specimen';
-  import ComboboxSection from './ComboboxSection.svelte';
+  import SelectSection from './SelectSection.svelte';
   import SkeletonSection from './SkeletonSection.svelte';
 
   let pressed = $state(false);
@@ -61,6 +62,10 @@ Svelte specimen: every Arkhé component with the shared specimen data.
       <Button icon="x" label="Close" />
       <Button icon="plus" label="Add" shape="rhombus" />
       <Button icon="x" label="Remove" shape="rhombus" variant="danger" />
+      {#each SPECIMEN_BUTTON_SIZES as size (size)}
+        <Button icon="x" label={`Close ${size}`} {size} />
+      {/each}
+      <Button icon="plus" shape="rhombus" size="s">Add spell</Button>
       <Button {pressed} onclick={() => (pressed = !pressed)}>Toggle</Button>
       <Button disabled>Disabled</Button>
       <Button href="#buttons">Link</Button>
@@ -219,5 +224,5 @@ Svelte specimen: every Arkhé component with the shared specimen data.
     </div>
   </section>
 
-  <ComboboxSection />
+  <SelectSection />
 </main>

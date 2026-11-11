@@ -76,14 +76,14 @@ export async function shoot() {
     await page.waitForTimeout(500);
     await page.screenshot({ path: join(OUT, '6-react-menu.png') });
     await page.goto(
-      `http://127.0.0.1:${PORT}/targets/svelte/?shot=combobox#combobox`,
+      `http://127.0.0.1:${PORT}/targets/svelte/?shot=select#select`,
     );
     const search = page.getByRole('combobox', { name: 'Search', exact: true });
     await search.click();
     await search.pressSequentially('r');
     await page.keyboard.press('ArrowDown');
     await page.waitForTimeout(400);
-    await page.screenshot({ path: join(OUT, '8-svelte-combobox.png') });
+    await page.screenshot({ path: join(OUT, '8-svelte-select.png') });
   } finally {
     await browser.close();
     await server.close();

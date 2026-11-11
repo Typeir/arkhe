@@ -17,7 +17,8 @@ anchor that keeps its text but loses its address, click and tab stop.
    * @property {'default' | 'primary' | 'ghost' | 'danger'} [variant] - Visual weight. Defaults to `default`.
    * @property {string} [icon] - Lucide name of a leading icon.
    * @property {string} [label] - Accessible name; required for icon-only buttons.
-   * @property {'square' | 'rhombus'} [shape] - Icon-only outline. Defaults to `square`.
+   * @property {'square' | 'rhombus'} [shape] - Outline. Icon-only: the box. Labelled: `rhombus` is a ghost label with the icon in a rhombus. Defaults to `square`.
+   * @property {'xs' | 's' | 'm' | 'l' | 'xl'} [size] - Glyph scale; an icon-only box scales with it. Unset keeps the text-sized glyph.
    * @property {boolean} [pressed] - Toggle state; sets `aria-pressed`.
    * @property {string} [href] - Renders a link to this address.
    * @property {boolean} [disabled] - Blocks interaction.
@@ -30,6 +31,7 @@ anchor that keeps its text but loses its address, click and tab stop.
     icon?: string;
     label?: string;
     shape?: 'square' | 'rhombus';
+    size?: 'xs' | 's' | 'm' | 'l' | 'xl';
     pressed?: boolean;
     href?: string;
     disabled?: boolean;
@@ -43,6 +45,7 @@ anchor that keeps its text but loses its address, click and tab stop.
     icon,
     label,
     shape,
+    size,
     pressed,
     href,
     disabled,
@@ -57,6 +60,7 @@ anchor that keeps its text but loses its address, click and tab stop.
     'data-variant': variant,
     'data-icon-only': flag(children === undefined),
     'data-shape': shape,
+    'data-size': size,
     'aria-label': label,
     'aria-pressed': pressed,
     onclick,

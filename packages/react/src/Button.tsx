@@ -23,6 +23,13 @@ import { Icon } from './Icon.js';
 export type ButtonVariant = 'default' | 'primary' | 'ghost' | 'danger';
 
 /**
+ * Glyph scale of a button; an icon-only box scales with it.
+ *
+ * @typedef {'xs' | 's' | 'm' | 'l' | 'xl'} ButtonSize
+ */
+export type ButtonSize = 'xs' | 's' | 'm' | 'l' | 'xl';
+
+/**
  * Props of Button.
  *
  * @interface ButtonProps
@@ -30,7 +37,8 @@ export type ButtonVariant = 'default' | 'primary' | 'ghost' | 'danger';
  * @property {ButtonVariant} [variant] - Visual weight. Defaults to `default`.
  * @property {string} [icon] - Lucide name of a leading icon.
  * @property {string} [label] - Accessible name; required for icon-only buttons.
- * @property {'square' | 'rhombus'} [shape] - Icon-only outline. Defaults to `square`.
+ * @property {'square' | 'rhombus'} [shape] - Outline. Icon-only: the box. Labelled: `rhombus` is a ghost label with the icon in a rhombus. Defaults to `square`.
+ * @property {ButtonSize} [size] - Glyph scale; an icon-only box scales with it. Unset keeps the text-sized glyph.
  * @property {boolean} [pressed] - Toggle state; sets `aria-pressed`.
  * @property {string} [href] - Renders a link to this address.
  * @property {boolean} [disabled] - Blocks interaction.
@@ -43,6 +51,7 @@ export interface ButtonProps {
   readonly icon?: string;
   readonly label?: string;
   readonly shape?: 'square' | 'rhombus';
+  readonly size?: ButtonSize;
   readonly pressed?: boolean;
   readonly href?: string;
   readonly disabled?: boolean;
@@ -60,7 +69,8 @@ export interface ButtonProps {
  * @param {ButtonVariant} [props.variant] - Visual weight.
  * @param {string} [props.icon] - Lucide name of a leading icon.
  * @param {string} [props.label] - Accessible name.
- * @param {'square' | 'rhombus'} [props.shape] - Icon-only outline.
+ * @param {'square' | 'rhombus'} [props.shape] - Outline.
+ * @param {ButtonSize} [props.size] - Glyph scale.
  * @param {boolean} [props.pressed] - Toggle state.
  * @param {string} [props.href] - Link address.
  * @param {boolean} [props.disabled] - Blocks interaction.
@@ -74,6 +84,7 @@ export const Button = ({
   icon,
   label,
   shape,
+  size,
   pressed,
   href,
   disabled,
@@ -87,6 +98,7 @@ export const Button = ({
     'data-variant': variant,
     'data-icon-only': flag(children === undefined),
     'data-shape': shape,
+    'data-size': size,
     'aria-label': label,
     'aria-pressed': pressed,
     onClick,

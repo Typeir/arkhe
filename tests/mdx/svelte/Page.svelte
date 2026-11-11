@@ -7,9 +7,9 @@ paragraph of a hundred triggers.
 <script lang="ts">
   import {
     ArkheProvider,
-    Combobox,
     Menu,
     Popover,
+    Select,
     Tooltip,
     type LinkComponent,
   } from '@arkhe/svelte';
@@ -68,7 +68,7 @@ paragraph of a hundred triggers.
           { value: 'drop', label: 'Drop', danger: true },
         ]}
         onSelect={() => undefined} />
-      <Combobox
+      <Select
         label="Ring"
         items={[
           { value: 'ward', label: 'Ward' },

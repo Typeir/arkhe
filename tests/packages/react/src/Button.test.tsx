@@ -39,6 +39,25 @@ describe('Button', () => {
     );
   });
 
+  it('takes a size, and a rhombus around the icon of a labelled button', () => {
+    render(
+      <>
+        <Button icon='x' label='Close' size='xs' />
+        <Button icon='plus' shape='rhombus' size='l'>
+          Add
+        </Button>
+      </>,
+    );
+    expect(screen.getByRole('button', { name: 'Close' })).toHaveAttribute(
+      'data-size',
+      'xs',
+    );
+    const labelled = screen.getByRole('button', { name: 'Add' });
+    expect(labelled).toHaveAttribute('data-shape', 'rhombus');
+    expect(labelled).toHaveAttribute('data-size', 'l');
+    expect(labelled).not.toHaveAttribute('data-icon-only');
+  });
+
   it('reports toggle state', () => {
     render(<Button pressed>Bold</Button>);
     expect(screen.getByRole('button', { name: 'Bold' })).toHaveAttribute(

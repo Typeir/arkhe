@@ -2,13 +2,12 @@
 @component
 Renders a labelled text input that filters a list of options, on Zag's
 combobox machine, with the list portalled into the environment's container.
-Serves three jobs: a searchable select, a picker that adds the chosen option
-elsewhere and empties itself, and a search box whose host supplies results
-and takes free text on Enter. Tab completes the highlighted option. The list
-filters once Svelte has flushed the keystroke: a list change inside it makes
-Zag move the caret to the end of the text. The filter still lands before the
-next key, so Enter never acts on a stale list. The list portals in once
-mounted on the client, so server markup holds none.
+Not exported: it is the body of the searchable Select, of Picker and of
+Search. Tab completes the highlighted option. The list filters, and the host
+hears the new text, once Svelte has flushed the keystroke: a list change
+inside it makes Zag move the caret to the end of the text. Both still land
+before the next key, so Enter never acts on a stale list. The list portals in
+once mounted on the client, so server markup holds none.
 -->
 <script lang="ts" generics="T extends ComboboxOption">
   import {
@@ -40,7 +39,7 @@ mounted on the client, so server markup holds none.
   import Status from './Status.svelte';
 
   /**
-   * Props of Combobox.
+   * Props of ComboboxField.
    *
    * @interface Props
    * @property {string} label - Visible label.
@@ -104,8 +103,10 @@ mounted on the client, so server markup holds none.
     collection,
     onInputValueChange: (details: combobox.InputValueChangeDetails) => {
       const next = queryAfterChange(details);
-      void tick().then(() => (query = next));
-      props.onInputChange?.(details.inputValue);
+      void tick().then(() => {
+        query = next;
+        props.onInputChange?.(details.inputValue);
+      });
     },
     onValueChange: (details: combobox.ValueChangeDetails<T>) => {
       const next = details.value[0] ?? null;

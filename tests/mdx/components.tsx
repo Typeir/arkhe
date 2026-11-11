@@ -2,8 +2,8 @@
  * @fileoverview The MDX components map, as thin wrappers like the app's:
  * Unit is an inline Tooltip trigger with rich content, Keyword a link
  * HoverCard whose body loads on first open, the MDX Tooltip takes a
- * trigger span and a content span, and Popover, Menu and Combobox take
- * MDX literals.
+ * trigger span and a content span, and Popover, Menu and Select take MDX
+ * literals.
  *
  * @module tests/mdx/components
  * @version 1.0.0
@@ -12,10 +12,10 @@
  */
 
 import {
-  Combobox,
   HoverCard,
   Menu,
   Popover,
+  Select,
   Tooltip,
   type ComboboxOption,
   type MenuEntry,
@@ -143,19 +143,19 @@ export const MdxMenu = ({
 );
 
 /**
- * Combobox from MDX literals.
+ * Select from MDX literals.
  *
  * @component
  * @param {{ label: string; items: readonly ComboboxOption[] }} props - Label and options.
- * @returns {JSX.Element} Combobox.
+ * @returns {JSX.Element} Select.
  */
-export const MdxCombobox = ({
+export const MdxSelect = ({
   label,
   items,
 }: {
   label: string;
   items: readonly ComboboxOption[];
-}): JSX.Element => <Combobox label={label} items={items} />;
+}): JSX.Element => <Select label={label} items={items} />;
 
 /**
  * The components map handed to the MDX content.
@@ -169,5 +169,5 @@ export const MDX_COMPONENTS: MDXComponents = {
   Tooltip: MdxTooltip,
   Popover,
   Menu: MdxMenu,
-  Combobox: MdxCombobox,
+  Select: MdxSelect,
 };

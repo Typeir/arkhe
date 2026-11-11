@@ -8,15 +8,16 @@ Svelte side of the parity scenes. Each scene must match its twin in
     ArkheProvider,
     Button,
     Chip,
-    Combobox,
     Field,
     HoverCard,
     Icon,
     Menu,
     Modal,
     NumericInput,
+    Picker,
     Popover,
     Progress,
+    Select,
     Skeleton,
     SkeletonGroup,
     Status,
@@ -69,6 +70,8 @@ Svelte side of the parity scenes. Each scene must match its twin in
   <Button variant="danger" disabled>Danger</Button>
   <Button icon="x" label="Close" />
   <Button icon="plus" label="Add" shape="rhombus" />
+  <Button icon="x" label="Shut" size="xl" />
+  <Button icon="plus" shape="rhombus" size="s">Add spell</Button>
   <Button {pressed} onclick={() => (pressed = !pressed)}>Toggle</Button>
   <Button href="#a">Link</Button>
   <Button href="#b" disabled>Dead link</Button>
@@ -148,7 +151,7 @@ Svelte side of the parity scenes. Each scene must match its twin in
   <Tabs items={TWIN_TABS} label="Sheet">
     {#snippet panel(key)}{TAB_TEXT[key]}{/snippet}
   </Tabs>
-  <Combobox label="Spell" items={TWIN_OPTIONS} />
+  <Select label="Spell" items={TWIN_OPTIONS} searchable />
 {:else if name === 'modal'}
   <Modal title="Rest" description="Recover." trigger="Open">Body</Modal>
 {:else if name === 'modal-description'}
@@ -186,8 +189,12 @@ Svelte side of the parity scenes. Each scene must match its twin in
   <Popover trigger="Sort">Body</Popover>
 {:else if name === 'menu'}
   <Menu trigger="Actions" items={MENU_ITEMS} onSelect={() => undefined} />
-{:else if name === 'combobox'}
-  <Combobox label="Spell" items={COMBO_ITEMS} />
+{:else if name === 'select'}
+  <Select label="Spell" items={COMBO_ITEMS} placeholder="Any" />
+{:else if name === 'select-searchable'}
+  <Select label="Spell" items={COMBO_ITEMS} searchable />
+{:else if name === 'picker'}
+  <Picker label="Spell" items={COMBO_ITEMS} onSelect={() => undefined} />
 {:else}
   missing scene {name}
 {/if}

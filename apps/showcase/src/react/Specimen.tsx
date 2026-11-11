@@ -30,6 +30,7 @@ import {
 } from '@arkhe/react';
 import { useState, type JSX, type ReactNode } from 'react';
 import {
+  SPECIMEN_BUTTON_SIZES,
   SPECIMEN_CHIPS,
   SPECIMEN_ICONS,
   SPECIMEN_MENU,
@@ -42,7 +43,7 @@ import {
   loadSpecimenCard,
   nameReadout,
 } from '../specimen';
-import { ComboboxSection } from './ComboboxSection';
+import { SelectSection } from './SelectSection';
 import { SkeletonSection } from './SkeletonSection';
 
 const Section = ({
@@ -82,6 +83,12 @@ export const Specimen = (): JSX.Element => {
         <Button icon='x' label='Close' />
         <Button icon='plus' label='Add' shape='rhombus' />
         <Button icon='x' label='Remove' shape='rhombus' variant='danger' />
+        {SPECIMEN_BUTTON_SIZES.map((size) => (
+          <Button key={size} icon='x' label={`Close ${size}`} size={size} />
+        ))}
+        <Button icon='plus' shape='rhombus' size='s'>
+          Add spell
+        </Button>
         <Button pressed={pressed} onClick={() => setPressed(!pressed)}>
           Toggle
         </Button>
@@ -229,7 +236,7 @@ export const Specimen = (): JSX.Element => {
         <Menu trigger='Actions' items={SPECIMEN_MENU} onSelect={setPicked} />
         <output>Picked: {picked}</output>
       </Section>
-      <ComboboxSection />
+      <SelectSection />
     </main>
   );
 };

@@ -126,7 +126,8 @@ body {
     }
 
     > [data-scope='number-input'],
-    > [data-scope='combobox'] {
+    > [data-scope='combobox'],
+    > [data-scope='select'] {
       flex: 1 1 10rem;
     }
 

@@ -16,6 +16,14 @@ import {
 } from '@arkhe/core';
 
 /**
+ * Button sizes shown as a row of icon-only buttons, smallest first.
+ *
+ * @constant SPECIMEN_BUTTON_SIZES
+ * @type {readonly ('xs' | 's' | 'm' | 'l' | 'xl')[]}
+ */
+export const SPECIMEN_BUTTON_SIZES = ['xs', 's', 'm', 'l', 'xl'] as const;
+
+/**
  * Chips shown in the removable list, in order.
  *
  * @constant SPECIMEN_CHIPS
@@ -83,11 +91,11 @@ export const SPECIMEN_SECTIONS = {
   tabs: 'Tabs',
   modal: 'Modal',
   floating: 'Floating',
-  combobox: 'Combobox',
+  select: 'Select',
 } as const;
 
 /**
- * Spells offered by the specimen comboboxes.
+ * Spells offered by the specimen selects and picker.
  *
  * @constant SPECIMEN_SPELLS
  * @type {readonly ComboboxOption[]}
@@ -107,6 +115,19 @@ export const SPECIMEN_SPELLS: readonly ComboboxOption[] = [
     description: 'Locked',
     disabled: true,
   },
+];
+
+/**
+ * Schools offered by the specimen plain select, in two groups.
+ *
+ * @constant SPECIMEN_SCHOOLS
+ * @type {readonly ComboboxOption[]}
+ */
+export const SPECIMEN_SCHOOLS: readonly ComboboxOption[] = [
+  { value: 'abjuration', label: 'Abjuration', group: 'Guarding' },
+  { value: 'divination', label: 'Divination', group: 'Guarding' },
+  { value: 'evocation', label: 'Evocation', group: 'Shaping' },
+  { value: 'illusion', label: 'Illusion', group: 'Shaping' },
 ];
 
 /**

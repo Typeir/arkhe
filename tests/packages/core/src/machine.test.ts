@@ -1,5 +1,13 @@
-import { definedOnly, uniqueByValue } from '@arkhe/core';
+import { definedOnly, uniqueByValue, valueArray } from '@arkhe/core';
 import { describe, expect, it } from 'vitest';
+
+describe('valueArray', () => {
+  it('leaves undefined unset, makes null empty and wraps a value', () => {
+    expect(valueArray(undefined)).toBeUndefined();
+    expect(valueArray(null)).toEqual([]);
+    expect(valueArray('a')).toEqual(['a']);
+  });
+});
 
 describe('definedOnly', () => {
   it('drops undefined keys and keeps falsy values', () => {

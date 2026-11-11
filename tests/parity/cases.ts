@@ -192,7 +192,22 @@ export const PARITY_CASES: readonly ParityCase[] = [
   { name: 'popover-untitled', steps: [click('Sort')] },
   { name: 'menu', steps: [click('Actions'), press('{ArrowDown}')] },
   {
-    name: 'combobox',
+    name: 'select',
+    steps: [click('Spell', 'combobox'), press('{ArrowDown}'), press('{Enter}')],
+  },
+  {
+    name: 'select-searchable',
+    steps: [
+      click('Spell', 'combobox'),
+      {
+        label: 'type "fr"',
+        run: async () => enterText(screen.getByRole('combobox'), 'fr'),
+      },
+      press('{Enter}'),
+    ],
+  },
+  {
+    name: 'picker',
     steps: [
       click('Spell', 'combobox'),
       {

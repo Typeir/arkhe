@@ -28,6 +28,7 @@ describe('arkhe.css', () => {
       'popover',
       'menu',
       'combobox',
+      'select',
       'tooltip',
       'hover-card',
     ]) {
@@ -61,6 +62,40 @@ describe('arkhe.css', () => {
     expect(declarations('combobox', 'input', ':disabled')).toContain(
       'cursor: not-allowed',
     );
+  });
+
+  it('frames both select scopes alike and turns each open indicator', () => {
+    for (const scope of ['combobox', 'select']) {
+      expect(declarations(scope, 'control'), scope).toContain('display: flex');
+      expect(declarations(scope, 'content'), scope).toContain(
+        'min-width: var(--reference-width)',
+      );
+    }
+    expect(declarations('combobox', 'trigger', '[data-state=open]')).toContain(
+      'rotate: 180deg',
+    );
+    expect(declarations('select', 'indicator', '[data-state=open]')).toContain(
+      'rotate: 180deg',
+    );
+  });
+
+  it('scales the button glyph per size and keeps a labelled rhombus a ghost', () => {
+    for (const [size, edge] of [
+      ['xs', '0.625rem'],
+      ['m', '1rem'],
+      ['xl', '1.5rem'],
+    ]) {
+      expect(declarations('button', 'root', `[data-size=${size}]`)).toContain(
+        `--button-glyph: ${edge}`,
+      );
+    }
+    expect(
+      declarations(
+        'button',
+        'root',
+        '[data-shape=rhombus]:not([data-icon-only])',
+      ),
+    ).toMatch(/border-color: transparent;\s+background: transparent/);
   });
 
   it('lays out floating headers with logical properties', () => {

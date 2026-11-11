@@ -1,4 +1,4 @@
-import { Combobox } from '@arkhe/react';
+import { ComboboxField as Combobox } from '../../../../packages/react/src/ComboboxField';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderToString } from 'react-dom/server';
@@ -20,7 +20,7 @@ function enter(input: HTMLElement, text: string) {
 const names = () =>
   screen.getAllByRole('option').map((option) => option.textContent);
 
-describe('Combobox', () => {
+describe('ComboboxField', () => {
   it('opens on click and filters as you type, ignoring accents', async () => {
     render(<Combobox label='Spell' items={SPELLS} />);
     const input = screen.getByRole('combobox', { name: 'Spell' });

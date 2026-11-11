@@ -10,6 +10,7 @@
 import '@testing-library/jest-dom/vitest';
 import './quiet';
 import './resizeObserver';
+import './scrollTo';
 import { cleanup } from '@testing-library/svelte';
 import { afterEach } from 'vitest';
 
