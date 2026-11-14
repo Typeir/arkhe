@@ -111,3 +111,4 @@ Rulings are David's. Proposals are Claude's and stay marked until David rules. N
 | #   | Question                                                                        |
 | --- | ------------------------------------------------------------------------------- |
 | Q15 | Does Ikuisuus drop Tailwind as it adopts Arkhé? Deferred to the migration (Q19) |
+| P59 | Virtualization in core, fixed row pitch in rem as Ikuisuus's `VirtualList` (react-window v2, sidebar folders and search results): a framework-free range from scroll offset, pitch and overscan, rows carrying `aria-setsize` / `aria-posinset`. Search and Select render only the visible window and scroll Zag's highlight into it through `scrollToIndexFn`; a `VirtualList` export in both ports covers the sidebar. react-window is React-only, so it cannot be the shared answer | `Search`, `Select`, `VirtualList` |
