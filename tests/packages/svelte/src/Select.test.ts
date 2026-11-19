@@ -1,8 +1,9 @@
-import { Select } from '@arkhe/svelte';
+import { Picker, Search, Select } from '@arkhe/svelte';
+import { resetNarrow, setNarrow } from '@tests/fixtures/narrow';
 import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
-import { render, screen, waitFor } from '@testing-library/svelte';
+import { render, screen, waitFor, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const SPELLS = [
   { value: 'fireball', label: 'Fireball' },
@@ -46,4 +47,89 @@ describe('Select', () => {
       await waitFor(() => expect(held()).toBe(`held ${kept}`));
     },
   );
+
+  it('submits the searchable choice through a hidden input', () => {
+    const { container } = render(Select, {
+      label: 'Spell',
+      items: SPELLS,
+      searchable: true,
+      name: 'spell',
+      required: true,
+      defaultValue: 'frost',
+    });
+    const hidden = container.querySelector('input[type="hidden"]');
+    expect(hidden).toHaveAttribute('name', 'spell');
+    expect(hidden).toHaveValue('frost');
+    expect(screen.getByRole('combobox', { name: 'Spell' })).toBeRequired();
+  });
+
+  it('gives its hidden native select an autofill hint', () => {
+    const { container } = render(Select, {
+      label: 'Spell',
+      items: SPELLS,
+      name: 'spell',
+      autoComplete: 'off',
+    });
+    expect(container.querySelector('select')).toHaveAttribute(
+      'autocomplete',
+      'off',
+    );
+  });
+});
+
+describe('Select family at phone width', () => {
+  beforeEach(() => setNarrow(true));
+  afterEach(resetNarrow);
+
+  it('Select opens a sheet with a search box; choosing closes it and shows the choice', async () => {
+    const onValueChange = vi.fn();
+    render(Select, {
+      label: 'Spell',
+      items: SPELLS,
+      emptyLabel: 'Any',
+      onValueChange,
+    });
+    await userEvent.click(screen.getByRole('button', { name: 'Spell Any' }));
+    const sheet = await screen.findByRole('dialog', { name: 'Spell' });
+    const input = within(sheet).getByRole('combobox', { name: 'Spell' });
+    await userEvent.click(input);
+    expect(input).toHaveValue('');
+    await userEvent.type(input, 'fro');
+    await userEvent.click(
+      await within(sheet).findByRole('option', { name: 'Frost ray' }),
+    );
+    expect(onValueChange).toHaveBeenLastCalledWith('frost');
+    await waitFor(() => expect(sheet).not.toBeVisible());
+    expect(
+      screen.getByRole('button', { name: 'Spell Frost ray' }),
+    ).toBeInTheDocument();
+  });
+
+  it('Picker keeps its sheet open while choices are added', async () => {
+    const onSelect = vi.fn();
+    render(Picker, { label: 'Learn', items: SPELLS, onSelect });
+    await userEvent.click(screen.getByRole('button', { name: /Learn/ }));
+    const sheet = await screen.findByRole('dialog', { name: 'Learn' });
+    await userEvent.click(within(sheet).getByRole('combobox'));
+    await userEvent.click(
+      await within(sheet).findByRole('option', { name: 'Fireball' }),
+    );
+    expect(onSelect).toHaveBeenCalledWith(SPELLS[0]);
+    expect(sheet).toBeVisible();
+  });
+
+  it('Search closes its sheet on submit', async () => {
+    const onSubmit = vi.fn();
+    render(Search, {
+      label: 'Find',
+      items: SPELLS,
+      onInputChange: () => undefined,
+      onSubmit,
+    });
+    await userEvent.click(screen.getByRole('button', { name: /Find/ }));
+    const sheet = await screen.findByRole('dialog', { name: 'Find' });
+    await userEvent.type(within(sheet).getByRole('combobox'), 'ember{Enter}');
+    expect(onSubmit).toHaveBeenCalledWith('ember');
+    await waitFor(() => expect(sheet).not.toBeVisible());
+  });
 });

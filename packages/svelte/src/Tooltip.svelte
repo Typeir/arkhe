@@ -86,6 +86,7 @@ holds the trigger alone.
     }),
     openDelay,
     closeDelay,
+    interactive: true,
   }));
   const api = $derived(tooltip.connect(service, normalizeProps));
   const hint = useHint(() => ({

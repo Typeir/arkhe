@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/svelte';
+import { render, screen, waitFor, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import SelectSection from '../../../../../apps/showcase/src/svelte/SelectSection.svelte';
@@ -6,9 +6,11 @@ import SelectSection from '../../../../../apps/showcase/src/svelte/SelectSection
 describe('Svelte SelectSection', () => {
   it('shows the select family', () => {
     render(SelectSection);
-    for (const name of ['School', 'Spell', 'Learn spell', 'Search']) {
+    for (const name of ['School', 'Spell', 'Learn spell', 'Search', 'Rune']) {
       expect(screen.getByRole('combobox', { name })).toBeInTheDocument();
     }
+    const runes = screen.getByRole('list', { name: 'Runes' });
+    expect(within(runes).getAllByRole('listitem')).toHaveLength(8);
   });
 
   it('reports the chosen school', async () => {
@@ -32,14 +34,14 @@ describe('Svelte SelectSection', () => {
     expect(screen.getByText('Known: Ward')).toBeInTheDocument();
   });
 
-  it('filters search results here and reports searched text', async () => {
+  it('asks the search request and reports searched text', async () => {
     render(SelectSection);
     const input = screen.getByRole('combobox', { name: 'Search' });
     await userEvent.type(input, 'gob');
-    await waitFor(() =>
-      expect(screen.queryByRole('option', { name: /Ward/ })).toBeNull(),
-    );
-    expect(screen.getByRole('option', { name: /Goblin/ })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('option', { name: /Goblin/ }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: /Ward/ })).toBeNull();
     await userEvent.clear(input);
     await userEvent.type(input, 'ember{Enter}');
     expect(screen.getByText('Searched: ember')).toBeInTheDocument();

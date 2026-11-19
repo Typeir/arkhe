@@ -135,4 +135,15 @@ describe('Tooltip', () => {
     await waitFor(() => expect(screen.queryByRole('tooltip')).toBeNull());
     expect(report).toHaveBeenCalledWith(false);
   });
+
+  it('lets the pointer move onto the hint', async () => {
+    render(
+      <Tooltip content='Hint' openDelay={0}>
+        word
+      </Tooltip>,
+    );
+    await userEvent.hover(screen.getByRole('button', { name: 'word' }));
+    const hint = await screen.findByRole('tooltip');
+    expect(hint.style.pointerEvents).not.toBe('none');
+  });
 });

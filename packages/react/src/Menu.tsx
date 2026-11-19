@@ -14,6 +14,7 @@
 import {
   ARKHE_CLASS,
   entryKey,
+  flag,
   floatingMachineProps,
   isSeparator,
   type MenuEntry,
@@ -31,13 +32,15 @@ import { usePortalContainer } from './usePortalContainer.js';
  * Props of Menu.
  *
  * @interface MenuProps
- * @property {string} trigger - Text of the open button.
+ * @property {string} trigger - Text of the open button; its accessible name when `icon` is set.
+ * @property {string} [icon] - Lucide name; makes the open button icon-only.
  * @property {readonly MenuEntry[]} items - Actions and separators.
  * @property {(value: string) => void} onSelect - Called with the chosen action.
  * @property {Placement} [placement] - Side. Defaults to `bottom-start`.
  */
 export interface MenuProps {
   readonly trigger: string;
+  readonly icon?: string;
   readonly items: readonly MenuEntry[];
   readonly onSelect: (value: string) => void;
   readonly placement?: Placement;
@@ -52,6 +55,7 @@ export interface MenuProps {
  */
 export const Menu = ({
   trigger,
+  icon,
   items,
   onSelect,
   placement = 'bottom-start',
@@ -71,9 +75,19 @@ export const Menu = ({
   return (
     <>
       <button
-        {...mergeProps(api.getTriggerProps(), { className: ARKHE_CLASS })}>
-        {trigger}
-        <Icon name='chevron-down' />
+        {...mergeProps(api.getTriggerProps(), {
+          className: ARKHE_CLASS,
+          'aria-label': icon ? trigger : undefined,
+        })}
+        data-icon-only={flag(icon !== undefined)}>
+        {icon ? (
+          <Icon name={icon} />
+        ) : (
+          <>
+            {trigger}
+            <Icon name='chevron-down' />
+          </>
+        )}
       </button>
       {hydrated ? (
         <Portal container={container} getRootNode={env.getRootNode}>

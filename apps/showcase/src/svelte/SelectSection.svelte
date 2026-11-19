@@ -2,21 +2,21 @@
 @component
 Svelte specimen section for Select, Picker and Search: a plain grouped
 select, a searchable select, a picker that adds to a list, and a grouped
-search box that filters here and takes free text.
+search box that asks its request and takes free text, and two thousand runes
+as virtual rows: a select and a plain list.
 -->
 <script lang="ts">
-  import { filterOptions } from '@arkhe/core';
-  import { Picker, Search, Select } from '@arkhe/svelte';
+  import { Picker, Search, Select, VirtualList } from '@arkhe/svelte';
   import {
+    SPECIMEN_RUNES,
     SPECIMEN_SCHOOLS,
-    SPECIMEN_SEARCH,
     SPECIMEN_SECTIONS,
     SPECIMEN_SPELLS,
+    searchSpecimen,
   } from '../specimen';
 
   let school = $state<string | null>(null);
   let known = $state<readonly string[]>([]);
-  let query = $state('');
   let searched = $state('nothing yet');
 </script>
 
@@ -26,7 +26,7 @@ search box that filters here and takes free text.
     <Select
       label="School"
       items={SPECIMEN_SCHOOLS}
-      placeholder="Any school"
+      emptyLabel="Any school"
       bind:value={school} />
     <Select
       label="Spell"
@@ -42,10 +42,22 @@ search box that filters here and takes free text.
       }} />
     <Search
       label="Search"
-      items={filterOptions(SPECIMEN_SEARCH, query)}
+      search={searchSpecimen}
       placeholder="Search, Enter for all results"
-      onInputChange={(text) => (query = text)}
       onSubmit={(text) => (searched = text)} />
+    <Select
+      label="Rune"
+      items={SPECIMEN_RUNES}
+      placeholder="One of 2000"
+      rowPitch={2} />
+    <VirtualList
+      label="Runes"
+      items={SPECIMEN_RUNES}
+      rowPitch={2}
+      maxHeight="12rem"
+      getKey={(rune) => rune.value}>
+      {#snippet item(rune)}{rune.label}{/snippet}
+    </VirtualList>
     <output>School: {school ?? 'any'}</output>
     <output>Known: {known.join(', ') || 'none'}</output>
     <output>Searched: {searched}</output>

@@ -58,6 +58,25 @@ describe('Button', () => {
     expect(labelled).not.toHaveAttribute('data-icon-only');
   });
 
+  it('takes a tone, a dashed outline, an end icon and a plain shape', () => {
+    render(
+      <>
+        <Button icon='plus' iconSide='end' dashed tone='danger'>
+          Add
+        </Button>
+        <Button icon='x' label='Close' shape='plain' />
+      </>,
+    );
+    const add = screen.getByRole('button', { name: 'Add' });
+    expect(add).toHaveAttribute('data-icon-side', 'end');
+    expect(add).toHaveAttribute('data-dashed', '');
+    expect(add).toHaveAttribute('data-tone', 'danger');
+    expect(screen.getByRole('button', { name: 'Close' })).toHaveAttribute(
+      'data-shape',
+      'plain',
+    );
+  });
+
   it('reports toggle state', () => {
     render(<Button pressed>Bold</Button>);
     expect(screen.getByRole('button', { name: 'Bold' })).toHaveAttribute(
@@ -108,5 +127,15 @@ describe('Button', () => {
       'data-router',
       '',
     );
+  });
+
+  it('keeps its visible text as the name when a label is also given', () => {
+    render(
+      <Button icon='plus' label='Add a spell'>
+        Add
+      </Button>,
+    );
+    const button = screen.getByRole('button', { name: 'Add' });
+    expect(button).not.toHaveAttribute('aria-label');
   });
 });

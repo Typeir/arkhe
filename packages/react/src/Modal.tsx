@@ -15,13 +15,16 @@ import {
   ARKHE_CLASS,
   FocusReturn,
   dialogMachineProps,
+  flag,
   hideShadowSiblings,
+  watchCloseRequest,
   type DialogRole,
 } from '@arkhe/core';
 import * as dialog from '@zag-js/dialog';
 import { Portal, mergeProps, normalizeProps, useMachine } from '@zag-js/react';
 import {
   useEffect,
+  useEffectEvent,
   useId,
   useRef,
   useState,
@@ -45,7 +48,9 @@ import { usePortalContainer } from './usePortalContainer.js';
  * @property {boolean} [defaultOpen] - First open state when uncontrolled.
  * @property {(open: boolean) => void} [onOpenChange] - Open-state callback.
  * @property {DialogRole} [role] - `alertdialog` for confirmations. Defaults to `dialog`.
+ * @property {() => HTMLElement | null} [initialFocus] - Element to focus on open. Defaults to the first focusable.
  * @property {() => HTMLElement | null} [finalFocus] - Element to focus on close; for when the opener is gone.
+ * @property {boolean} [sheet] - Rises from the bottom edge at full width instead of centring.
  * @property {ReactNode} [children] - Body.
  */
 export interface ModalProps {
@@ -56,12 +61,14 @@ export interface ModalProps {
   readonly defaultOpen?: boolean;
   readonly onOpenChange?: (open: boolean) => void;
   readonly role?: DialogRole;
+  readonly initialFocus?: () => HTMLElement | null;
   readonly finalFocus?: () => HTMLElement | null;
+  readonly sheet?: boolean;
   readonly children?: ReactNode;
 }
 
 /**
- * Renders a modal dialog. The portal mounts after hydration so server HTML
+ * Renders a modal dialog, centred or as a bottom sheet. The portal mounts after hydration so server HTML
  * matches the client; Zag stays closed until then, or its focus trap and
  * title check would run before the content exists.
  *
@@ -77,7 +84,9 @@ export const Modal = ({
   defaultOpen,
   onOpenChange,
   role,
+  initialFocus,
   finalFocus,
+  sheet,
   children,
 }: ModalProps): JSX.Element => {
   const { labels } = useArkhe();
@@ -98,6 +107,7 @@ export const Modal = ({
       ready: hydrated,
       role,
       onOpenChange: change,
+      initialFocus,
       finalFocus,
       focusReturn,
       getRootNode: env.getRootNode,
@@ -110,6 +120,11 @@ export const Modal = ({
     if (!api.open || !content.current) return undefined;
     return hideShadowSiblings(content.current);
   }, [api.open]);
+  const requestClose = useEffectEvent(() => api.setOpen(false));
+  useEffect(() => {
+    if (!api.open) return undefined;
+    return watchCloseRequest(env.getRootNode(), requestClose);
+  }, [api.open, env]);
   return (
     <>
       {trigger === undefined ? null : (
@@ -122,10 +137,11 @@ export const Modal = ({
         <Portal container={container} getRootNode={env.getRootNode}>
           <div className={ARKHE_CLASS}>
             <div {...api.getBackdropProps()} />
-            <div {...api.getPositionerProps()}>
+            <div {...api.getPositionerProps()} data-sheet={flag(sheet)}>
               <div
                 ref={content}
                 {...api.getContentProps()}
+                data-sheet={flag(sheet)}
                 aria-describedby={
                   description === undefined
                     ? undefined

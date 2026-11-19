@@ -98,6 +98,21 @@ describe('arkhe.css', () => {
     ).toMatch(/border-color: transparent;\s+background: transparent/);
   });
 
+  it('lights a button in its tone and keeps a plain one boxless', () => {
+    expect(declarations('button', 'root', '[data-tone=danger]')).toContain(
+      '--button-tone: var(--color-danger)',
+    );
+    expect(
+      declarations('button', 'root', '[data-icon-only][data-shape=plain]'),
+    ).toMatch(/border-color: transparent;\s+background: transparent/);
+    expect(declarations('button', 'root', '[data-dashed]')).toContain(
+      'border-style: dashed',
+    );
+    expect(declarations('button', 'root', '[data-icon-side=end]')).toContain(
+      'flex-direction: row-reverse',
+    );
+  });
+
   it('lays out floating headers with logical properties', () => {
     for (const scope of ['popover', 'hover-card']) {
       expect(declarations(scope, 'header'), scope).toMatch(
@@ -107,5 +122,61 @@ describe('arkhe.css', () => {
     const close = declarations('popover', 'close-trigger');
     expect(close).toContain('margin-inline-start: auto');
     expect(close).not.toContain('margin-left');
+  });
+
+  it('holds virtual rows at one pitch with spacers for the rows not drawn', () => {
+    for (const [scope, part] of [
+      ['combobox', 'content'],
+      ['select', 'content'],
+      ['virtual-list', 'root'],
+    ] as const) {
+      expect(
+        declarations(scope, part, '[data-virtual]::before'),
+        scope,
+      ).toContain('block-size: var(--virtual-before)');
+      expect(
+        declarations(scope, part, '[data-virtual]::after'),
+        scope,
+      ).toContain('block-size: var(--virtual-after)');
+      expect(declarations(scope, part, '[data-virtual] > *'), scope).toContain(
+        'block-size: var(--row-pitch)',
+      );
+    }
+    expect(declarations('virtual-list', 'root')).toContain(
+      'max-block-size: var(--virtual-max, 37.5rem)',
+    );
+  });
+
+  it('marks a control invalid once the user has met its constraint', () => {
+    expect(CSS).toMatch(
+      /:user-invalid\s*\{\s*border-color: var\(--color-error\)/,
+    );
+    expect(CSS).toContain(':has(input:user-invalid)');
+    expect(CSS).toContain(':has(> select:user-invalid) > [data-part=control]');
+  });
+
+  it('keeps overlay scroll off the page and fits menus to the viewport', () => {
+    for (const [scope, part] of [
+      ['dialog', 'content'],
+      ['menu', 'content'],
+      ['popover', 'content'],
+      ['combobox', 'content'],
+      ['select', 'content'],
+    ] as const) {
+      expect(declarations(scope, part), scope).toContain(
+        'overscroll-behavior: contain',
+      );
+    }
+    const menu = declarations('menu', 'content');
+    expect(menu).toContain('max-height: var(--available-height, none)');
+    expect(menu).toContain('opacity var(--dur-1)');
+  });
+
+  it('fades without travel and slows the spinner under reduced motion', () => {
+    const still = CSS.split('@media (prefers-reduced-motion: reduce)')
+      .slice(1)
+      .join(' ');
+    expect(still).toContain('animation-duration: 6s');
+    expect(still).toMatch(/translate: 0 0/);
   });
 });

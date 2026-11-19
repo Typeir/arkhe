@@ -7,7 +7,7 @@
  * @since 0.1.0
  */
 
-import type { ComboboxOption, MenuEntry, TabItem } from '@arkhe/core';
+import type { SelectOption, MenuEntry, TabItem } from '@arkhe/core';
 
 /**
  * Tabs for the tabs scene.
@@ -70,9 +70,9 @@ export const MENU_ITEMS: readonly MenuEntry[] = [
  * Options for the combobox scene, in two groups.
  *
  * @constant COMBO_ITEMS
- * @type {readonly ComboboxOption[]}
+ * @type {readonly SelectOption[]}
  */
-export const COMBO_ITEMS: readonly ComboboxOption[] = [
+export const COMBO_ITEMS: readonly SelectOption[] = [
   {
     value: 'fireball',
     label: 'Fireball',
@@ -99,10 +99,21 @@ export const TWIN_TABS: readonly TabItem[] = [
  * Options whose values repeat, for the duplicates scene.
  *
  * @constant TWIN_OPTIONS
- * @type {readonly ComboboxOption[]}
+ * @type {readonly SelectOption[]}
  */
-export const TWIN_OPTIONS: readonly ComboboxOption[] = [
+export const TWIN_OPTIONS: readonly SelectOption[] = [
   { value: 'frost', label: 'Frost ray' },
   { value: 'frost', label: 'Frost ray again' },
   { value: 'fireball', label: 'Fireball' },
 ];
+
+/**
+ * A long flat list for the virtual scenes.
+ *
+ * @constant LONG_ITEMS
+ * @type {readonly SelectOption[]}
+ */
+export const LONG_ITEMS: readonly SelectOption[] = Array.from(
+  { length: 60 },
+  (_, at) => ({ value: `rune-${at + 1}`, label: `Rune ${at + 1}` }),
+);

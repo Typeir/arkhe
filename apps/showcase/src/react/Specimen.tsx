@@ -89,6 +89,13 @@ export const Specimen = (): JSX.Element => {
         <Button icon='plus' shape='rhombus' size='s'>
           Add spell
         </Button>
+        <Button icon='x' label='Dismiss' shape='plain' tone='danger' size='m' />
+        <Button icon='plus' dashed>
+          New entry
+        </Button>
+        <Button icon='chevron-down' iconSide='end' variant='ghost'>
+          Options
+        </Button>
         <Button pressed={pressed} onClick={() => setPressed(!pressed)}>
           Toggle
         </Button>

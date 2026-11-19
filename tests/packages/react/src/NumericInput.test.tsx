@@ -142,4 +142,17 @@ describe('NumericInput', () => {
       screen.getByRole('button', { name: 'Lisää Nopeus' }),
     ).toBeInTheDocument();
   });
+
+  it('takes part in a form', () => {
+    const { unmount } = render(
+      <NumericInput label='Speed' name='speed' required readOnly />,
+    );
+    const input = screen.getByRole('spinbutton', { name: 'Speed' });
+    expect(input).toHaveAttribute('name', 'speed');
+    expect(input).toBeRequired();
+    expect(input).toHaveAttribute('readonly');
+    unmount();
+    render(<NumericInput label='Speed' disabled />);
+    expect(screen.getByRole('spinbutton', { name: 'Speed' })).toBeDisabled();
+  });
 });

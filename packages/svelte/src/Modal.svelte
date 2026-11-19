@@ -2,7 +2,8 @@
 @component
 Renders a modal dialog on Zag's dialog machine, portalled into the
 environment's container. The portal mounts on the client only, and Zag stays
-closed until then, matching the React port. Once mounted it stays; the
+closed until then, matching the React port. With `sheet` it rises from the
+bottom edge. Once mounted it stays; the
 `hidden` attribute plus CSS transitions animate entry and exit, so no presence
 machine is needed.
 -->
@@ -11,7 +12,9 @@ machine is needed.
     ARKHE_CLASS,
     FocusReturn,
     dialogMachineProps,
+    flag,
     hideShadowSiblings,
+    watchCloseRequest,
     type DialogRole,
   } from '@arkhe/core';
   import * as dialog from '@zag-js/dialog';
@@ -37,7 +40,9 @@ machine is needed.
    * @property {boolean} [defaultOpen] - First open state when uncontrolled.
    * @property {(open: boolean) => void} [onOpenChange] - Reports open-state changes.
    * @property {DialogRole} [role] - `alertdialog` for confirmations. Defaults to `dialog`.
+   * @property {() => HTMLElement | null} [initialFocus] - Element to focus on open. Defaults to the first focusable.
    * @property {() => HTMLElement | null} [finalFocus] - Element to focus on close; for when the opener is gone.
+   * @property {boolean} [sheet] - Rises from the bottom edge at full width instead of centring.
    * @property {Snippet} [children] - Body.
    */
   interface Props {
@@ -48,7 +53,9 @@ machine is needed.
     defaultOpen?: boolean;
     onOpenChange?: (open: boolean) => void;
     role?: DialogRole;
+    initialFocus?: () => HTMLElement | null;
     finalFocus?: () => HTMLElement | null;
+    sheet?: boolean;
     children?: Snippet;
   }
 
@@ -60,7 +67,9 @@ machine is needed.
     defaultOpen,
     onOpenChange,
     role,
+    initialFocus,
     finalFocus,
+    sheet,
     children,
   }: Props = $props();
   const id = $props.id();
@@ -87,6 +96,7 @@ machine is needed.
       ready: mounted,
       role,
       onOpenChange: change,
+      initialFocus,
       finalFocus,
       focusReturn,
       getRootNode: env().getRootNode,
@@ -97,6 +107,13 @@ machine is needed.
   $effect(() => {
     if (!api.open || !content) return;
     return hideShadowSiblings(content);
+  });
+  const shown = $derived(api.open);
+  $effect(() => {
+    if (!shown) return;
+    return watchCloseRequest(env().getRootNode(), () =>
+      untrack(() => api.setOpen(false)),
+    );
   });
 </script>
 
@@ -112,10 +129,11 @@ machine is needed.
       getRootNode: env().getRootNode,
     }}>
     <div {...api.getBackdropProps()}></div>
-    <div {...api.getPositionerProps()}>
+    <div {...api.getPositionerProps()} data-sheet={flag(sheet)}>
       <div
         bind:this={content}
         {...api.getContentProps()}
+        data-sheet={flag(sheet)}
         aria-describedby={description === undefined
           ? undefined
           : api.getDescriptionProps().id}>

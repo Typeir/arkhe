@@ -1,7 +1,8 @@
 /**
  * @fileoverview SelectMenu: a button that opens a list of options, on Zag's
  * select machine. Not exported: it is the body of Select when not
- * searchable. A hidden native select mirrors the value for forms.
+ * searchable. A hidden native select mirrors the value for forms; with
+ * virtual rows it holds only the chosen option.
  *
  * @module packages/react/src/SelectMenu
  * @version 1.0.0
@@ -13,12 +14,17 @@
 
 import {
   ARKHE_CLASS,
+  EMPTY_VALUE,
+  flag,
+  fromEmptyValue,
   isGrouped,
   optionCollection,
   selectMachineProps,
   slug,
+  toEmptyValue,
   uniqueByValue,
-  type ComboboxOption,
+  withEmptyOption,
+  type SelectOption,
   type Placement,
 } from '@arkhe/core';
 import { Portal, mergeProps, normalizeProps, useMachine } from '@zag-js/react';
@@ -30,12 +36,13 @@ import { optionBody } from './ComboboxField.js';
 import { Icon } from './Icon.js';
 import { useHydrated } from './useHydrated.js';
 import { usePortalContainer } from './usePortalContainer.js';
+import { useVirtualRows } from './useVirtualRows.js';
 
 /**
  * Props of SelectMenu.
  *
  * @interface SelectMenuProps
- * @template {ComboboxOption} T
+ * @template {SelectOption} T
  * @property {string} label - Visible label.
  * @property {readonly T[]} items - Options; a repeated value is dropped.
  * @property {string} [placeholder] - Shown while nothing is chosen.
@@ -45,10 +52,15 @@ import { usePortalContainer } from './usePortalContainer.js';
  * @property {(item: T) => ReactNode} [renderItem] - Option body. Defaults to label and description.
  * @property {string} [name] - Form field name.
  * @property {boolean} [required] - A value must be chosen.
+ * @property {string} [autoComplete] - Autofill hint of the hidden native select, such as `country`.
  * @property {boolean} [disabled] - Blocks interaction.
  * @property {Placement} [placement] - Side of the list. Defaults to `bottom-start`.
+ * @property {string} [emptyLabel] - Text of a first option that stands for no choice, such as "All".
+ * @property {'s' | 'm' | 'l'} [size] - Control size. Defaults to `m`.
+ * @property {boolean} [labelHidden] - Keeps the label for assistive tech only.
+ * @property {number} [rowPitch] - Row height in rem; draws only the rows in view. Flat lists only.
  */
-export interface SelectMenuProps<T extends ComboboxOption> {
+export interface SelectMenuProps<T extends SelectOption> {
   readonly label: string;
   readonly items: readonly T[];
   readonly placeholder?: string;
@@ -58,8 +70,13 @@ export interface SelectMenuProps<T extends ComboboxOption> {
   readonly renderItem?: (item: T) => ReactNode;
   readonly name?: string;
   readonly required?: boolean;
+  readonly autoComplete?: string;
   readonly disabled?: boolean;
   readonly placement?: Placement;
+  readonly emptyLabel?: string;
+  readonly size?: 's' | 'm' | 'l';
+  readonly labelHidden?: boolean;
+  readonly rowPitch?: number;
 }
 
 /**
@@ -69,39 +86,58 @@ export interface SelectMenuProps<T extends ComboboxOption> {
  * @param {SelectMenuProps<T>} props - Label, options, selection.
  * @returns {JSX.Element} Select.
  */
-export const SelectMenu = <T extends ComboboxOption>(
+export const SelectMenu = <T extends SelectOption>(
   props: SelectMenuProps<T>,
 ): JSX.Element => {
-  const { label, items, placeholder } = props;
+  const { label, items, placeholder, emptyLabel } = props;
   const renderItem =
     props.renderItem ?? ((item: T) => optionBody(item, 'select'));
   const { labels } = useArkhe();
   const env = useArkheEnvironment();
   const container = usePortalContainer();
   const hydrated = useHydrated();
-  const shown = useMemo(() => uniqueByValue(items), [items]);
+  const shown = useMemo(
+    () => uniqueByValue(withEmptyOption(items, emptyLabel)) as readonly T[],
+    [items, emptyLabel],
+  );
   const collection = useMemo(
     () => select.collection(optionCollection(shown)),
     [shown],
+  );
+  const { attach, ...rows } = useVirtualRows(
+    shown.length,
+    isGrouped(shown) ? undefined : props.rowPitch,
   );
   const service = useMachine(select.machine, {
     ...selectMachineProps({
       ...props,
       id: useId(),
       labels,
+      value: toEmptyValue(props.value, emptyLabel),
+      defaultValue: toEmptyValue(props.defaultValue ?? null, emptyLabel),
       getRootNode: env.getRootNode,
     }),
+    ...(rows.on ? { scrollToIndexFn: rows.scrollTo } : {}),
     collection,
-    onValueChange: (details) => props.onValueChange?.(details.value[0] ?? null),
+    onValueChange: (details) =>
+      props.onValueChange?.(fromEmptyValue(details.value[0] ?? null)),
   });
   const api = select.connect(service, normalizeProps);
-  const option = (item: T) => (
-    <div key={item.value} {...api.getItemProps({ item })}>
-      {renderItem(item)}
+  const option = (item: T, index: number) => (
+    <div
+      key={item.value}
+      {...api.getItemProps({ item })}
+      {...rows.position(index)}>
+      {item.value === EMPTY_VALUE && emptyLabel !== undefined
+        ? optionBody(item, 'select')
+        : renderItem(item)}
     </div>
   );
   return (
-    <div {...mergeProps(api.getRootProps(), { className: ARKHE_CLASS })}>
+    <div
+      {...mergeProps(api.getRootProps(), { className: ARKHE_CLASS })}
+      data-size={props.size}
+      data-label-hidden={flag(props.labelHidden)}>
       <label {...api.getLabelProps()}>{label}</label>
       <div {...api.getControlProps()}>
         <button {...api.getTriggerProps()}>
@@ -114,33 +150,50 @@ export const SelectMenu = <T extends ComboboxOption>(
         </button>
       </div>
       <select {...api.getHiddenSelectProps()}>
-        <option value='' />
-        {shown.map((item) => (
-          <option key={item.value} value={item.value} disabled={item.disabled}>
-            {item.label}
-          </option>
-        ))}
+        <option value=''>{emptyLabel}</option>
+        {shown
+          .filter(
+            (item) =>
+              item.value !== EMPTY_VALUE &&
+              (!rows.on || api.value.includes(item.value)),
+          )
+          .map((item) => (
+            <option
+              key={item.value}
+              value={item.value}
+              disabled={item.disabled}>
+              {item.label}
+            </option>
+          ))}
       </select>
       {hydrated ? (
         <Portal container={container} getRootNode={env.getRootNode}>
           <div className={ARKHE_CLASS}>
             <div {...api.getPositionerProps()}>
-              <div {...api.getContentProps()}>
-                {isGrouped(shown)
-                  ? collection.group().map(([group, members]) => (
-                      <div
-                        key={group}
-                        {...api.getItemGroupProps({ id: slug(group) })}>
+              <div
+                {...api.getContentProps()}
+                ref={attach}
+                style={rows.vars}
+                data-virtual={flag(rows.on)}>
+                {rows.on
+                  ? shown
+                      .slice(rows.range.start, rows.range.end)
+                      .map((item, at) => option(item, rows.range.start + at))
+                  : isGrouped(shown)
+                    ? collection.group().map(([group, members]) => (
                         <div
-                          {...api.getItemGroupLabelProps({
-                            htmlFor: slug(group),
-                          })}>
-                          {group}
+                          key={group}
+                          {...api.getItemGroupProps({ id: slug(group) })}>
+                          <div
+                            {...api.getItemGroupLabelProps({
+                              htmlFor: slug(group),
+                            })}>
+                            {group}
+                          </div>
+                          {members.map(option)}
                         </div>
-                        {members.map(option)}
-                      </div>
-                    ))
-                  : shown.map(option)}
+                      ))
+                    : shown.map(option)}
               </div>
             </div>
           </div>

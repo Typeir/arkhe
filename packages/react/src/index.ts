@@ -24,6 +24,7 @@ export {
   Button,
   type ButtonProps,
   type ButtonSize,
+  type ButtonTone,
   type ButtonVariant,
 } from './Button.js';
 export { Chip, type ChipProps, type ChipTone } from './Chip.js';
@@ -54,9 +55,10 @@ export {
   type TextInputProps,
 } from './TextInput.js';
 export { Tooltip, type TooltipProps } from './Tooltip.js';
+export { VirtualList, type VirtualListProps } from './VirtualList.js';
 export type {
   ArkheLabels,
-  ComboboxOption,
+  SelectOption,
   DialogRole,
   FieldControlAttrs,
   MenuEntry,
@@ -67,4 +69,5 @@ export type {
   RootNode,
   StatusKind,
   TabItem,
+  VirtualRange,
 } from '@arkhe/core';

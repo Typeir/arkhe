@@ -104,6 +104,13 @@ describe('comboboxMachineProps', () => {
     expect(translations.resultsCount(4)).toBe('4 results');
   });
 
+  it('marks the input required only when asked', () => {
+    expect(comboboxMachineProps({ ...base, required: true }).required).toBe(
+      true,
+    );
+    expect(comboboxMachineProps(base)).not.toHaveProperty('required');
+  });
+
   it('announces the count as a plural in the locale', () => {
     const labels = {
       ...base.labels,

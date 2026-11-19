@@ -8,6 +8,7 @@ Home, End and typeahead move; focus returns to the button on close.
   import {
     ARKHE_CLASS,
     entryKey,
+    flag,
     floatingMachineProps,
     isSeparator,
     type MenuEntry,
@@ -28,13 +29,15 @@ Home, End and typeahead move; focus returns to the button on close.
    * Props of Menu.
    *
    * @interface Props
-   * @property {string} trigger - Text of the open button.
+   * @property {string} trigger - Text of the open button; its accessible name when `icon` is set.
+   * @property {string} [icon] - Lucide name; makes the open button icon-only.
    * @property {readonly MenuEntry[]} items - Actions and separators.
    * @property {(value: string) => void} onSelect - Called with the chosen action.
    * @property {Placement} [placement] - Side. Defaults to `bottom-start`.
    */
   interface Props {
     trigger: string;
+    icon?: string;
     items: readonly MenuEntry[];
     onSelect: (value: string) => void;
     placement?: Placement;
@@ -42,6 +45,7 @@ Home, End and typeahead move; focus returns to the button on close.
 
   let {
     trigger,
+    icon,
     items,
     onSelect,
     placement = 'bottom-start',
@@ -63,8 +67,14 @@ Home, End and typeahead move; focus returns to the button on close.
   });
 </script>
 
-<button {...mergeProps(api.getTriggerProps(), { class: ARKHE_CLASS })}
-  >{trigger}<Icon name="chevron-down" /></button>
+<button
+  {...mergeProps(api.getTriggerProps(), {
+    class: ARKHE_CLASS,
+    'aria-label': icon ? trigger : undefined,
+    'data-icon-only': flag(icon !== undefined),
+  })}
+  >{#if icon}<Icon name={icon} />{:else}{trigger}<Icon
+      name="chevron-down" />{/if}</button>
 {#if mounted}
   <div
     class={ARKHE_CLASS}

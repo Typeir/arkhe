@@ -127,13 +127,20 @@ body {
 
     > [data-scope='number-input'],
     > [data-scope='combobox'],
+    > [data-scope='search'],
     > [data-scope='select'] {
       flex: 1 1 10rem;
     }
 
     > [data-scope='tabs'],
+    > [data-scope='virtual-list'],
     > .prose {
       flex: 1 1 100%;
+    }
+
+    > [data-scope='virtual-list'] {
+      padding-inline: var(--space-2);
+      border: var(--border-width-xs) solid var(--color-border);
     }
 
     > .prose {

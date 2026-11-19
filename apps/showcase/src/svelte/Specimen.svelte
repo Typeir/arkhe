@@ -66,6 +66,10 @@ Svelte specimen: every Arkhé component with the shared specimen data.
         <Button icon="x" label={`Close ${size}`} {size} />
       {/each}
       <Button icon="plus" shape="rhombus" size="s">Add spell</Button>
+      <Button icon="x" label="Dismiss" shape="plain" tone="danger" size="m" />
+      <Button icon="plus" dashed>New entry</Button>
+      <Button icon="chevron-down" iconSide="end" variant="ghost"
+        >Options</Button>
       <Button {pressed} onclick={() => (pressed = !pressed)}>Toggle</Button>
       <Button disabled>Disabled</Button>
       <Button href="#buttons">Link</Button>

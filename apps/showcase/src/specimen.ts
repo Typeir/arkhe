@@ -10,8 +10,9 @@
 
 import {
   ARKHE_ICON_NAMES,
-  type ComboboxOption,
+  filterOptions,
   type MenuEntry,
+  type SelectOption,
   type TabItem,
 } from '@arkhe/core';
 
@@ -98,9 +99,9 @@ export const SPECIMEN_SECTIONS = {
  * Spells offered by the specimen selects and picker.
  *
  * @constant SPECIMEN_SPELLS
- * @type {readonly ComboboxOption[]}
+ * @type {readonly SelectOption[]}
  */
-export const SPECIMEN_SPELLS: readonly ComboboxOption[] = [
+export const SPECIMEN_SPELLS: readonly SelectOption[] = [
   { value: 'fireball', label: 'Fireball', description: 'Level 3 · evocation' },
   {
     value: 'frost-ray',
@@ -121,9 +122,9 @@ export const SPECIMEN_SPELLS: readonly ComboboxOption[] = [
  * Schools offered by the specimen plain select, in two groups.
  *
  * @constant SPECIMEN_SCHOOLS
- * @type {readonly ComboboxOption[]}
+ * @type {readonly SelectOption[]}
  */
-export const SPECIMEN_SCHOOLS: readonly ComboboxOption[] = [
+export const SPECIMEN_SCHOOLS: readonly SelectOption[] = [
   { value: 'abjuration', label: 'Abjuration', group: 'Guarding' },
   { value: 'divination', label: 'Divination', group: 'Guarding' },
   { value: 'evocation', label: 'Evocation', group: 'Shaping' },
@@ -131,12 +132,23 @@ export const SPECIMEN_SCHOOLS: readonly ComboboxOption[] = [
 ];
 
 /**
+ * Two thousand runes for the specimen long lists, drawn as virtual rows.
+ *
+ * @constant SPECIMEN_RUNES
+ * @type {readonly SelectOption[]}
+ */
+export const SPECIMEN_RUNES: readonly SelectOption[] = Array.from(
+  { length: 2000 },
+  (_, at) => ({ value: `rune-${at + 1}`, label: `Rune ${at + 1}` }),
+);
+
+/**
  * Grouped search results for the specimen search box.
  *
  * @constant SPECIMEN_SEARCH
- * @type {readonly ComboboxOption[]}
+ * @type {readonly SelectOption[]}
  */
-export const SPECIMEN_SEARCH: readonly ComboboxOption[] = [
+export const SPECIMEN_SEARCH: readonly SelectOption[] = [
   ...SPECIMEN_SPELLS.slice(0, 3).map((spell) => ({
     ...spell,
     group: 'Spells',
@@ -154,6 +166,20 @@ export const SPECIMEN_SEARCH: readonly ComboboxOption[] = [
     group: 'Creatures',
   },
 ];
+
+/**
+ * Stands in for a search request: answers `query` from `SPECIMEN_SEARCH`,
+ * filtering where the data lives as a server would.
+ *
+ * @function searchSpecimen
+ * @param {string} query - Typed text.
+ * @returns {Promise<readonly SelectOption[]>} Matching results.
+ */
+export async function searchSpecimen(
+  query: string,
+): Promise<readonly SelectOption[]> {
+  return filterOptions(SPECIMEN_SEARCH, query);
+}
 
 /**
  * Menu actions shown in the specimen.

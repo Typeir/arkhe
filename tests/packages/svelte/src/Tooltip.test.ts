@@ -102,4 +102,15 @@ describe('Tooltip', () => {
       expect(screen.queryByRole('tooltip') !== null).toBe(!refuse);
     },
   );
+
+  it('lets the pointer move onto the hint', async () => {
+    render(Tooltip, {
+      content: 'Hint',
+      openDelay: 0,
+      children: textSnippet('word'),
+    });
+    await userEvent.hover(screen.getByRole('button', { name: 'word' }));
+    const hint = await screen.findByRole('tooltip');
+    expect(hint.style.pointerEvents).not.toBe('none');
+  });
 });

@@ -196,6 +196,11 @@ export const PARITY_CASES: readonly ParityCase[] = [
     steps: [click('Spell', 'combobox'), press('{ArrowDown}'), press('{Enter}')],
   },
   {
+    name: 'select-empty',
+    steps: [click('Spell', 'combobox'), press('{ArrowDown}'), press('{Enter}')],
+  },
+  { name: 'menu-icon', steps: [click('Actions'), press('{ArrowDown}')] },
+  {
     name: 'select-searchable',
     steps: [
       click('Spell', 'combobox'),
@@ -217,4 +222,13 @@ export const PARITY_CASES: readonly ParityCase[] = [
       press('{Enter}'),
     ],
   },
+  {
+    name: 'select-virtual',
+    steps: [click('Rune', 'combobox'), press('{End}'), press('{Enter}')],
+  },
+  {
+    name: 'select-virtual-searchable',
+    steps: [click('Rune', 'combobox'), press('{ArrowUp}'), press('{Enter}')],
+  },
+  { name: 'virtual-list', steps: [] },
 ];

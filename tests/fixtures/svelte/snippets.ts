@@ -61,3 +61,15 @@ export function valueSnippet(): Snippet<[string]> {
     render: () => `<p>${value()}</p>`,
   }));
 }
+
+/**
+ * Builds a list row snippet that prints `<index>: <row>`.
+ *
+ * @function rowSnippet
+ * @returns {Snippet<[string, number]>} Snippet.
+ */
+export function rowSnippet(): Snippet<[string, number]> {
+  return createRawSnippet<[string, number]>((row, index) => ({
+    render: () => `<span>${index()}: ${row()}</span>`,
+  }));
+}

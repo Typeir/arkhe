@@ -29,6 +29,7 @@ export { default as Tabs } from './Tabs.svelte';
 export { default as TextArea } from './TextArea.svelte';
 export { default as TextInput } from './TextInput.svelte';
 export { default as Tooltip } from './Tooltip.svelte';
+export { default as VirtualList } from './VirtualList.svelte';
 export {
   useArkhe,
   type ArkheContextValue,
@@ -39,7 +40,7 @@ export { useArkheEnvironment } from './environment.js';
 export { LUCIDE_ICONS } from './lucideIcons.js';
 export type {
   ArkheLabels,
-  ComboboxOption,
+  SelectOption,
   DialogRole,
   FieldControlAttrs,
   MenuEntry,
@@ -50,4 +51,5 @@ export type {
   RootNode,
   StatusKind,
   TabItem,
+  VirtualRange,
 } from '@arkhe/core';

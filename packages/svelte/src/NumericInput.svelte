@@ -38,6 +38,10 @@ input its formatted value, which Svelte would bind live and so erase a lone
    * @property {number} [min] - Lowest value.
    * @property {number} [max] - Highest value.
    * @property {number} [step] - Step size. Defaults to 1.
+   * @property {string} [name] - Form field name.
+   * @property {boolean} [required] - A value must be given.
+   * @property {boolean} [disabled] - Blocks input.
+   * @property {boolean} [readOnly] - Shows the value without taking edits.
    */
   interface Props {
     label: string;
@@ -48,6 +52,10 @@ input its formatted value, which Svelte would bind live and so erase a lone
     min?: number;
     max?: number;
     step?: number;
+    name?: string;
+    required?: boolean;
+    disabled?: boolean;
+    readOnly?: boolean;
   }
 
   let {
@@ -59,6 +67,10 @@ input its formatted value, which Svelte would bind live and so erase a lone
     min,
     max,
     step,
+    name,
+    required,
+    disabled,
+    readOnly,
   }: Props = $props();
   const id = $props.id();
   const arkhe = useArkhe();
@@ -89,6 +101,10 @@ input its formatted value, which Svelte would bind live and so erase a lone
       min,
       max,
       step,
+      name,
+      required,
+      disabled,
+      readOnly,
       getRootNode: env().getRootNode,
     }),
     onValueChange: (details: numberInput.ValueChangeDetails) => {

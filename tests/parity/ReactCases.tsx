@@ -14,10 +14,8 @@ import {
   Chip,
   Field,
   Icon,
-  Menu,
   Modal,
   NumericInput,
-  Picker,
   Popover,
   Progress,
   Select,
@@ -31,8 +29,6 @@ import {
 import type { NumericValue } from '@arkhe/core';
 import { useState, type JSX, type ReactNode } from 'react';
 import {
-  COMBO_ITEMS,
-  MENU_ITEMS,
   TAB_ITEMS,
   TAB_STAGES,
   TAB_TEXT,
@@ -40,6 +36,7 @@ import {
   TWIN_TABS,
 } from './scenes';
 import { HINT_SCENES } from './ReactHintCases';
+import { SELECT_SCENES } from './ReactSelectCases';
 
 const Buttons = (): JSX.Element => {
   const [pressed, setPressed] = useState(false);
@@ -56,6 +53,10 @@ const Buttons = (): JSX.Element => {
       <Button icon='x' label='Close' />
       <Button icon='plus' label='Add' shape='rhombus' />
       <Button icon='x' label='Shut' size='xl' />
+      <Button icon='x' label='Dismiss' shape='plain' tone='danger' />
+      <Button icon='plus' iconSide='end' dashed>
+        More
+      </Button>
       <Button icon='plus' shape='rhombus' size='s'>
         Add spell
       </Button>
@@ -224,16 +225,7 @@ const SCENES: Readonly<Record<string, () => ReactNode>> = {
     </Popover>
   ),
   'popover-untitled': () => <Popover trigger='Sort'>Body</Popover>,
-  menu: () => (
-    <Menu trigger='Actions' items={MENU_ITEMS} onSelect={() => undefined} />
-  ),
-  select: () => <Select label='Spell' items={COMBO_ITEMS} placeholder='Any' />,
-  'select-searchable': () => (
-    <Select label='Spell' items={COMBO_ITEMS} searchable />
-  ),
-  picker: () => (
-    <Picker label='Spell' items={COMBO_ITEMS} onSelect={() => undefined} />
-  ),
+  ...SELECT_SCENES,
 };
 
 /**

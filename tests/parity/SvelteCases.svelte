@@ -25,10 +25,12 @@ Svelte side of the parity scenes. Each scene must match its twin in
     TextArea,
     TextInput,
     Tooltip,
+    VirtualList,
   } from '@arkhe/svelte';
   import type { NumericValue } from '@arkhe/core';
   import {
     COMBO_ITEMS,
+    LONG_ITEMS,
     MENU_ITEMS,
     TAB_ITEMS,
     TAB_STAGES,
@@ -71,6 +73,8 @@ Svelte side of the parity scenes. Each scene must match its twin in
   <Button icon="x" label="Close" />
   <Button icon="plus" label="Add" shape="rhombus" />
   <Button icon="x" label="Shut" size="xl" />
+  <Button icon="x" label="Dismiss" shape="plain" tone="danger" />
+  <Button icon="plus" iconSide="end" dashed>More</Button>
   <Button icon="plus" shape="rhombus" size="s">Add spell</Button>
   <Button {pressed} onclick={() => (pressed = !pressed)}>Toggle</Button>
   <Button href="#a">Link</Button>
@@ -191,10 +195,36 @@ Svelte side of the parity scenes. Each scene must match its twin in
   <Menu trigger="Actions" items={MENU_ITEMS} onSelect={() => undefined} />
 {:else if name === 'select'}
   <Select label="Spell" items={COMBO_ITEMS} placeholder="Any" />
+{:else if name === 'select-empty'}
+  <Select
+    label="Spell"
+    items={COMBO_ITEMS}
+    emptyLabel="All"
+    size="s"
+    labelHidden />
+{:else if name === 'menu-icon'}
+  <Menu
+    trigger="Actions"
+    icon="plus"
+    items={MENU_ITEMS}
+    onSelect={() => undefined} />
 {:else if name === 'select-searchable'}
   <Select label="Spell" items={COMBO_ITEMS} searchable />
 {:else if name === 'picker'}
   <Picker label="Spell" items={COMBO_ITEMS} onSelect={() => undefined} />
+{:else if name === 'select-virtual'}
+  <Select label="Rune" items={LONG_ITEMS} rowPitch={2} placeholder="Any" />
+{:else if name === 'select-virtual-searchable'}
+  <Select label="Rune" items={LONG_ITEMS} rowPitch={2} searchable />
+{:else if name === 'virtual-list'}
+  <VirtualList
+    items={LONG_ITEMS}
+    rowPitch={2}
+    label="Runes"
+    maxHeight="10rem"
+    getKey={(entry) => entry.value}>
+    {#snippet item(entry, index)}{index}: {entry.label}{/snippet}
+  </VirtualList>
 {:else}
   missing scene {name}
 {/if}

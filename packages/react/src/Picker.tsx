@@ -11,15 +11,17 @@
 
 'use client';
 
-import type { ComboboxOption, OptionFilter, Placement } from '@arkhe/core';
+import type { SelectOption, OptionFilter, Placement } from '@arkhe/core';
 import type { JSX, ReactNode } from 'react';
 import { ComboboxField } from './ComboboxField.js';
+import { SheetField } from './SheetField.js';
+import { useNarrow } from './useNarrow.js';
 
 /**
  * Props of Picker.
  *
  * @interface PickerProps
- * @template {ComboboxOption} T
+ * @template {SelectOption} T
  * @property {string} label - Visible label.
  * @property {readonly T[]} items - Options; a repeated value is dropped.
  * @property {(item: T) => void} onSelect - Every choice, even a repeat.
@@ -30,8 +32,11 @@ import { ComboboxField } from './ComboboxField.js';
  * @property {(item: T) => ReactNode} [renderItem] - Option body. Defaults to label and description.
  * @property {boolean} [disabled] - Blocks input.
  * @property {Placement} [placement] - Side of the list. Defaults to `bottom-start`.
+ * @property {'s' | 'm' | 'l'} [size] - Control size. Defaults to `m`.
+ * @property {boolean} [labelHidden] - Keeps the label for assistive tech only.
+ * @property {number} [rowPitch] - Row height in rem; draws only the rows in view, for long lists. Flat lists only.
  */
-export interface PickerProps<T extends ComboboxOption> {
+export interface PickerProps<T extends SelectOption> {
   readonly label: string;
   readonly items: readonly T[];
   readonly onSelect: (item: T) => void;
@@ -42,15 +47,31 @@ export interface PickerProps<T extends ComboboxOption> {
   readonly renderItem?: (item: T) => ReactNode;
   readonly disabled?: boolean;
   readonly placement?: Placement;
+  readonly size?: 's' | 'm' | 'l';
+  readonly labelHidden?: boolean;
+  readonly rowPitch?: number;
 }
 
 /**
- * Renders a labelled picker that empties itself after each choice.
+ * Renders a labelled picker that empties itself after each choice. At phone
+ * width it opens a sheet that stays open while choices are added.
  *
  * @component
  * @param {PickerProps<T>} props - Label, options, choice callback.
  * @returns {JSX.Element} Picker.
  */
-export const Picker = <T extends ComboboxOption>(
+export const Picker = <T extends SelectOption>(
   props: PickerProps<T>,
-): JSX.Element => <ComboboxField {...props} clearOnSelect />;
+): JSX.Element => {
+  if (!useNarrow()) return <ComboboxField {...props} clearOnSelect />;
+  return (
+    <SheetField
+      label={props.label}
+      placeholder={props.placeholder}
+      size={props.size}
+      labelHidden={props.labelHidden}
+      disabled={props.disabled}>
+      {() => <ComboboxField {...props} clearOnSelect labelHidden inline />}
+    </SheetField>
+  );
+};

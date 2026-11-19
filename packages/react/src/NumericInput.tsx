@@ -37,6 +37,10 @@ import { useNumericSync } from './useNumericSync.js';
  * @property {number} [min] - Lowest value.
  * @property {number} [max] - Highest value.
  * @property {number} [step] - Step size. Defaults to 1.
+ * @property {string} [name] - Form field name.
+ * @property {boolean} [required] - A value must be given.
+ * @property {boolean} [disabled] - Blocks input.
+ * @property {boolean} [readOnly] - Shows the value without taking edits.
  */
 export interface NumericInputProps {
   readonly label: string;
@@ -47,6 +51,10 @@ export interface NumericInputProps {
   readonly min?: number;
   readonly max?: number;
   readonly step?: number;
+  readonly name?: string;
+  readonly required?: boolean;
+  readonly disabled?: boolean;
+  readonly readOnly?: boolean;
 }
 
 /**

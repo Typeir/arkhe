@@ -30,15 +30,25 @@ export type ButtonVariant = 'default' | 'primary' | 'ghost' | 'danger';
 export type ButtonSize = 'xs' | 's' | 'm' | 'l' | 'xl';
 
 /**
+ * Colour a button lights up in on hover and focus.
+ *
+ * @typedef {'accent' | 'danger' | 'inherit'} ButtonTone
+ */
+export type ButtonTone = 'accent' | 'danger' | 'inherit';
+
+/**
  * Props of Button.
  *
  * @interface ButtonProps
  * @property {ReactNode} [children] - Visible text. Omit for an icon-only button.
  * @property {ButtonVariant} [variant] - Visual weight. Defaults to `default`.
- * @property {string} [icon] - Lucide name of a leading icon.
- * @property {string} [label] - Accessible name; required for icon-only buttons.
- * @property {'square' | 'rhombus'} [shape] - Outline. Icon-only: the box. Labelled: `rhombus` is a ghost label with the icon in a rhombus. Defaults to `square`.
+ * @property {string} [icon] - Lucide name of the icon.
+ * @property {'start' | 'end'} [iconSide] - Side of the text the icon sits on. Defaults to `start`.
+ * @property {string} [label] - Accessible name of an icon-only button; visible text names the others.
+ * @property {'square' | 'rhombus' | 'plain'} [shape] - Outline. Icon-only: the box, or `plain` for the glyph alone. Labelled: `rhombus` is a ghost label with the icon in a rhombus. Defaults to `square`.
  * @property {ButtonSize} [size] - Glyph scale; an icon-only box scales with it. Unset keeps the text-sized glyph.
+ * @property {ButtonTone} [tone] - Hover and focus colour. Defaults to `accent`.
+ * @property {boolean} [dashed] - Dashed emphasis outline, for an add action.
  * @property {boolean} [pressed] - Toggle state; sets `aria-pressed`.
  * @property {string} [href] - Renders a link to this address.
  * @property {boolean} [disabled] - Blocks interaction.
@@ -49,9 +59,12 @@ export interface ButtonProps {
   readonly children?: ReactNode;
   readonly variant?: ButtonVariant;
   readonly icon?: string;
+  readonly iconSide?: 'start' | 'end';
   readonly label?: string;
-  readonly shape?: 'square' | 'rhombus';
+  readonly shape?: 'square' | 'rhombus' | 'plain';
   readonly size?: ButtonSize;
+  readonly tone?: ButtonTone;
+  readonly dashed?: boolean;
   readonly pressed?: boolean;
   readonly href?: string;
   readonly disabled?: boolean;
@@ -67,10 +80,13 @@ export interface ButtonProps {
  * @param {ButtonProps} props - Component props.
  * @param {ReactNode} [props.children] - Visible text.
  * @param {ButtonVariant} [props.variant] - Visual weight.
- * @param {string} [props.icon] - Lucide name of a leading icon.
+ * @param {string} [props.icon] - Lucide name of the icon.
+ * @param {'start' | 'end'} [props.iconSide] - Icon side.
  * @param {string} [props.label] - Accessible name.
- * @param {'square' | 'rhombus'} [props.shape] - Outline.
+ * @param {'square' | 'rhombus' | 'plain'} [props.shape] - Outline.
  * @param {ButtonSize} [props.size] - Glyph scale.
+ * @param {ButtonTone} [props.tone] - Hover colour.
+ * @param {boolean} [props.dashed] - Dashed outline.
  * @param {boolean} [props.pressed] - Toggle state.
  * @param {string} [props.href] - Link address.
  * @param {boolean} [props.disabled] - Blocks interaction.
@@ -82,9 +98,12 @@ export const Button = ({
   children,
   variant = 'default',
   icon,
+  iconSide,
   label,
   shape,
   size,
+  tone,
+  dashed,
   pressed,
   href,
   disabled,
@@ -99,7 +118,10 @@ export const Button = ({
     'data-icon-only': flag(children === undefined),
     'data-shape': shape,
     'data-size': size,
-    'aria-label': label,
+    'data-tone': tone,
+    'data-dashed': flag(dashed),
+    'data-icon-side': iconSide,
+    'aria-label': children === undefined ? label : undefined,
     'aria-pressed': pressed,
     onClick,
   };

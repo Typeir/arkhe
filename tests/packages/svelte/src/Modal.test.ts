@@ -1,4 +1,5 @@
 import { Modal } from '@arkhe/svelte';
+import { liveWatcher, stubCloseWatcher } from '@tests/fixtures/closeWatcher';
 import DeleteRows from '@tests/fixtures/svelte/DeleteRows.svelte';
 import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
 import ShadowModal from '@tests/fixtures/svelte/ShadowModal.svelte';
@@ -140,4 +141,19 @@ describe('Modal', () => {
       expect(screen.queryByRole('dialog') !== null).toBe(!refuse);
     },
   );
+
+  it('closes on the close request a back gesture sends', async () => {
+    stubCloseWatcher();
+    render(Modal, {
+      title: 'Rest',
+      trigger: 'Open',
+      children: textSnippet('Body'),
+    });
+    await userEvent.click(screen.getByRole('button', { name: 'Open' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Rest' });
+    liveWatcher()?.requestClose();
+    await waitFor(() => expect(dialog).not.toBeVisible());
+    expect(liveWatcher()).toBeUndefined();
+    vi.unstubAllGlobals();
+  });
 });

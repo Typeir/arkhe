@@ -98,4 +98,20 @@ describe('ComboboxField', () => {
       await screen.findByRole('group', { name: 'Fire spells' }),
     ).toBeInTheDocument();
   });
+
+  it('offers an empty option that reports no choice', async () => {
+    const onValueChange = vi.fn();
+    render(Combobox, {
+      label: 'Spell',
+      items: SPELLS,
+      emptyLabel: 'All',
+      defaultValue: 'frost',
+      onValueChange,
+    });
+    const input = screen.getByRole('combobox');
+    await userEvent.click(input);
+    await userEvent.click(await screen.findByRole('option', { name: 'All' }));
+    expect(onValueChange).toHaveBeenLastCalledWith(null);
+    await waitFor(() => expect(input).toHaveValue('All'));
+  });
 });

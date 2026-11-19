@@ -1,5 +1,12 @@
 import { ArkheEnvironment, ArkheProvider, Modal } from '@arkhe/react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { liveWatcher, stubCloseWatcher } from '@tests/fixtures/closeWatcher';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { useState } from 'react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
@@ -161,5 +168,20 @@ describe('Modal', () => {
     unmount();
     expect(app).not.toHaveAttribute('aria-hidden');
     host.remove();
+  });
+
+  it('closes on the close request a back gesture sends', async () => {
+    stubCloseWatcher();
+    render(
+      <Modal title='Rest' trigger='Open'>
+        Body
+      </Modal>,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Open' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Rest' });
+    act(() => liveWatcher()?.requestClose());
+    await waitFor(() => expect(dialog).not.toBeVisible());
+    expect(liveWatcher()).toBeUndefined();
+    vi.unstubAllGlobals();
   });
 });

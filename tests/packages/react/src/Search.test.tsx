@@ -8,6 +8,53 @@ const RESULTS = [
   { value: 'goblin', label: 'Goblin', group: 'Creatures' },
 ];
 
+describe('Search at request time', () => {
+  it('asks the host with the typed text, shows its answer, and never re-asks on a choice', async () => {
+    const search = vi.fn(async (query: string) =>
+      RESULTS.filter((result) => result.label.toLowerCase().includes(query)),
+    );
+    const onSelect = vi.fn();
+    render(
+      <Search
+        label='Search'
+        search={search}
+        debounce={0}
+        onSelect={onSelect}
+      />,
+    );
+    const input = screen.getByRole('combobox');
+    await userEvent.click(input);
+    fireEvent.change(input, { target: { value: 'gob' } });
+    expect(
+      await screen.findByRole('option', { name: 'Goblin' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'Fireball' })).toBeNull();
+    expect(search).toHaveBeenLastCalledWith('gob', expect.any(AbortSignal));
+    const asked = search.mock.calls.length;
+    await userEvent.click(screen.getByRole('option', { name: 'Goblin' }));
+    expect(onSelect).toHaveBeenCalledWith(RESULTS[1]);
+    expect(search).toHaveBeenCalledTimes(asked);
+  });
+
+  it('says when the request fails', async () => {
+    render(
+      <Search
+        label='Search'
+        search={() => Promise.reject(new Error('down'))}
+        debounce={0}
+      />,
+    );
+    const input = screen.getByRole('combobox');
+    await userEvent.click(input);
+    fireEvent.change(input, { target: { value: 'x' } });
+    await waitFor(() =>
+      expect(
+        document.querySelector('[data-part="note"] [data-kind="error"]'),
+      ).toHaveTextContent('Something went wrong.'),
+    );
+  });
+});
+
 describe('Search', () => {
   it('shows the host results unfiltered, grouped, and hands over the text', async () => {
     const onInputChange = vi.fn();
@@ -41,5 +88,12 @@ describe('Search', () => {
     expect(onSubmit).toHaveBeenCalledWith('burning');
     await userEvent.keyboard('{ArrowDown}{Enter}');
     expect(onSelect).toHaveBeenCalledWith(RESULTS[0]);
+  });
+
+  it('is a search landmark whose Enter key reads search', () => {
+    render(<Search label='Find' items={RESULTS} />);
+    const input = screen.getByRole('combobox', { name: 'Find' });
+    expect(screen.getByRole('search')).toContainElement(input);
+    expect(input).toHaveAttribute('enterkeyhint', 'search');
   });
 });

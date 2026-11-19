@@ -13,6 +13,22 @@ const ITEMS: readonly MenuEntry[] = [
 ];
 
 describe('Menu', () => {
+  it('renders an icon-only trigger named by its text', async () => {
+    render(Menu, {
+      trigger: 'Insert sample',
+      icon: 'plus',
+      items: [{ value: 'a', label: 'Spell', icon: 'info' }],
+      onSelect: () => undefined,
+    });
+    const trigger = screen.getByRole('button', { name: 'Insert sample' });
+    expect(trigger).toHaveAttribute('data-icon-only', '');
+    expect(trigger).not.toHaveTextContent('Insert sample');
+    await userEvent.click(trigger);
+    expect(
+      await screen.findByRole('menuitem', { name: 'Spell' }),
+    ).toBeVisible();
+  });
+
   it('lists actions and separators', async () => {
     render(Menu, {
       trigger: 'Actions',

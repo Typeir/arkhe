@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { SelectSection } from '../../../../../apps/showcase/src/react/SelectSection';
@@ -6,9 +6,11 @@ import { SelectSection } from '../../../../../apps/showcase/src/react/SelectSect
 describe('React SelectSection', () => {
   it('shows the select family', () => {
     render(<SelectSection />);
-    for (const name of ['School', 'Spell', 'Learn spell', 'Search']) {
+    for (const name of ['School', 'Spell', 'Learn spell', 'Search', 'Rune']) {
       expect(screen.getByRole('combobox', { name })).toBeInTheDocument();
     }
+    const runes = screen.getByRole('list', { name: 'Runes' });
+    expect(within(runes).getAllByRole('listitem')).toHaveLength(8);
   });
 
   it('reports the chosen school', async () => {
@@ -29,7 +31,7 @@ describe('React SelectSection', () => {
     expect(screen.getByText('Known: Ward')).toBeInTheDocument();
   });
 
-  it('filters search results here and reports searched text', async () => {
+  it('asks the search request and reports searched text', async () => {
     render(<SelectSection />);
     const input = screen.getByRole('combobox', { name: 'Search' });
     await userEvent.click(input);

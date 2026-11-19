@@ -47,6 +47,7 @@ for (const target of TARGETS) {
       await expect(page.getByText('Searched: ember')).toBeVisible();
       await input.fill('');
       await input.pressSequentially('gob');
+      await expect(page.getByRole('option', { name: /Goblin/ })).toBeVisible();
       await page.keyboard.press('ArrowDown');
       await page.keyboard.press('Tab');
       await expect(input).toHaveValue('Goblin');
@@ -67,6 +68,8 @@ for (const target of TARGETS) {
       const button = await trigger.boundingBox();
       const box = await list.boundingBox();
       expect(box?.width ?? 0).toBeGreaterThanOrEqual((button?.width ?? 0) - 1);
+      await expect(trigger).toHaveText('Any school');
+      await page.keyboard.press('ArrowDown');
       await page.keyboard.press('ArrowDown');
       await page.keyboard.press('Enter');
       await expect(trigger).toHaveText('Divination');

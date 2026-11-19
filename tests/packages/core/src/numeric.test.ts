@@ -53,6 +53,23 @@ describe('numericMachineProps', () => {
     expect(numericMachineProps(base).locale).toBe('en');
   });
 
+  it('passes form and state props through', () => {
+    expect(
+      numericMachineProps({
+        ...base,
+        name: 'speed',
+        required: true,
+        disabled: true,
+        readOnly: true,
+      }),
+    ).toMatchObject({
+      name: 'speed',
+      required: true,
+      disabled: true,
+      readOnly: true,
+    });
+  });
+
   it('leaves missing bounds to Zag', () => {
     const props = numericMachineProps({ ...base, min: 0 });
     expect(props.min).toBe(0);

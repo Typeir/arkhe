@@ -30,12 +30,14 @@ describe('selectMachineProps', () => {
         ...BASE,
         name: 'size',
         required: true,
+        autoComplete: 'country',
         disabled: true,
         placement: 'top',
       }),
     ).toMatchObject({
       name: 'size',
       required: true,
+      autoComplete: 'country',
       disabled: true,
       positioning: { placement: 'top' },
     });

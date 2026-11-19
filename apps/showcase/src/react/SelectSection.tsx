@@ -1,7 +1,8 @@
 /**
  * @fileoverview React specimen section for Select, Picker and Search: a
  * plain grouped select, a searchable select, a picker that adds to a list,
- * and a grouped search box that filters here and takes free text.
+ * a grouped search box that asks its request and takes free text, and two
+ * thousand runes as virtual rows: a select and a plain list.
  *
  * @module apps/showcase/src/react/SelectSection
  * @version 1.0.0
@@ -9,14 +10,14 @@
  * @since 0.1.0
  */
 
-import { filterOptions } from '@arkhe/core';
-import { Picker, Search, Select } from '@arkhe/react';
+import { Picker, Search, Select, VirtualList } from '@arkhe/react';
 import { useState, type JSX } from 'react';
 import {
+  SPECIMEN_RUNES,
   SPECIMEN_SCHOOLS,
-  SPECIMEN_SEARCH,
   SPECIMEN_SECTIONS,
   SPECIMEN_SPELLS,
+  searchSpecimen,
 } from '../specimen';
 
 /**
@@ -28,7 +29,6 @@ import {
 export const SelectSection = (): JSX.Element => {
   const [school, setSchool] = useState<string | null>(null);
   const [known, setKnown] = useState<readonly string[]>([]);
-  const [query, setQuery] = useState('');
   const [searched, setSearched] = useState('nothing yet');
   return (
     <section className='specimen' id='select'>
@@ -37,7 +37,7 @@ export const SelectSection = (): JSX.Element => {
         <Select
           label='School'
           items={SPECIMEN_SCHOOLS}
-          placeholder='Any school'
+          emptyLabel='Any school'
           value={school}
           onValueChange={setSchool}
         />
@@ -59,10 +59,23 @@ export const SelectSection = (): JSX.Element => {
         />
         <Search
           label='Search'
-          items={filterOptions(SPECIMEN_SEARCH, query)}
+          search={searchSpecimen}
           placeholder='Search, Enter for all results'
-          onInputChange={setQuery}
           onSubmit={setSearched}
+        />
+        <Select
+          label='Rune'
+          items={SPECIMEN_RUNES}
+          placeholder='One of 2000'
+          rowPitch={2}
+        />
+        <VirtualList
+          label='Runes'
+          items={SPECIMEN_RUNES}
+          rowPitch={2}
+          maxHeight='12rem'
+          getKey={(rune) => rune.value}
+          renderItem={(rune) => rune.label}
         />
         <output>School: {school ?? 'any'}</output>
         <output>Known: {known.join(', ') || 'none'}</output>

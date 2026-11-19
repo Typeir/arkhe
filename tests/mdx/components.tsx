@@ -17,7 +17,7 @@ import {
   Popover,
   Select,
   Tooltip,
-  type ComboboxOption,
+  type SelectOption,
   type MenuEntry,
 } from '@arkhe/react';
 import type { MDXComponents } from 'mdx/types';
@@ -146,7 +146,7 @@ export const MdxMenu = ({
  * Select from MDX literals.
  *
  * @component
- * @param {{ label: string; items: readonly ComboboxOption[] }} props - Label and options.
+ * @param {{ label: string; items: readonly SelectOption[] }} props - Label and options.
  * @returns {JSX.Element} Select.
  */
 export const MdxSelect = ({
@@ -154,7 +154,7 @@ export const MdxSelect = ({
   items,
 }: {
   label: string;
-  items: readonly ComboboxOption[];
+  items: readonly SelectOption[];
 }): JSX.Element => <Select label={label} items={items} />;
 
 /**

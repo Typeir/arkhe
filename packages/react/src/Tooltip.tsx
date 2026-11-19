@@ -88,6 +88,7 @@ export const Tooltip = ({
     }),
     openDelay,
     closeDelay,
+    interactive: true,
   });
   const api = tooltip.connect(service, normalizeProps);
   const positioner = api.getPositionerProps();

@@ -3,7 +3,9 @@ import {
   FocusReturn,
   dialogMachineProps,
   hideShadowSiblings,
+  watchCloseRequest,
 } from '@arkhe/core';
+import { liveWatcher, stubCloseWatcher } from '@tests/fixtures/closeWatcher';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const base = {
@@ -18,6 +20,17 @@ describe('dialogMachineProps', () => {
       false,
     );
     expect(dialogMachineProps({ ...base, open: true }).open).toBe(true);
+  });
+
+  it('passes the open focus target only when set', () => {
+    const target = () => null;
+    expect(dialogMachineProps({ ...base, open: false })).not.toHaveProperty(
+      'initialFocusEl',
+    );
+    expect(
+      dialogMachineProps({ ...base, open: false, initialFocus: target })
+        .initialFocusEl,
+    ).toBe(target);
   });
 
   it('passes the role only when set', () => {
@@ -97,5 +110,24 @@ describe('hideShadowSiblings', () => {
     document.body.append(nav, content);
     hideShadowSiblings(content)();
     expect(nav.hasAttribute('aria-hidden')).toBe(false);
+  });
+});
+
+describe('watchCloseRequest', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('hears the platform close request until stopped', () => {
+    stubCloseWatcher();
+    const onClose = vi.fn();
+    const stop = watchCloseRequest(document, onClose);
+    liveWatcher()?.requestClose();
+    expect(onClose).toHaveBeenCalledOnce();
+    stop();
+    expect(liveWatcher()).toBeUndefined();
+  });
+
+  it('does nothing where the window has no CloseWatcher', () => {
+    vi.stubGlobal('CloseWatcher', undefined);
+    expect(() => watchCloseRequest(document, () => undefined)()).not.toThrow();
   });
 });
