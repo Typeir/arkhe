@@ -1,7 +1,8 @@
 <!--
 @component
 Renders a labelled control. The control receives its id, description ids and
-invalid state through the `children` snippet.
+invalid state through the `children` snippet. A new error is announced
+politely.
 -->
 <script lang="ts">
   import {
@@ -13,6 +14,7 @@ invalid state through the `children` snippet.
     type FieldControlAttrs,
   } from '@arkhe/core';
   import type { Snippet } from 'svelte';
+  import FieldNote from './FieldNote.svelte';
 
   /**
    * Props of Field.
@@ -54,6 +56,5 @@ invalid state through the `children` snippet.
     {/if}
   </div>
   {@render children(control)}
-  {#if showHint}<p {...partAttrs('field', 'hint')} id={ids.hint}>{hint}</p>{/if}
-  {#if error}<p {...partAttrs('field', 'error')} id={ids.error}>{error}</p>{/if}
+  <FieldNote {ids} {hint} {error} />
 </div>

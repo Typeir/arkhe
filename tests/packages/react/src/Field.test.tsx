@@ -45,4 +45,19 @@ describe('Field', () => {
     expect(readout).toHaveAttribute('for', screen.getByRole('textbox').id);
     expect(readout).toHaveAttribute('aria-live', 'off');
   });
+
+  it('announces a new error politely', async () => {
+    const { rerender } = render(
+      <Field label='Name'>{(control) => <TextInput {...control} />}</Field>,
+    );
+    rerender(
+      <Field label='Name' error='Name is taken'>
+        {(control) => <TextInput {...control} />}
+      </Field>,
+    );
+    const line = await screen.findByText('Name is taken', {
+      selector: '[data-politeness="polite"] > div',
+    });
+    expect(line).toBeInTheDocument();
+  });
 });

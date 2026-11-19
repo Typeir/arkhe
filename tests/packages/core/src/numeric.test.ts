@@ -61,12 +61,14 @@ describe('numericMachineProps', () => {
         required: true,
         disabled: true,
         readOnly: true,
+        invalid: true,
       }),
     ).toMatchObject({
       name: 'speed',
       required: true,
       disabled: true,
       readOnly: true,
+      invalid: true,
     });
   });
 

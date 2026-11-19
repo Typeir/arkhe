@@ -171,6 +171,7 @@ const SCENES: Readonly<Record<string, () => ReactNode>> = {
     <>
       <Progress value={5} max={10} label='Budget' markers={[2, 8]} showValue />
       <Progress value={13} max={10} label='Load' />
+      <Progress max={10} label='Loading' showValue />
     </>
   ),
   skeleton: () => (

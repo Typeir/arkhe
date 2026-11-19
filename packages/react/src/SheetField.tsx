@@ -12,8 +12,15 @@
 
 'use client';
 
-import { ARKHE_CLASS, flag, partAttrs } from '@arkhe/core';
+import {
+  ARKHE_CLASS,
+  fieldDescribedBy,
+  fieldIds,
+  flag,
+  partAttrs,
+} from '@arkhe/core';
 import { useId, useRef, useState, type JSX, type ReactNode } from 'react';
+import { FieldNote } from './FieldNote.js';
 import { Icon } from './Icon.js';
 import { Modal } from './Modal.js';
 
@@ -27,8 +34,11 @@ import { Modal } from './Modal.js';
  * @property {'s' | 'm' | 'l'} [size] - Control size. Defaults to `m`.
  * @property {boolean} [labelHidden] - Keeps the label for assistive tech only.
  * @property {boolean} [disabled] - Blocks opening.
- * @property {string} [name] - Form field name, carried by a hidden input.
- * @property {string | null} [value] - Value the hidden input submits.
+ * @property {string} [name] - Form field name, carried by a stand-in input.
+ * @property {string | null} [value] - Value the stand-in input submits.
+ * @property {boolean} [required] - A value must be chosen; a stand-in input takes part in form validation.
+ * @property {string} [hint] - Help text under the button.
+ * @property {string} [error] - Error text; replaces the hint and marks the button invalid.
  * @property {(close: () => void) => ReactNode} children - Sheet body; `close` shuts the sheet.
  */
 export interface SheetFieldProps {
@@ -40,6 +50,9 @@ export interface SheetFieldProps {
   readonly disabled?: boolean;
   readonly name?: string;
   readonly value?: string | null;
+  readonly required?: boolean;
+  readonly hint?: string;
+  readonly error?: string;
   readonly children: (close: () => void) => ReactNode;
 }
 
@@ -59,11 +72,16 @@ export const SheetField = ({
   disabled,
   name,
   value,
+  required,
+  hint,
+  error,
   children,
 }: SheetFieldProps): JSX.Element => {
   const [open, setOpen] = useState(false);
   const body = useRef<HTMLDivElement>(null);
   const id = useId();
+  const ids = fieldIds(id);
+  const trigger = useRef<HTMLButtonElement>(null);
   return (
     <div
       className={ARKHE_CLASS}
@@ -73,13 +91,17 @@ export const SheetField = ({
       <span {...partAttrs('select', 'label')} id={`${id}label`}>
         {label}
       </span>
-      <div {...partAttrs('select', 'control')}>
+      <div
+        {...partAttrs('select', 'control')}
+        data-invalid={flag(Boolean(error))}>
         <button
+          ref={trigger}
           type='button'
           {...partAttrs('select', 'trigger')}
           aria-haspopup='dialog'
           aria-expanded={open}
           aria-labelledby={`${id}label ${id}text`}
+          aria-describedby={fieldDescribedBy(ids, hint, error)}
           data-placeholder-shown={flag(!text)}
           disabled={disabled}
           onClick={() => setOpen(true)}>
@@ -91,8 +113,19 @@ export const SheetField = ({
           </span>
         </button>
       </div>
-      {name === undefined ? null : (
-        <input type='hidden' name={name} value={value ?? ''} />
+      <FieldNote ids={ids} hint={hint} error={error} />
+      {name === undefined && !required ? null : (
+        <input
+          {...partAttrs('select', 'stand-in')}
+          name={name}
+          value={value ?? ''}
+          required={required}
+          autoComplete='off'
+          tabIndex={-1}
+          aria-hidden='true'
+          onChange={() => undefined}
+          onFocus={() => trigger.current?.focus()}
+        />
       )}
       <Modal
         title={label}

@@ -16,6 +16,8 @@ import {
   REACT_EVENTS,
   EMPTY_VALUE,
   comboboxMachineProps,
+  fieldDescribedBy,
+  fieldIds,
   flag,
   fromEmptyValue,
   filterOptions,
@@ -35,6 +37,7 @@ import { useId, useMemo, useState, type JSX, type ReactNode } from 'react';
 import { useArkhe } from './ArkheProvider.js';
 import { useArkheEnvironment } from './ArkheEnvironment.js';
 import { ComboboxList, type ListNote } from './ComboboxList.js';
+import { FieldNote } from './FieldNote.js';
 import { Icon } from './Icon.js';
 import { useHydrated } from './useHydrated.js';
 import { usePortalContainer } from './usePortalContainer.js';
@@ -67,6 +70,8 @@ import { useVirtualRows } from './useVirtualRows.js';
  * @property {boolean} [labelHidden] - Keeps the label for assistive tech only.
  * @property {boolean} [inline] - Renders the list in place and always shown, as inside a sheet; the input empties and the list opens as it takes focus.
  * @property {string} [name] - Form field name; a hidden input carries the value.
+ * @property {string} [hint] - Help text under the control.
+ * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
  * @property {'search' | 'done' | 'go' | 'next' | 'enter'} [enterKeyHint] - Label of the on-screen keyboard's Enter key.
  * @property {boolean} [required] - The input must not be empty.
  * @property {number} [rowPitch] - Row height in rem; draws only the rows in view. Flat lists only.
@@ -94,6 +99,8 @@ export interface ComboboxFieldProps<T extends SelectOption> {
   readonly labelHidden?: boolean;
   readonly inline?: boolean;
   readonly name?: string;
+  readonly hint?: string;
+  readonly error?: string;
   readonly enterKeyHint?: 'search' | 'done' | 'go' | 'next' | 'enter';
   readonly required?: boolean;
   readonly rowPitch?: number;
@@ -167,10 +174,13 @@ export const ComboboxField = <T extends SelectOption>(
       : shown.length === 0
         ? 'empty'
         : undefined;
+  const id = useId();
+  const ids = fieldIds(id);
   const service = useMachine(combobox.machine, {
     ...comboboxMachineProps({
       ...props,
-      id: useId(),
+      id,
+      invalid: Boolean(props.error),
       labels,
       locale,
       value: toEmptyValue(props.value, emptyLabel),
@@ -245,7 +255,14 @@ export const ComboboxField = <T extends SelectOption>(
               REACT_EVENTS,
             ),
             props.inline ? { onFocus: focusInline } : {},
-            { enterKeyHint: props.enterKeyHint },
+            {
+              enterKeyHint: props.enterKeyHint,
+              'aria-describedby': fieldDescribedBy(
+                ids,
+                props.hint,
+                props.error,
+              ),
+            },
           )}
         />
         <button {...api.getClearTriggerProps()}>
@@ -257,6 +274,7 @@ export const ComboboxField = <T extends SelectOption>(
           </button>
         )}
       </div>
+      <FieldNote ids={ids} hint={props.hint} error={props.error} />
       {props.name === undefined ? null : (
         <input
           type='hidden'

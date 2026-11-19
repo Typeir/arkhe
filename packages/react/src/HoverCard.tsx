@@ -15,13 +15,23 @@
 
 import {
   ARKHE_CLASS,
+  CardAccess,
+  cardTriggerAria,
+  elementById,
   floatingMachineProps,
   formatLabel,
   type Placement,
 } from '@arkhe/core';
 import * as hoverCard from '@zag-js/hover-card';
 import { Portal, mergeProps, normalizeProps, useMachine } from '@zag-js/react';
-import { useEffect, useId, useState, type JSX, type ReactNode } from 'react';
+import {
+  useEffect,
+  useEffectEvent,
+  useId,
+  useState,
+  type JSX,
+  type ReactNode,
+} from 'react';
 import { useArkhe } from './ArkheProvider.js';
 import { useArkheEnvironment } from './ArkheEnvironment.js';
 import { Button } from './Button.js';
@@ -55,6 +65,8 @@ import { usePortalContainer } from './usePortalContainer.js';
  * @property {Placement} [placement] - Side. Defaults to `bottom-start`.
  * @property {number} [openDelay] - Milliseconds before opening. Defaults to 400.
  * @property {number} [closeDelay] - Milliseconds before closing. Defaults to 200.
+ * @property {'narrow' | 'wide'} [width] - Card width; between the two by default.
+ * @property {boolean} [card] - `false` opens this card on click only; overrides the provider's `hoverCards`.
  */
 export interface HoverCardProps<T> {
   readonly title: string;
@@ -71,14 +83,19 @@ export interface HoverCardProps<T> {
   readonly placement?: Placement;
   readonly openDelay?: number;
   readonly closeDelay?: number;
+  readonly width?: 'narrow' | 'wide';
+  readonly card?: boolean;
 }
 
 /**
  * Renders a trigger that opens a reference card on hover, focus or tap. A
- * tap outside or Escape closes it, unless pinned. A tap on a link trigger
- * opens the card; the header's link follows it. A card stays open while
- * a card nested in it is open. Unpinning hands the card back to hover: it
- * stays open while the pointer is over it.
+ * click or Enter on a button or inline trigger pins it; a link trigger
+ * follows its link, and a tap on it opens the card. Tab reaches into the
+ * open card and out past the trigger; focus leaving an unpinned card closes
+ * it. Escape closes the innermost card, pinned or not, and focus inside it
+ * returns to the trigger. A tap outside closes an unpinned card. A card
+ * stays open while a card nested in it is open. Unpinning hands the card
+ * back to hover: it stays open while the pointer is over it.
  *
  * @component
  * @param {HoverCardProps<T>} props - Title, trigger, body, open state, timing.
@@ -99,8 +116,11 @@ export const HoverCard = <T,>({
   placement = 'bottom-start',
   openDelay = 400,
   closeDelay = 200,
+  width,
+  card,
 }: HoverCardProps<T>): JSX.Element => {
-  const { labels } = useArkhe();
+  const { labels, hoverCards } = useArkhe();
+  const id = useId();
   const env = useArkheEnvironment();
   const container = usePortalContainer();
   const node = useHintNode();
@@ -109,7 +129,7 @@ export const HoverCard = <T,>({
   const body = useContentLoader(load);
   const service = useMachine(hoverCard.machine, {
     ...floatingMachineProps({
-      id: useId(),
+      id,
       open: shown,
       hold: pinned,
       placement,
@@ -120,30 +140,68 @@ export const HoverCard = <T,>({
     }),
     openDelay,
     closeDelay,
+    disabled: !(card ?? hoverCards),
   });
   const api = hoverCard.connect(service, normalizeProps);
   const positioner = api.getPositionerProps();
+  const contentProps = api.getContentProps();
+  const triggerProps = api.getTriggerProps();
+  const [triggerId, contentId] = [triggerProps.id ?? '', contentProps.id ?? ''];
+  const togglePin = () => {
+    if (pinned) change(service.state.matches('open'));
+    setPinned(!pinned);
+  };
+  const unpinAndClose = () => {
+    setPinned(false);
+    change(false);
+  };
+  const release = useEffectEvent(unpinAndClose);
+  const shut = useEffectEvent(() => change(false));
   const hint = useHint({
     open: api.open,
     setOpen: (next: boolean) => {
       if (next || !pinned) change(next);
     },
-    trigger: api.getTriggerProps(),
+    trigger: triggerProps,
     positionerId: positioner.id ?? '',
     node,
     leaving: () => service.state.matches('closing'),
+    activate: href === undefined ? togglePin : undefined,
+    keys: href === undefined && inline,
   });
   const { state, load: start } = body;
   useEffect(() => {
     if (api.open) start();
   }, [api.open, start]);
-  const togglePin = () => {
-    if (pinned) change(service.state.matches('open'));
-    setPinned(!pinned);
-  };
+  useEffect(() => {
+    if (!api.open) return undefined;
+    const byId = (key: string) => elementById(env.getRootNode(), key);
+    const access = new CardAccess({
+      getRootNode: env.getRootNode,
+      trigger: () => byId(triggerId),
+      content: () => byId(contentId),
+      node,
+      close: () => shut(),
+      release: () => release(),
+    });
+    access.pin(pinned);
+    return access.attach();
+  }, [api.open, pinned, env, node, triggerId, contentId]);
   return (
     <span className={ARKHE_CLASS} data-scope='hover-card' data-part='root'>
-      <HintTrigger attrs={hint.trigger} href={href} inline={inline}>
+      <HintTrigger
+        attrs={{
+          ...hint.trigger,
+          ...cardTriggerAria({
+            link: href !== undefined,
+            inline: Boolean(inline),
+            open: api.open,
+            contentId,
+            bodyId: `${id}body`,
+          }),
+        }}
+        href={href}
+        inline={inline}>
         {children}
       </HintTrigger>
       {hint.mounted ? (
@@ -151,10 +209,17 @@ export const HoverCard = <T,>({
           <div className={ARKHE_CLASS}>
             <div {...mergeProps(positioner, { hidden: !api.open })}>
               <div
-                {...api.getContentProps()}
-                data-pinned={pinned ? '' : undefined}>
+                {...mergeProps(contentProps, {
+                  role: 'dialog',
+                  'aria-labelledby': `${id}title`,
+                })}
+                data-pinned={pinned ? '' : undefined}
+                data-width={width}>
                 <div data-scope='hover-card' data-part='header'>
-                  <span data-scope='hover-card' data-part='title'>
+                  <span
+                    data-scope='hover-card'
+                    data-part='title'
+                    id={`${id}title`}>
                     {title}
                   </span>
                   {href !== undefined ? (
@@ -176,8 +241,19 @@ export const HoverCard = <T,>({
                       onClick={togglePin}
                     />
                   ) : null}
+                  {pinned ? (
+                    <Button
+                      variant='ghost'
+                      icon='x'
+                      label={labels.close}
+                      onClick={() => {
+                        elementById(env.getRootNode(), triggerId)?.focus();
+                        unpinAndClose();
+                      }}
+                    />
+                  ) : null}
                 </div>
-                <div data-scope='hover-card' data-part='body'>
+                <div data-scope='hover-card' data-part='body' id={`${id}body`}>
                   <HintContext value={node}>
                     {content}
                     {state.status === 'loading' ? (

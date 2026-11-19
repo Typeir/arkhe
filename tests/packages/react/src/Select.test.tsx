@@ -97,6 +97,26 @@ describe('Select', () => {
       'off',
     );
   });
+
+  it('is described by its hint, then marked invalid by its error', () => {
+    const { rerender } = render(
+      <Select label='Spell' items={SPELLS} hint='One at a time' />,
+    );
+    const trigger = screen.getByRole('combobox', { name: 'Spell' });
+    expect(trigger).toHaveAccessibleDescription('One at a time');
+    rerender(<Select label='Spell' items={SPELLS} error='Pick a spell' />);
+    expect(trigger).toHaveAccessibleDescription('Pick a spell');
+    expect(trigger).toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('describes the searchable input the same way', () => {
+    render(
+      <Select label='Spell' items={SPELLS} searchable error='Pick a spell' />,
+    );
+    const input = screen.getByRole('combobox', { name: 'Spell' });
+    expect(input).toHaveAccessibleDescription('Pick a spell');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+  });
 });
 
 describe('Select family at phone width', () => {

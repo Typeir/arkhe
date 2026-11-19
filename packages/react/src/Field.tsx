@@ -19,6 +19,7 @@ import {
   type FieldControlAttrs,
 } from '@arkhe/core';
 import { useId, type JSX, type ReactNode } from 'react';
+import { FieldNote } from './FieldNote.js';
 
 /**
  * Props of Field.
@@ -40,7 +41,7 @@ export interface FieldProps {
 
 /**
  * Renders a labelled control. The control receives its id, description ids
- * and invalid state through `children`.
+ * and invalid state through `children`. A new error is announced politely.
  *
  * @component
  * @param {FieldProps} props - Component props.
@@ -82,16 +83,7 @@ export const Field = ({
         )}
       </div>
       {children(fieldControlAttrs(ids, showHint, Boolean(error)))}
-      {showHint ? (
-        <p {...partAttrs('field', 'hint')} id={ids.hint}>
-          {hint}
-        </p>
-      ) : null}
-      {error ? (
-        <p {...partAttrs('field', 'error')} id={ids.error}>
-          {error}
-        </p>
-      ) : null}
+      <FieldNote ids={ids} hint={hint} error={error} />
     </div>
   );
 };

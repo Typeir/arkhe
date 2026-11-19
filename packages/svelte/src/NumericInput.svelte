@@ -13,6 +13,8 @@ input its formatted value, which Svelte would bind live and so erase a lone
   import {
     ARKHE_CLASS,
     SVELTE_EVENTS,
+    fieldDescribedBy,
+    fieldIds,
     formatDraft,
     guardInputProps,
     numericMachineProps,
@@ -23,6 +25,7 @@ input its formatted value, which Svelte would bind live and so erase a lone
   import { untrack } from 'svelte';
   import { useArkhe } from './context.js';
   import { useArkheEnvironment } from './environment.js';
+  import FieldNote from './FieldNote.svelte';
   import Icon from './Icon.svelte';
   import { useNumericSync } from './numericSync.svelte.js';
 
@@ -42,6 +45,8 @@ input its formatted value, which Svelte would bind live and so erase a lone
    * @property {boolean} [required] - A value must be given.
    * @property {boolean} [disabled] - Blocks input.
    * @property {boolean} [readOnly] - Shows the value without taking edits.
+   * @property {string} [hint] - Help text under the control.
+   * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
    */
   interface Props {
     label: string;
@@ -56,6 +61,8 @@ input its formatted value, which Svelte would bind live and so erase a lone
     required?: boolean;
     disabled?: boolean;
     readOnly?: boolean;
+    hint?: string;
+    error?: string;
   }
 
   let {
@@ -71,8 +78,11 @@ input its formatted value, which Svelte would bind live and so erase a lone
     required,
     disabled,
     readOnly,
+    hint,
+    error,
   }: Props = $props();
   const id = $props.id();
+  const ids = fieldIds(id);
   const arkhe = useArkhe();
   const env = useArkheEnvironment();
   const sync = useNumericSync(
@@ -105,6 +115,7 @@ input its formatted value, which Svelte would bind live and so erase a lone
       required,
       disabled,
       readOnly,
+      invalid: Boolean(error),
       getRootNode: env().getRootNode,
     }),
     onValueChange: (details: numberInput.ValueChangeDetails) => {
@@ -129,7 +140,10 @@ input its formatted value, which Svelte would bind live and so erase a lone
   <label {...api.getLabelProps()}>{label}</label>
   <div {...api.getControlProps()}>
     <button {...api.getDecrementTriggerProps()}><Icon name="minus" /></button>
-    <input {...inputProps} />
+    <input
+      {...inputProps}
+      aria-describedby={fieldDescribedBy(ids, hint, error)} />
     <button {...api.getIncrementTriggerProps()}><Icon name="plus" /></button>
   </div>
+  <FieldNote {ids} {hint} {error} />
 </div>

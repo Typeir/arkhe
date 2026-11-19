@@ -40,6 +40,8 @@ import { useNarrow } from './useNarrow.js';
  * @property {string} [emptyLabel] - Text of a first option that stands for no choice, such as "All".
  * @property {'s' | 'm' | 'l'} [size] - Control size. Defaults to `m`.
  * @property {boolean} [labelHidden] - Keeps the label for assistive tech only.
+ * @property {string} [hint] - Help text under the control.
+ * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
  * @property {number} [rowPitch] - Row height in rem; draws only the rows in view, for long lists. Flat lists only.
  */
 export interface SelectProps<T extends SelectOption> {
@@ -60,6 +62,8 @@ export interface SelectProps<T extends SelectOption> {
   readonly emptyLabel?: string;
   readonly size?: 's' | 'm' | 'l';
   readonly labelHidden?: boolean;
+  readonly hint?: string;
+  readonly error?: string;
   readonly rowPitch?: number;
 }
 
@@ -74,6 +78,9 @@ export interface SelectProps<T extends SelectOption> {
 const SelectSheet = <T extends SelectOption>({
   name,
   defaultValue,
+  required,
+  hint,
+  error,
   ...shared
 }: SelectProps<T>): JSX.Element => {
   const [inner, setInner] = useState(defaultValue ?? null);
@@ -91,7 +98,10 @@ const SelectSheet = <T extends SelectOption>({
       labelHidden={shared.labelHidden}
       disabled={shared.disabled}
       name={name}
-      value={value}>
+      value={value}
+      required={required}
+      hint={hint}
+      error={error}>
       {(close) => (
         <ComboboxField
           {...shared}

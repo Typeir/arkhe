@@ -13,6 +13,8 @@
 import {
   ARKHE_CLASS,
   REACT_EVENTS,
+  fieldDescribedBy,
+  fieldIds,
   guardInputProps,
   numericMachineProps,
   type NumericValue,
@@ -22,6 +24,7 @@ import { mergeProps, normalizeProps, useMachine } from '@zag-js/react';
 import { useId, type JSX } from 'react';
 import { useArkhe } from './ArkheProvider.js';
 import { useArkheEnvironment } from './ArkheEnvironment.js';
+import { FieldNote } from './FieldNote.js';
 import { Icon } from './Icon.js';
 import { useNumericSync } from './useNumericSync.js';
 
@@ -41,6 +44,8 @@ import { useNumericSync } from './useNumericSync.js';
  * @property {boolean} [required] - A value must be given.
  * @property {boolean} [disabled] - Blocks input.
  * @property {boolean} [readOnly] - Shows the value without taking edits.
+ * @property {string} [hint] - Help text under the control.
+ * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
  */
 export interface NumericInputProps {
   readonly label: string;
@@ -55,6 +60,8 @@ export interface NumericInputProps {
   readonly required?: boolean;
   readonly disabled?: boolean;
   readonly readOnly?: boolean;
+  readonly hint?: string;
+  readonly error?: string;
 }
 
 /**
@@ -70,10 +77,13 @@ export const NumericInput = (props: NumericInputProps): JSX.Element => {
   const { labels, locale } = useArkhe();
   const env = useArkheEnvironment();
   const { sync, track } = useNumericSync(value);
+  const id = useId();
+  const ids = fieldIds(id);
   const service = useMachine(numberInput.machine, {
     ...numericMachineProps({
       ...props,
-      id: useId(),
+      id,
+      invalid: Boolean(props.error),
       labels,
       locale,
       getRootNode: env.getRootNode,
@@ -97,11 +107,13 @@ export const NumericInput = (props: NumericInputProps): JSX.Element => {
             sync,
             REACT_EVENTS,
           )}
+          aria-describedby={fieldDescribedBy(ids, props.hint, props.error)}
         />
         <button {...api.getIncrementTriggerProps()}>
           <Icon name='plus' />
         </button>
       </div>
+      <FieldNote ids={ids} hint={props.hint} error={props.error} />
     </div>
   );
 };

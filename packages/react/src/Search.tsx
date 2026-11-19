@@ -48,6 +48,8 @@ import { useNarrow } from './useNarrow.js';
  * @property {Placement} [placement] - Side of the list. Defaults to `bottom-start`.
  * @property {'s' | 'm' | 'l'} [size] - Control size. Defaults to `m`.
  * @property {boolean} [labelHidden] - Keeps the label for assistive tech only.
+ * @property {string} [hint] - Help text under the control.
+ * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
  * @property {number} [rowPitch] - Row height in rem; draws only the rows in view, for long lists. Flat lists only.
  */
 export interface SearchProps<T extends SelectOption> {
@@ -65,6 +67,8 @@ export interface SearchProps<T extends SelectOption> {
   readonly placement?: Placement;
   readonly size?: 's' | 'm' | 'l';
   readonly labelHidden?: boolean;
+  readonly hint?: string;
+  readonly error?: string;
   readonly rowPitch?: number;
 }
 
@@ -107,6 +111,8 @@ export const Search = <T extends SelectOption>({
       {...(close
         ? {
             labelHidden: true,
+            hint: undefined,
+            error: undefined,
             inline: true,
             onSelect: (item: T) => {
               rest.onSelect?.(item);
@@ -128,7 +134,9 @@ export const Search = <T extends SelectOption>({
           placeholder={rest.placeholder}
           size={rest.size}
           labelHidden={rest.labelHidden}
-          disabled={rest.disabled}>
+          disabled={rest.disabled}
+          hint={rest.hint}
+          error={rest.error}>
           {field}
         </SheetField>
       ) : (

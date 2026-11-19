@@ -11,6 +11,8 @@ disabled.
 <script lang="ts">
   import {
     ARKHE_CLASS,
+    findablePanels,
+    flag,
     staleTabFallback,
     tabsMachineProps,
     uniqueByValue,
@@ -18,7 +20,7 @@ disabled.
   } from '@arkhe/core';
   import { mergeProps, normalizeProps, useMachine } from '@zag-js/svelte';
   import * as tabs from '@zag-js/tabs';
-  import type { Snippet } from 'svelte';
+  import { untrack, type Snippet } from 'svelte';
   import { useArkheEnvironment } from './environment.js';
 
   /**
@@ -89,7 +91,10 @@ disabled.
   const slotFor = (key: string) => slots[key] as Snippet | undefined;
 </script>
 
-<div {...mergeProps(api.getRootProps(), { class: ARKHE_CLASS })}>
+<div
+  {...mergeProps(api.getRootProps(), { class: ARKHE_CLASS })}
+  {@attach (root) =>
+    findablePanels(root, (next) => untrack(() => api.setValue(next)))}>
   <div {...api.getListProps()}>
     {#each shown as item (item.value)}
       <button
@@ -99,7 +104,10 @@ disabled.
     <div {...api.getIndicatorProps()}></div>
   </div>
   {#each shown as item (item.value)}
-    <div {...api.getContentProps({ value: item.value })}>
+    <div
+      {...api.getContentProps({ value: item.value })}
+      data-value={item.value}
+      data-findable={flag(!item.disabled)}>
       {#if panel}{@render panel(item.value)}{:else}{@render slotFor(
           item.value,
         )?.()}{/if}

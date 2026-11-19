@@ -1,4 +1,4 @@
-import { fieldControlAttrs, fieldIds } from '@arkhe/core';
+import { fieldControlAttrs, fieldDescribedBy, fieldIds } from '@arkhe/core';
 import { describe, expect, it } from 'vitest';
 
 describe('fieldIds', () => {
@@ -43,5 +43,15 @@ describe('fieldControlAttrs', () => {
     expect(fieldControlAttrs(ids, true, true)['aria-describedby']).toBe(
       'f-hint f-error',
     );
+  });
+});
+
+describe('fieldDescribedBy', () => {
+  const ids = fieldIds('f');
+
+  it('points at the error first, else the hint, else nothing', () => {
+    expect(fieldDescribedBy(ids, 'Help', 'Wrong')).toBe('f-error');
+    expect(fieldDescribedBy(ids, 'Help')).toBe('f-hint');
+    expect(fieldDescribedBy(ids)).toBeUndefined();
   });
 });

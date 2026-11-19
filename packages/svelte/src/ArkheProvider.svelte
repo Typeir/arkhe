@@ -31,6 +31,7 @@ with itself, and destroys its engine with itself.
    * @property {IconSet<IconComponent>} [icons] - Icons by Lucide name; win over Lucide.
    * @property {LinkComponent} [link] - Link renderer. Defaults to `a`.
    * @property {EffectsSetting} [effects] - Canvas effect options, or `false` for CSS skeletons everywhere. Read once.
+   * @property {boolean} [hoverCards] - `false` opens hover cards on click only. Defaults to true.
    * @property {Snippet} children - App subtree.
    */
   interface Props {
@@ -39,10 +40,12 @@ with itself, and destroys its engine with itself.
     icons?: IconSet<IconComponent>;
     link?: LinkComponent;
     effects?: EffectsSetting;
+    hoverCards?: boolean;
     children: Snippet;
   }
 
-  let { labels, locale, icons, link, effects, children }: Props = $props();
+  let { labels, locale, icons, link, effects, hoverCards, children }: Props =
+    $props();
   const announcer = new Announcer();
   const engine = new FxLoader(untrack(() => effects) ?? {}, loadFx);
   $effect.pre(() => announcer.mount());
@@ -54,6 +57,7 @@ with itself, and destroys its engine with itself.
     link,
     announcer,
     effects: engine,
+    hoverCards: hoverCards ?? true,
   });
   provideArkhe(() => value);
 </script>

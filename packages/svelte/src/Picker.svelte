@@ -28,6 +28,8 @@ machine.
    * @property {Placement} [placement] - Side of the list. Defaults to `bottom-start`.
    * @property {'s' | 'm' | 'l'} [size] - Control size. Defaults to `m`.
    * @property {boolean} [labelHidden] - Keeps the label for assistive tech only.
+   * @property {string} [hint] - Help text under the control.
+   * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
    * @property {number} [rowPitch] - Row height in rem; draws only the rows in view, for long lists. Flat lists only.
    */
   interface Props {
@@ -43,6 +45,8 @@ machine.
     placement?: Placement;
     size?: 's' | 'm' | 'l';
     labelHidden?: boolean;
+    hint?: string;
+    error?: string;
     rowPitch?: number;
   }
 
@@ -56,8 +60,16 @@ machine.
     placeholder={props.placeholder}
     size={props.size}
     labelHidden={props.labelHidden}
-    disabled={props.disabled}>
-    <ComboboxField {...props} clearOnSelect labelHidden inline />
+    disabled={props.disabled}
+    hint={props.hint}
+    error={props.error}>
+    <ComboboxField
+      {...props}
+      hint={undefined}
+      error={undefined}
+      clearOnSelect
+      labelHidden
+      inline />
   </SheetField>
 {:else}
   <ComboboxField {...props} clearOnSelect />

@@ -155,4 +155,11 @@ describe('NumericInput', () => {
     render(<NumericInput label='Speed' disabled />);
     expect(screen.getByRole('spinbutton', { name: 'Speed' })).toBeDisabled();
   });
+
+  it('is described by its error and marked invalid', () => {
+    render(<NumericInput label='Speed' hint='Feet' error='Too fast' />);
+    const input = screen.getByRole('spinbutton', { name: 'Speed' });
+    expect(input).toHaveAccessibleDescription('Too fast');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+  });
 });

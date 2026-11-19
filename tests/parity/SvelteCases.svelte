@@ -104,6 +104,7 @@ Svelte side of the parity scenes. Each scene must match its twin in
 {:else if name === 'progress'}
   <Progress value={5} max={10} label="Budget" markers={[2, 8]} showValue />
   <Progress value={13} max={10} label="Load" />
+  <Progress max={10} label="Loading" showValue />
 {:else if name === 'skeleton'}
   <ArkheProvider effects={fx ? {} : false}>
     <SkeletonGroup loading>

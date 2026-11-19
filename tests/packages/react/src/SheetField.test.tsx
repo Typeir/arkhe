@@ -27,7 +27,7 @@ describe('SheetField', () => {
     await waitFor(() => expect(sheet).not.toBeVisible());
   });
 
-  it('shows the placeholder without a choice and submits through a hidden input', () => {
+  it('shows the placeholder without a choice and submits through a stand-in input', () => {
     const { container } = render(
       <SheetField label='School' placeholder='Any' name='school' value='abj'>
         {() => null}
@@ -37,9 +37,39 @@ describe('SheetField', () => {
       'data-placeholder-shown',
       '',
     );
-    expect(container.querySelector('input[type="hidden"]')).toHaveAttribute(
-      'name',
-      'school',
+    const standIn = container.querySelector('[data-part="stand-in"]');
+    expect(standIn).toHaveAttribute('name', 'school');
+    expect(standIn).toHaveValue('abj');
+  });
+
+  it('validates a required choice and hands focus to its button', () => {
+    const { container } = render(
+      <SheetField label='School' required>
+        {() => null}
+      </SheetField>,
     );
+    const standIn = container.querySelector(
+      '[data-part="stand-in"]',
+    ) as HTMLInputElement;
+    expect(standIn).toBeRequired();
+    expect(standIn.checkValidity()).toBe(false);
+    standIn.focus();
+    expect(screen.getByRole('button', { name: /School/ })).toHaveFocus();
+  });
+
+  it('is described by its hint, then by its error', () => {
+    const { rerender } = render(
+      <SheetField label='School' hint='Pick one'>
+        {() => null}
+      </SheetField>,
+    );
+    const button = screen.getByRole('button', { name: /School/ });
+    expect(button).toHaveAccessibleDescription('Pick one');
+    rerender(
+      <SheetField label='School' hint='Pick one' error='Required'>
+        {() => null}
+      </SheetField>,
+    );
+    expect(button).toHaveAccessibleDescription('Required');
   });
 });

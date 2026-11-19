@@ -15,6 +15,8 @@ once mounted on the client, so server markup holds none.
     EMPTY_VALUE,
     SVELTE_EVENTS,
     comboboxMachineProps,
+    fieldDescribedBy,
+    fieldIds,
     flag,
     fromEmptyValue,
     filterOptions,
@@ -39,6 +41,7 @@ once mounted on the client, so server markup holds none.
   import { useArkhe } from './context.js';
   import { useArkheEnvironment } from './environment.js';
   import ComboboxList from './ComboboxList.svelte';
+  import FieldNote from './FieldNote.svelte';
   import Icon from './Icon.svelte';
   import { useVirtualRows } from './virtualRows.svelte.js';
 
@@ -68,6 +71,8 @@ once mounted on the client, so server markup holds none.
    * @property {boolean} [labelHidden] - Keeps the label for assistive tech only.
    * @property {boolean} [inline] - Renders the list in place and always shown, as inside a sheet; the input empties and the list opens as it takes focus.
    * @property {string} [name] - Form field name; a hidden input carries the value.
+   * @property {string} [hint] - Help text under the control.
+   * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
    * @property {'search' | 'done' | 'go' | 'next' | 'enter'} [enterKeyHint] - Label of the on-screen keyboard's Enter key.
    * @property {boolean} [required] - The input must not be empty.
    * @property {number} [rowPitch] - Row height in rem; draws only the rows in view. Flat lists only.
@@ -95,6 +100,8 @@ once mounted on the client, so server markup holds none.
     labelHidden?: boolean;
     inline?: boolean;
     name?: string;
+    hint?: string;
+    error?: string;
     enterKeyHint?: 'search' | 'done' | 'go' | 'next' | 'enter';
     required?: boolean;
     rowPitch?: number;
@@ -102,6 +109,7 @@ once mounted on the client, so server markup holds none.
 
   let { value = $bindable(), ...props }: Props = $props();
   const id = $props.id();
+  const ids = fieldIds(id);
   const arkhe = useArkhe();
   const env = useArkheEnvironment();
   let query = $state('');
@@ -136,6 +144,7 @@ once mounted on the client, so server markup holds none.
       loading: props.loading,
       disabled: props.disabled,
       required: props.required,
+      invalid: Boolean(props.error),
       placeholder: props.placeholder,
       placement: props.placement,
       getRootNode: env().getRootNode,
@@ -190,7 +199,10 @@ once mounted on the client, so server markup holds none.
             },
           }
         : {},
-      { enterkeyhint: props.enterKeyHint },
+      {
+        enterkeyhint: props.enterKeyHint,
+        'aria-describedby': fieldDescribedBy(ids, props.hint, props.error),
+      },
     ),
   );
 </script>
@@ -236,6 +248,7 @@ once mounted on the client, so server markup holds none.
       <button {...api.getTriggerProps()}><Icon name="chevron-down" /></button>
     {/if}
   </div>
+  <FieldNote {ids} hint={props.hint} error={props.error} />
   {#if props.name !== undefined}
     <input
       type="hidden"

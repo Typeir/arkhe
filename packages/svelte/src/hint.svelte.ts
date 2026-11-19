@@ -55,6 +55,8 @@ export function provideHintNode(node: HintNode): void {
  * @property {() => RootNode} getRootNode - Root node holding trigger and hint.
  * @property {HintNode} node - The hint's tree node, from `useHintNode`.
  * @property {() => boolean} leaving - Whether Zag waits to close it after the pointer left.
+ * @property {() => void} [activate] - A click that is not a tap; pins a card.
+ * @property {boolean} [keys] - Enter and Space also activate.
  */
 export interface HintInput<P extends object> {
   readonly open: boolean;
@@ -64,6 +66,8 @@ export interface HintInput<P extends object> {
   readonly getRootNode: () => RootNode;
   readonly node: HintNode;
   readonly leaving: () => boolean;
+  readonly activate?: () => void;
+  readonly keys?: boolean;
 }
 
 /**
@@ -137,6 +141,8 @@ export function useHint<P extends object>(read: () => HintInput<P>): Hint<P> {
         memory,
         names: SVELTE_EVENTS,
         holds: (target) => node.holds(getRootNode(), target),
+        activate: read().activate,
+        keys: read().keys,
       });
     },
     get mounted() {

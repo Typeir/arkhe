@@ -34,6 +34,8 @@ list instead; choosing closes it.
    * @property {string} [emptyLabel] - Text of a first option that stands for no choice, such as "All".
    * @property {'s' | 'm' | 'l'} [size] - Control size. Defaults to `m`.
    * @property {boolean} [labelHidden] - Keeps the label for assistive tech only.
+   * @property {string} [hint] - Help text under the control.
+   * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
    * @property {number} [rowPitch] - Row height in rem; draws only the rows in view, for long lists. Flat lists only.
    */
   interface Props {
@@ -54,6 +56,8 @@ list instead; choosing closes it.
     emptyLabel?: string;
     size?: 's' | 'm' | 'l';
     labelHidden?: boolean;
+    hint?: string;
+    error?: string;
     rowPitch?: number;
   }
 
@@ -90,10 +94,15 @@ list instead; choosing closes it.
     labelHidden={shared.labelHidden}
     disabled={shared.disabled}
     {name}
-    value={current}>
+    value={current}
+    {required}
+    hint={shared.hint}
+    error={shared.error}>
     {#snippet children(close)}
       <ComboboxField
         {...shared}
+        hint={undefined}
+        error={undefined}
         value={current}
         labelHidden
         inline

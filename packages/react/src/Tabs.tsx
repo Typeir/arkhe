@@ -13,6 +13,8 @@
 
 import {
   ARKHE_CLASS,
+  findablePanels,
+  flag,
   staleTabFallback,
   tabsMachineProps,
   uniqueByValue,
@@ -20,7 +22,15 @@ import {
 } from '@arkhe/core';
 import { mergeProps, normalizeProps, useMachine } from '@zag-js/react';
 import * as tabs from '@zag-js/tabs';
-import { useEffect, useId, useState, type JSX, type ReactNode } from 'react';
+import {
+  useEffect,
+  useEffectEvent,
+  useId,
+  useRef,
+  useState,
+  type JSX,
+  type ReactNode,
+} from 'react';
 import { useArkheEnvironment } from './ArkheEnvironment.js';
 
 /**
@@ -90,10 +100,18 @@ export const Tabs = ({
   useEffect(() => {
     if (fallback !== undefined) api.setValue(fallback);
   }, [api, fallback]);
+  const root = useRef<HTMLDivElement>(null);
+  const select = useEffectEvent((next: string) => api.setValue(next));
+  useEffect(() => {
+    if (!root.current) return undefined;
+    return findablePanels(root.current, select);
+  }, []);
   const panelFor = (key: string) =>
     typeof panels === 'function' ? panels(key) : panels[key];
   return (
-    <div {...mergeProps(api.getRootProps(), { className: ARKHE_CLASS })}>
+    <div
+      {...mergeProps(api.getRootProps(), { className: ARKHE_CLASS })}
+      ref={root}>
       <div {...api.getListProps()}>
         {shown.map((item) => (
           <button
@@ -108,7 +126,11 @@ export const Tabs = ({
         <div {...api.getIndicatorProps()} />
       </div>
       {shown.map((item) => (
-        <div key={item.value} {...api.getContentProps({ value: item.value })}>
+        <div
+          key={item.value}
+          {...api.getContentProps({ value: item.value })}
+          data-value={item.value}
+          data-findable={flag(!item.disabled)}>
           {panelFor(item.value)}
         </div>
       ))}

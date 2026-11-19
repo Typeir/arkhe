@@ -32,7 +32,7 @@ const forced = forcedBlocks(
 
 describe('forced colours', () => {
   it.each([
-    ['[data-progress-fill])', 'background: Highlight'],
+    ['[data-progress-fill])::-webkit-progress-value', 'background: Highlight'],
     [
       '[data-progress-track])',
       'outline: var(--border-width-xs) solid CanvasText',

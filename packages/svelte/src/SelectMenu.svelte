@@ -11,6 +11,8 @@ client, so server markup holds none.
   import {
     ARKHE_CLASS,
     EMPTY_VALUE,
+    fieldDescribedBy,
+    fieldIds,
     flag,
     fromEmptyValue,
     isGrouped,
@@ -33,6 +35,7 @@ client, so server markup holds none.
   import { onMount, type Snippet } from 'svelte';
   import { useArkhe } from './context.js';
   import { useArkheEnvironment } from './environment.js';
+  import FieldNote from './FieldNote.svelte';
   import Icon from './Icon.svelte';
   import { useVirtualRows } from './virtualRows.svelte.js';
 
@@ -55,6 +58,8 @@ client, so server markup holds none.
    * @property {string} [emptyLabel] - Text of a first option that stands for no choice, such as "All".
    * @property {'s' | 'm' | 'l'} [size] - Control size. Defaults to `m`.
    * @property {boolean} [labelHidden] - Keeps the label for assistive tech only.
+   * @property {string} [hint] - Help text under the control.
+   * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
    * @property {number} [rowPitch] - Row height in rem; draws only the rows in view. Flat lists only.
    */
   interface Props {
@@ -73,11 +78,14 @@ client, so server markup holds none.
     emptyLabel?: string;
     size?: 's' | 'm' | 'l';
     labelHidden?: boolean;
+    hint?: string;
+    error?: string;
     rowPitch?: number;
   }
 
   let { value = $bindable(), ...props }: Props = $props();
   const id = $props.id();
+  const ids = fieldIds(id);
   const arkhe = useArkhe();
   const env = useArkheEnvironment();
   const shown = $derived(
@@ -99,6 +107,7 @@ client, so server markup holds none.
       defaultValue: toEmptyValue(props.defaultValue ?? null, props.emptyLabel),
       name: props.name,
       required: props.required,
+      invalid: Boolean(props.error),
       autoComplete: props.autoComplete,
       disabled: props.disabled,
       placement: props.placement,
@@ -142,12 +151,15 @@ client, so server markup holds none.
   })}>
   <label {...api.getLabelProps()}>{props.label}</label>
   <div {...api.getControlProps()}>
-    <button {...api.getTriggerProps()}
+    <button
+      {...api.getTriggerProps()}
+      aria-describedby={fieldDescribedBy(ids, props.hint, props.error)}
       ><span {...api.getValueTextProps()}
         >{api.valueAsString || props.placeholder || ''}</span
       ><span {...api.getIndicatorProps()}><Icon name="chevron-down" /></span
       ></button>
   </div>
+  <FieldNote {ids} hint={props.hint} error={props.error} />
   <select {...api.getHiddenSelectProps()}>
     <option value="">{props.emptyLabel ?? ''}</option>
     {#each shown.filter((entry) => entry.value !== EMPTY_VALUE && (!rows.on || api.value.includes(entry.value))) as entry (entry.value)}

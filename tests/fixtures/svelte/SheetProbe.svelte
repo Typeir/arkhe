@@ -14,12 +14,18 @@ shuts the sheet.
    * @property {string} [placeholder] - Shown without a choice.
    * @property {string} [name] - Form field name.
    * @property {string | null} [value] - Submitted value.
+   * @property {boolean} [required] - A value must be chosen.
+   * @property {string} [hint] - Help text.
+   * @property {string} [error] - Error text.
    */
   interface Props {
     text?: string;
     placeholder?: string;
     name?: string;
     value?: string | null;
+    required?: boolean;
+    hint?: string;
+    error?: string;
   }
 
   let props: Props = $props();

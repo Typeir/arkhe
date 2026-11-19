@@ -161,3 +161,43 @@ describe('watchOutsideTap', () => {
     expect(close).toHaveBeenCalledOnce();
   });
 });
+
+describe('hintTriggerProps activation', () => {
+  function armed(keys: boolean) {
+    const activate = vi.fn();
+    const setOpen = vi.fn();
+    const props = hintTriggerProps(
+      {},
+      {
+        open: false,
+        setOpen,
+        memory: { current: undefined },
+        names: REACT_EVENTS,
+        activate,
+        keys,
+      },
+    ) as Record<string, Handler>;
+    return { props, activate, setOpen };
+  }
+
+  it('activates on a click that is not a tap, and not on a tap', () => {
+    const at = trigger('button', 'hover-card');
+    const { props, activate, setOpen } = armed(false);
+    props['onClick']?.(event('click', at, 'mouse'));
+    expect(activate).toHaveBeenCalledOnce();
+    props['onClick']?.(event('click', at, 'touch'));
+    expect(activate).toHaveBeenCalledOnce();
+    expect(setOpen).toHaveBeenCalledWith(true);
+    expect(props['onKeyDown']).toBeUndefined();
+  });
+
+  it('activates on Enter and Space when the trigger is not a button', () => {
+    const at = trigger('span', 'hover-card');
+    const { props, activate } = armed(true);
+    for (const key of ['Enter', ' ', 'a']) {
+      const press = { ...event('keydown', at), key };
+      props['onKeyDown']?.(press);
+    }
+    expect(activate).toHaveBeenCalledTimes(2);
+  });
+});

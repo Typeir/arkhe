@@ -1,5 +1,5 @@
 import { Tabs } from '@arkhe/react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -129,5 +129,29 @@ describe('Tabs', () => {
       />,
     );
     expect(screen.queryByRole('tab', { name: 'Stats again' })).toBeNull();
+  });
+
+  it('lets find-in-page open the panels of enabled tabs', async () => {
+    const { container } = render(
+      <Tabs items={ITEMS} label='Sheet' panels={(value) => `panel ${value}`} />,
+    );
+    const panel = (value: string) =>
+      container.querySelector(
+        `[data-part="content"][data-value="${value}"]`,
+      ) as HTMLElement;
+    await waitFor(() =>
+      expect(panel('spell list')).toHaveAttribute('hidden', 'until-found'),
+    );
+    expect(panel('gear')).toHaveAttribute('hidden', '');
+    fireEvent(panel('spell list'), new Event('beforematch', { bubbles: true }));
+    await waitFor(() =>
+      expect(screen.getByRole('tab', { name: 'Spells' })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      ),
+    );
+    await waitFor(() =>
+      expect(panel('stats')).toHaveAttribute('hidden', 'until-found'),
+    );
   });
 });

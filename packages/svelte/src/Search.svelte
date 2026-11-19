@@ -41,6 +41,8 @@ machine. Give `search`, or `items` with `onInputChange`.
    * @property {Placement} [placement] - Side of the list. Defaults to `bottom-start`.
    * @property {'s' | 'm' | 'l'} [size] - Control size. Defaults to `m`.
    * @property {boolean} [labelHidden] - Keeps the label for assistive tech only.
+   * @property {string} [hint] - Help text under the control.
+   * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
    * @property {number} [rowPitch] - Row height in rem; draws only the rows in view, for long lists. Flat lists only.
    */
   interface Props {
@@ -58,6 +60,8 @@ machine. Give `search`, or `items` with `onInputChange`.
     placement?: Placement;
     size?: 's' | 'm' | 'l';
     labelHidden?: boolean;
+    hint?: string;
+    error?: string;
     rowPitch?: number;
   }
 
@@ -90,6 +94,8 @@ machine. Give `search`, or `items` with `onInputChange`.
     {...close
       ? {
           labelHidden: true,
+          hint: undefined,
+          error: undefined,
           inline: true,
           onSelect: (item: T) => {
             rest.onSelect?.(item);
@@ -110,7 +116,9 @@ machine. Give `search`, or `items` with `onInputChange`.
       placeholder={rest.placeholder}
       size={rest.size}
       labelHidden={rest.labelHidden}
-      disabled={rest.disabled}>
+      disabled={rest.disabled}
+      hint={rest.hint}
+      error={rest.error}>
       {#snippet children(close)}{@render field(close)}{/snippet}
     </SheetField>
   {:else}

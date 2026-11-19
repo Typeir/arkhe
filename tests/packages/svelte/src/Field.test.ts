@@ -48,4 +48,16 @@ describe('Field', () => {
     expect(readout).toHaveAttribute('for', screen.getByRole('textbox').id);
     expect(readout).toHaveAttribute('aria-live', 'off');
   });
+
+  it('announces a new error politely', async () => {
+    const { rerender } = render(Field, {
+      label: 'Name',
+      children: inputSnippet(),
+    });
+    await rerender({ error: 'Name is taken' });
+    const line = await screen.findByText('Name is taken', {
+      selector: '[data-politeness="polite"] > div',
+    });
+    expect(line).toBeInTheDocument();
+  });
 });

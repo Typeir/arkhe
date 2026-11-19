@@ -31,6 +31,7 @@ describe('selectMachineProps', () => {
         name: 'size',
         required: true,
         autoComplete: 'country',
+        invalid: true,
         disabled: true,
         placement: 'top',
       }),
@@ -38,6 +39,7 @@ describe('selectMachineProps', () => {
       name: 'size',
       required: true,
       autoComplete: 'country',
+      invalid: true,
       disabled: true,
       positioning: { placement: 'top' },
     });

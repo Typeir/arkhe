@@ -35,6 +35,7 @@ export default defineConfig({
     ],
   },
   build: {
+    cssTarget: 'chrome131',
     rolldownOptions: {
       input: {
         landing: here('index.html'),

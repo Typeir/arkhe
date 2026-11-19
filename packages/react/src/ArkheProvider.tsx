@@ -62,6 +62,7 @@ export type LinkComponent =
  * @property {LinkComponent} link - Link renderer.
  * @property {Announcer} announcer - Speaks text through the app's live regions.
  * @property {FxLoader} effects - The canvas effect engine, loaded on first use.
+ * @property {boolean} hoverCards - Hover cards open on hover and focus; when false, only a click opens one.
  */
 export interface ArkheContextValue {
   readonly labels: ArkheLabels;
@@ -70,6 +71,7 @@ export interface ArkheContextValue {
   readonly link: LinkComponent;
   readonly announcer: Announcer;
   readonly effects: FxLoader;
+  readonly hoverCards: boolean;
 }
 
 /**
@@ -89,6 +91,7 @@ const DEFAULT_CONTEXT: ArkheContextValue = {
   link: 'a',
   announcer: new Announcer(),
   effects: new FxLoader({}, loadFx),
+  hoverCards: true,
 };
 
 const ArkheContext = createContext<ArkheContextValue>(DEFAULT_CONTEXT);
@@ -102,6 +105,7 @@ const ArkheContext = createContext<ArkheContextValue>(DEFAULT_CONTEXT);
  * @property {IconSet<IconComponent>} [icons] - Icons by Lucide name; win over Lucide.
  * @property {LinkComponent} [link] - Link renderer. Defaults to `a`.
  * @property {EffectsSetting} [effects] - Canvas effect options, or `false` for CSS skeletons everywhere. Read once.
+ * @property {boolean} [hoverCards] - `false` opens hover cards on click only. Defaults to true.
  * @property {ReactNode} children - App subtree.
  */
 export interface ArkheProviderProps {
@@ -110,6 +114,7 @@ export interface ArkheProviderProps {
   readonly icons?: IconSet<IconComponent>;
   readonly link?: LinkComponent;
   readonly effects?: EffectsSetting;
+  readonly hoverCards?: boolean;
   readonly children: ReactNode;
 }
 
@@ -134,6 +139,7 @@ export const ArkheProvider = ({
   icons,
   link,
   effects,
+  hoverCards,
   children,
 }: ArkheProviderProps): JSX.Element => {
   const [announcer] = useState(() => new Announcer());
@@ -148,8 +154,9 @@ export const ArkheProvider = ({
       link: link ?? 'a',
       announcer,
       effects: engine,
+      hoverCards: hoverCards ?? true,
     }),
-    [labels, locale, icons, link, announcer, engine],
+    [labels, locale, icons, link, announcer, engine, hoverCards],
   );
   return (
     <ArkheContext.Provider value={value}>{children}</ArkheContext.Provider>

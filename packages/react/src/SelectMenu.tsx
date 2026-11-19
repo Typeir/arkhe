@@ -15,6 +15,8 @@
 import {
   ARKHE_CLASS,
   EMPTY_VALUE,
+  fieldDescribedBy,
+  fieldIds,
   flag,
   fromEmptyValue,
   isGrouped,
@@ -33,6 +35,7 @@ import { useId, useMemo, type JSX, type ReactNode } from 'react';
 import { useArkhe } from './ArkheProvider.js';
 import { useArkheEnvironment } from './ArkheEnvironment.js';
 import { optionBody } from './ComboboxField.js';
+import { FieldNote } from './FieldNote.js';
 import { Icon } from './Icon.js';
 import { useHydrated } from './useHydrated.js';
 import { usePortalContainer } from './usePortalContainer.js';
@@ -58,6 +61,8 @@ import { useVirtualRows } from './useVirtualRows.js';
  * @property {string} [emptyLabel] - Text of a first option that stands for no choice, such as "All".
  * @property {'s' | 'm' | 'l'} [size] - Control size. Defaults to `m`.
  * @property {boolean} [labelHidden] - Keeps the label for assistive tech only.
+ * @property {string} [hint] - Help text under the control.
+ * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
  * @property {number} [rowPitch] - Row height in rem; draws only the rows in view. Flat lists only.
  */
 export interface SelectMenuProps<T extends SelectOption> {
@@ -76,6 +81,8 @@ export interface SelectMenuProps<T extends SelectOption> {
   readonly emptyLabel?: string;
   readonly size?: 's' | 'm' | 'l';
   readonly labelHidden?: boolean;
+  readonly hint?: string;
+  readonly error?: string;
   readonly rowPitch?: number;
 }
 
@@ -108,10 +115,13 @@ export const SelectMenu = <T extends SelectOption>(
     shown.length,
     isGrouped(shown) ? undefined : props.rowPitch,
   );
+  const id = useId();
+  const ids = fieldIds(id);
   const service = useMachine(select.machine, {
     ...selectMachineProps({
       ...props,
-      id: useId(),
+      id,
+      invalid: Boolean(props.error),
       labels,
       value: toEmptyValue(props.value, emptyLabel),
       defaultValue: toEmptyValue(props.defaultValue ?? null, emptyLabel),
@@ -140,7 +150,9 @@ export const SelectMenu = <T extends SelectOption>(
       data-label-hidden={flag(props.labelHidden)}>
       <label {...api.getLabelProps()}>{label}</label>
       <div {...api.getControlProps()}>
-        <button {...api.getTriggerProps()}>
+        <button
+          {...api.getTriggerProps()}
+          aria-describedby={fieldDescribedBy(ids, props.hint, props.error)}>
           <span {...api.getValueTextProps()}>
             {api.valueAsString || placeholder}
           </span>
@@ -149,6 +161,7 @@ export const SelectMenu = <T extends SelectOption>(
           </span>
         </button>
       </div>
+      <FieldNote ids={ids} hint={props.hint} error={props.error} />
       <select {...api.getHiddenSelectProps()}>
         <option value=''>{emptyLabel}</option>
         {shown

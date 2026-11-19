@@ -1,4 +1,6 @@
+// @vitest-environment jsdom
 import {
+  findablePanels,
   resolveTabValue,
   slug,
   staleTabFallback,
@@ -98,5 +100,46 @@ describe('tabsMachineProps', () => {
     expect(props.translations).toEqual({ listLabel: 'Sheet' });
     props.onValueChange({ value: 'stats' });
     expect(onValueChange).toHaveBeenCalledWith('stats');
+  });
+});
+
+describe('findablePanels', () => {
+  function tabsRoot() {
+    const root = document.createElement('div');
+    root.innerHTML =
+      '<div data-value="a" data-findable></div>' +
+      '<div data-value="b" data-findable hidden></div>' +
+      '<div data-value="c" hidden></div>';
+    document.body.append(root);
+    return root;
+  }
+
+  it('turns hidden findable panels until-found, now and after each hide', async () => {
+    const root = tabsRoot();
+    const stop = findablePanels(root, () => undefined);
+    const [a, b, c] = [...root.children] as HTMLElement[];
+    expect(b?.getAttribute('hidden')).toBe('until-found');
+    expect(c?.getAttribute('hidden')).toBe('');
+    a?.setAttribute('hidden', '');
+    await Promise.resolve();
+    expect(a?.getAttribute('hidden')).toBe('until-found');
+    stop();
+    root.remove();
+  });
+
+  it('reports the panel the browser reveals, until stopped', () => {
+    const root = tabsRoot();
+    const onFound = vi.fn();
+    const stop = findablePanels(root, onFound);
+    root.children[1]?.dispatchEvent(
+      new Event('beforematch', { bubbles: true }),
+    );
+    expect(onFound).toHaveBeenCalledWith('b');
+    stop();
+    root.children[1]?.dispatchEvent(
+      new Event('beforematch', { bubbles: true }),
+    );
+    expect(onFound).toHaveBeenCalledOnce();
+    root.remove();
   });
 });

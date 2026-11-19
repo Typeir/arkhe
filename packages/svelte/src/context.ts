@@ -49,6 +49,7 @@ export type LinkComponent = Component<Record<string, unknown>> | undefined;
  * @property {LinkComponent} link - Link renderer.
  * @property {Announcer} announcer - Speaks text through the app's live regions.
  * @property {FxLoader} effects - The canvas effect engine, loaded on first use.
+ * @property {boolean} hoverCards - Hover cards open on hover and focus; when false, only a click opens one.
  */
 export interface ArkheContextValue {
   readonly labels: ArkheLabels;
@@ -57,6 +58,7 @@ export interface ArkheContextValue {
   readonly link: LinkComponent;
   readonly announcer: Announcer;
   readonly effects: FxLoader;
+  readonly hoverCards: boolean;
 }
 
 const KEY = Symbol.for('arkhe.context');
@@ -78,6 +80,7 @@ const DEFAULT_CONTEXT: ArkheContextValue = {
   link: undefined,
   announcer: new Announcer(),
   effects: new FxLoader({}, loadFx),
+  hoverCards: true,
 };
 
 /**

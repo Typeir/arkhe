@@ -18,6 +18,14 @@ describe('progressState', () => {
     });
   });
 
+  it('reads no value as an unknown amount: nothing reached, nothing over', () => {
+    const state = progressState(undefined, 10, [2]);
+    expect(state.indeterminate).toBe(true);
+    expect(state.over).toBe(false);
+    expect(state.markers[0]?.reached).toBe(false);
+    expect(progressState(4, 10).indeterminate).toBe(false);
+  });
+
   it('clamps below zero', () => {
     expect(progressState(-2, 10).ratio).toBe(0);
   });

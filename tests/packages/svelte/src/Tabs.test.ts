@@ -1,7 +1,7 @@
 import { Tabs } from '@arkhe/svelte';
 import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
 import { panelSnippet, textSnippet } from '@tests/fixtures/svelte/snippets';
-import { render, screen, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -113,4 +113,33 @@ describe('Tabs', () => {
       expect(screen.getByRole('tabpanel')).toHaveTextContent(`panel ${shown}`);
     },
   );
+
+  it('lets find-in-page open the panels of enabled tabs', async () => {
+    const { container } = render(Tabs, {
+      items: ITEMS,
+      label: 'Sheet',
+      panel: panelSnippet(),
+    });
+    const panel = (value: string) =>
+      container.querySelector(
+        `[data-part="content"][data-value="${value}"]`,
+      ) as HTMLElement;
+    await waitFor(() =>
+      expect(panel('spells')).toHaveAttribute('hidden', 'until-found'),
+    );
+    expect(panel('gear')).toHaveAttribute('hidden', '');
+    await fireEvent(
+      panel('spells'),
+      new Event('beforematch', { bubbles: true }),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole('tab', { name: 'Spells' })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      ),
+    );
+    await waitFor(() =>
+      expect(panel('stats')).toHaveAttribute('hidden', 'until-found'),
+    );
+  });
 });

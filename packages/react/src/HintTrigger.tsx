@@ -101,6 +101,8 @@ export function useOpenState(
  * @property {string} positionerId - Id of the hint's positioner.
  * @property {HintNode} node - The hint's tree node, from `useHintNode`.
  * @property {() => boolean} leaving - Whether Zag waits to close it after the pointer left.
+ * @property {() => void} [activate] - A click that is not a tap; pins a card.
+ * @property {boolean} [keys] - Enter and Space also activate.
  */
 export interface HintInput<P extends object> {
   readonly open: boolean;
@@ -109,6 +111,8 @@ export interface HintInput<P extends object> {
   readonly positionerId: string;
   readonly node: HintNode;
   readonly leaving: () => boolean;
+  readonly activate?: () => void;
+  readonly keys?: boolean;
 }
 
 /**
@@ -159,6 +163,8 @@ export function useHint<P extends object>(
       memory,
       names: REACT_EVENTS,
       holds: (target) => node.holds(env.getRootNode(), target),
+      activate: input.activate,
+      keys: input.keys,
     }),
     mounted: opened,
   };

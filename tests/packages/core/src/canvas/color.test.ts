@@ -2,6 +2,7 @@
 import { stubCanvas } from '@tests/fixtures/canvas';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  computeColor,
   formatColor,
   mixRgb,
   readTokens,
@@ -58,5 +59,21 @@ describe('readTokens', () => {
       '--a': 'blue',
       '--b': '',
     });
+  });
+});
+
+describe('computeColor', () => {
+  it('computes a colour inside the element and leaves nothing behind', () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    expect(computeColor(host, 'rgb(1, 2, 3)')).toBe('rgb(1, 2, 3)');
+    expect(host.children).toHaveLength(0);
+    host.remove();
+  });
+
+  it('passes an empty or unparsable value through', () => {
+    const host = document.createElement('div');
+    expect(computeColor(host, '')).toBe('');
+    expect(computeColor(host, 'not a colour')).toBe('not a colour');
   });
 });

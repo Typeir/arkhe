@@ -179,4 +179,31 @@ describe('arkhe.css', () => {
     expect(still).toContain('animation-duration: 6s');
     expect(still).toMatch(/translate: 0 0/);
   });
+
+  it('paints a thin thumb on a 24px strip that needs no gutter', () => {
+    expect(CSS).not.toMatch(/scrollbar-(width|color):/);
+    expect(CSS).toMatch(/::-webkit-scrollbar \{\s*inline-size: 24px;/);
+    expect(CSS).toMatch(
+      /::-webkit-scrollbar-thumb \{\s*border: 10px solid transparent;/,
+    );
+  });
+
+  it('grows small targets to 24px with an invisible after-box', () => {
+    for (const [scope, part, state] of [
+      ['chip', 'remove', '::after'],
+      ['button', 'root', '[data-icon-only]::after'],
+    ] as const) {
+      expect(declarations(scope, part, state), scope).toContain(
+        'inline-size: max(100%, 24px)',
+      );
+    }
+  });
+
+  it('writes every colour once, as a light-dark pair', () => {
+    expect(CSS).toMatch(
+      /:root\[data-theme=light\] \{\s*color-scheme: light;\s*\}/,
+    );
+    expect(CSS).toMatch(/--color-error: light-dark\(/);
+    expect(CSS).not.toMatch(/rgb\(var\(--color-/);
+  });
 });

@@ -1,6 +1,8 @@
 /**
- * @fileoverview Progress: a rail with threshold markers that turns to the
- * error colour past its maximum.
+ * @fileoverview Progress: a native progress element on a rail with threshold
+ * markers, hatched in the error colour past its maximum, and indeterminate
+ * without a value. The value text shown above it is for sight only; the
+ * element itself carries it.
  *
  * @module packages/react/src/Progress
  * @version 1.0.0
@@ -24,14 +26,14 @@ import { useArkhe } from './ArkheProvider.js';
  * Props of Progress.
  *
  * @interface ProgressProps
- * @property {number} value - Current amount; may exceed `max`.
+ * @property {number} [value] - Current amount; may exceed `max`. None while the amount is unknown.
  * @property {number} max - Amount that fills the rail.
  * @property {string} label - Accessible name.
  * @property {readonly number[]} [markers] - Thresholds, in the value's units; repeats are dropped.
  * @property {boolean} [showValue] - Prints the value text above the rail.
  */
 export interface ProgressProps {
-  readonly value: number;
+  readonly value?: number;
   readonly max: number;
   readonly label: string;
   readonly markers?: readonly number[];
@@ -44,7 +46,7 @@ export interface ProgressProps {
  *
  * @component
  * @param {ProgressProps} props - Component props.
- * @param {number} props.value - Current amount.
+ * @param {number} [props.value] - Current amount.
  * @param {number} props.max - Amount that fills the rail.
  * @param {string} props.label - Accessible name.
  * @param {readonly number[]} [props.markers] - Thresholds.
@@ -61,25 +63,26 @@ export const Progress = ({
 }: ProgressProps): JSX.Element => {
   const { labels, locale } = useArkhe();
   const state = progressState(value, max, markers);
-  const text = progressValueText(state, max, labels, locale);
+  const text = state.indeterminate
+    ? undefined
+    : progressValueText(state, max, labels, locale);
   return (
     <div
       className={ARKHE_CLASS}
       {...partAttrs('progress', 'root')}
-      data-over={flag(state.over)}
-      role='progressbar'
-      aria-label={label}
-      aria-valuemin={0}
-      aria-valuemax={max}
-      aria-valuenow={Math.min(value, max)}
-      aria-valuetext={text}>
-      {showValue ? (
-        <span {...partAttrs('progress', 'value')}>{text}</span>
+      data-over={flag(state.over)}>
+      {showValue && text !== undefined ? (
+        <span {...partAttrs('progress', 'value')} aria-hidden='true'>
+          {text}
+        </span>
       ) : null}
       <span {...partAttrs('progress', 'track')}>
-        <span
+        <progress
           {...partAttrs('progress', 'fill')}
-          style={{ '--progress': state.ratio } as CSSProperties}
+          max={max}
+          value={state.indeterminate ? undefined : Math.min(state.value, max)}
+          aria-label={label}
+          aria-valuetext={text}
         />
         {state.markers.map((marker) => (
           <span

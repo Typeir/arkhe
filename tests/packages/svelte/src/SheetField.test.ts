@@ -16,7 +16,7 @@ describe('SheetField', () => {
     await waitFor(() => expect(sheet).not.toBeVisible());
   });
 
-  it('shows the placeholder without a choice and submits through a hidden input', () => {
+  it('shows the placeholder without a choice and submits through a stand-in input', () => {
     const { container } = render(SheetProbe, {
       placeholder: 'Any',
       name: 'school',
@@ -26,9 +26,27 @@ describe('SheetField', () => {
       'data-placeholder-shown',
       '',
     );
-    expect(container.querySelector('input[type="hidden"]')).toHaveAttribute(
-      'name',
-      'school',
-    );
+    const standIn = container.querySelector('[data-part="stand-in"]');
+    expect(standIn).toHaveAttribute('name', 'school');
+    expect(standIn).toHaveValue('abj');
+  });
+
+  it('validates a required choice and hands focus to its button', () => {
+    const { container } = render(SheetProbe, { required: true });
+    const standIn = container.querySelector(
+      '[data-part="stand-in"]',
+    ) as HTMLInputElement;
+    expect(standIn).toBeRequired();
+    expect(standIn.checkValidity()).toBe(false);
+    standIn.focus();
+    expect(screen.getByRole('button', { name: /School/ })).toHaveFocus();
+  });
+
+  it('is described by its hint, then by its error', async () => {
+    const { rerender } = render(SheetProbe, { hint: 'Pick one' });
+    const button = screen.getByRole('button', { name: /School/ });
+    expect(button).toHaveAccessibleDescription('Pick one');
+    await rerender({ hint: 'Pick one', error: 'Required' });
+    expect(button).toHaveAccessibleDescription('Required');
   });
 });

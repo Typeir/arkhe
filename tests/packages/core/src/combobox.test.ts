@@ -104,6 +104,10 @@ describe('comboboxMachineProps', () => {
     expect(translations.resultsCount(4)).toBe('4 results');
   });
 
+  it('marks the input invalid when asked', () => {
+    expect(comboboxMachineProps({ ...base, invalid: true }).invalid).toBe(true);
+  });
+
   it('marks the input required only when asked', () => {
     expect(comboboxMachineProps({ ...base, required: true }).required).toBe(
       true,
