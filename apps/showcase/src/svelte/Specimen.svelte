@@ -36,6 +36,8 @@ Svelte specimen: every Arkhé component with the shared specimen data.
     loadSpecimenCard,
     nameReadout,
   } from '../specimen';
+  import ChoiceSection from './ChoiceSection.svelte';
+  import CollapseSection from './CollapseSection.svelte';
   import SelectSection from './SelectSection.svelte';
   import SkeletonSection from './SkeletonSection.svelte';
 
@@ -229,4 +231,6 @@ Svelte specimen: every Arkhé component with the shared specimen data.
   </section>
 
   <SelectSection />
+  <ChoiceSection />
+  <CollapseSection />
 </main>

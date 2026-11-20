@@ -9,7 +9,7 @@
  * @since 0.1.0
  */
 
-import { fireEvent, screen } from '@testing-library/dom';
+import { fireEvent, screen, within } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
 import { tap } from '@tests/fixtures/tap';
 import { typeNumber } from '@tests/fixtures/typeNumber';
@@ -231,4 +231,50 @@ export const PARITY_CASES: readonly ParityCase[] = [
     steps: [click('Rune', 'combobox'), press('{ArrowUp}'), press('{Enter}')],
   },
   { name: 'virtual-list', steps: [] },
+  {
+    name: 'checkbox',
+    steps: [click('Use GPU', 'checkbox'), click('Clamp', 'checkbox')],
+  },
+  {
+    name: 'radio-group',
+    steps: [
+      {
+        label: 'choose Imperial in Units',
+        run: () =>
+          userEvent.click(
+            within(screen.getByRole('radiogroup', { name: 'Units' })).getByRole(
+              'radio',
+              { name: 'Imperial' },
+            ),
+          ),
+      },
+      press('{ArrowLeft}'),
+    ],
+  },
+  {
+    name: 'toggle-group',
+    steps: [
+      click('Fire'),
+      press('{ArrowRight}'),
+      click('Show more'),
+      click('Clear'),
+    ],
+  },
+  {
+    name: 'collapsible',
+    steps: [click('Lore'), click('Hidden'), click('Layer')],
+  },
+  {
+    name: 'disclosure',
+    steps: [
+      {
+        label: 'click LUT',
+        run: () => userEvent.click(screen.getByText('LUT')),
+      },
+    ],
+  },
+  {
+    name: 'accordion',
+    steps: [click('Expand all'), click('Senses'), click('Expand all')],
+  },
 ];

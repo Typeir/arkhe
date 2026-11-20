@@ -11,9 +11,12 @@
 import {
   ARKHE_ICON_NAMES,
   filterOptions,
+  type AccordionItem,
   type MenuEntry,
+  type RadioItem,
   type SelectOption,
   type TabItem,
+  type ToggleItem,
 } from '@arkhe/core';
 
 /**
@@ -93,6 +96,8 @@ export const SPECIMEN_SECTIONS = {
   modal: 'Modal',
   floating: 'Floating',
   select: 'Select',
+  choices: 'Choices',
+  sections: 'Sections',
 } as const;
 
 /**
@@ -284,3 +289,80 @@ export function clampTen(value: number | null): number | null {
 export function nameReadout(name: string): string {
   return `${name.length} / 24`;
 }
+
+/**
+ * Units for the specimen radio groups.
+ *
+ * @constant SPECIMEN_UNITS
+ * @type {readonly RadioItem[]}
+ */
+export const SPECIMEN_UNITS: readonly RadioItem[] = [
+  { value: 'metric', label: 'Metric' },
+  { value: 'imperial', label: 'Imperial' },
+  { value: 'stride', label: 'Stride' },
+];
+
+/**
+ * Boon options for the specimen pip radio group.
+ *
+ * @constant SPECIMEN_BOONS
+ * @type {readonly RadioItem[]}
+ */
+export const SPECIMEN_BOONS: readonly RadioItem[] = [
+  { value: 'might', label: 'Might' },
+  { value: 'grace', label: 'Grace' },
+  { value: 'wit', label: 'Wit' },
+  { value: 'lost', label: 'Lost', disabled: true },
+];
+
+/**
+ * Aspects for the specimen toggle group: more than its limit shows.
+ *
+ * @constant SPECIMEN_ASPECTS
+ * @type {readonly ToggleItem[]}
+ */
+export const SPECIMEN_ASPECTS: readonly ToggleItem[] = [
+  { value: 'fire', label: 'Fire' },
+  { value: 'frost', label: 'Frost' },
+  { value: 'storm', label: 'Storm' },
+  { value: 'stone', label: 'Stone' },
+  { value: 'tide', label: 'Tide' },
+  { value: 'void', label: 'Void', disabled: true },
+  { value: 'bloom', label: 'Bloom' },
+];
+
+/**
+ * Tools for the specimen single-press toggle group.
+ *
+ * @constant SPECIMEN_TOOLS
+ * @type {readonly ToggleItem[]}
+ */
+export const SPECIMEN_TOOLS: readonly ToggleItem[] = [
+  { value: 'move', label: 'Move', icon: 'plus' },
+  { value: 'erase', label: 'Erase', icon: 'x' },
+  { value: 'pin', label: 'Pin', icon: 'pin' },
+];
+
+/**
+ * Sections for the specimen accordions.
+ *
+ * @constant SPECIMEN_ACCORDION
+ * @type {readonly AccordionItem[]}
+ */
+export const SPECIMEN_ACCORDION: readonly AccordionItem[] = [
+  { value: 'senses', title: 'Senses' },
+  { value: 'actions', title: 'Actions' },
+  { value: 'lair', title: 'Lair actions', disabled: true },
+];
+
+/**
+ * Panel text per accordion section.
+ *
+ * @constant SPECIMEN_ACCORDION_TEXT
+ * @type {Readonly<Record<string, string>>}
+ */
+export const SPECIMEN_ACCORDION_TEXT: Readonly<Record<string, string>> = {
+  senses: 'Blindsight 12 stride, Fold-sense 6 stride.',
+  actions: 'Bite. Pounce. Howl that carries across the Fold.',
+  lair: 'The lair is quiet.',
+};

@@ -13,6 +13,7 @@ describe('useArkhe', () => {
       link: undefined,
       announcer: new Announcer(),
       effects: new FxLoader(false, () => Promise.reject(new Error('unused'))),
+      hoverCards: true,
     };
     const seen: { value?: ArkheContextValue } = {};
     render(ContextProbe, {

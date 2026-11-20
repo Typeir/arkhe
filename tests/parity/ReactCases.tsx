@@ -35,7 +35,9 @@ import {
   TWIN_OPTIONS,
   TWIN_TABS,
 } from './scenes';
+import { FORM_SCENES } from './ReactFormCases';
 import { HINT_SCENES } from './ReactHintCases';
+import { SECTION_SCENES } from './ReactSectionCases';
 import { SELECT_SCENES } from './ReactSelectCases';
 
 const Buttons = (): JSX.Element => {
@@ -227,6 +229,8 @@ const SCENES: Readonly<Record<string, () => ReactNode>> = {
   ),
   'popover-untitled': () => <Popover trigger='Sort'>Body</Popover>,
   ...SELECT_SCENES,
+  ...FORM_SCENES,
+  ...SECTION_SCENES,
 };
 
 /**

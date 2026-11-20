@@ -1,0 +1,139 @@
+/**
+ * @fileoverview Collapsible: a trigger button, optionally inside a heading,
+ * actions beside it, and a region find-in-page can open. Height animates in
+ * CSS.
+ *
+ * @module packages/react/src/Collapsible
+ * @version 1.0.0
+ * @author Typeir
+ * @since 0.4.0
+ */
+
+'use client';
+
+import {
+  ARKHE_CLASS,
+  collapsibleIds,
+  findableRegion,
+  headingTag,
+  partAttrs,
+  type HeadingLevel,
+} from '@arkhe/core';
+import {
+  createElement,
+  useEffect,
+  useEffectEvent,
+  useId,
+  useRef,
+  useState,
+  type JSX,
+  type ReactNode,
+} from 'react';
+import { Icon } from './Icon.js';
+
+/**
+ * Props of Collapsible.
+ *
+ * @interface CollapsibleProps
+ * @property {string} title - Trigger text; names the button and never changes.
+ * @property {boolean} [open] - Open state; makes it controlled.
+ * @property {boolean} [defaultOpen] - First state when uncontrolled.
+ * @property {(open: boolean) => void} [onOpenChange] - Reports changes, find-in-page included.
+ * @property {HeadingLevel} [heading] - Wraps the trigger in a heading of this level.
+ * @property {ReactNode} [actions] - Controls beside the trigger, outside it.
+ * @property {boolean} [lazy] - Mounts the content on first open, then keeps it.
+ * @property {boolean} [disabled] - The trigger stays focusable and ignores presses.
+ * @property {ReactNode} children - Content.
+ */
+export interface CollapsibleProps {
+  readonly title: string;
+  readonly open?: boolean;
+  readonly defaultOpen?: boolean;
+  readonly onOpenChange?: (open: boolean) => void;
+  readonly heading?: HeadingLevel;
+  readonly actions?: ReactNode;
+  readonly lazy?: boolean;
+  readonly disabled?: boolean;
+  readonly children: ReactNode;
+}
+
+/**
+ * Renders a collapsible section. A closed region stays findable; when the
+ * browser reveals it, the section opens.
+ *
+ * @component
+ * @param {CollapsibleProps} props - Component props.
+ * @returns {JSX.Element} Collapsible.
+ */
+export const Collapsible = ({
+  title,
+  open,
+  defaultOpen = false,
+  onOpenChange,
+  heading,
+  actions,
+  lazy,
+  disabled,
+  children,
+}: CollapsibleProps): JSX.Element => {
+  const ids = collapsibleIds(useId());
+  const [own, setOwn] = useState(defaultOpen);
+  const shown = open ?? own;
+  const [seen, setSeen] = useState(shown);
+  if (shown && !seen) setSeen(true);
+  const root = useRef<HTMLDivElement>(null);
+  const change = (next: boolean) => {
+    if (open === undefined) setOwn(next);
+    onOpenChange?.(next);
+  };
+  const found = useEffectEvent(() => {
+    if (!shown) change(true);
+  });
+  useEffect(
+    () => (root.current ? findableRegion(root.current, found) : undefined),
+    [],
+  );
+  const trigger = (
+    <button
+      type='button'
+      {...partAttrs('collapsible', 'trigger')}
+      id={ids.trigger}
+      aria-expanded={shown}
+      aria-controls={ids.content}
+      aria-disabled={disabled ? true : undefined}
+      onClick={() => {
+        if (!disabled) change(!shown);
+      }}>
+      <span {...partAttrs('collapsible', 'marker')}>
+        <Icon name='chevron-down' />
+      </span>
+      <span {...partAttrs('collapsible', 'title')}>{title}</span>
+    </button>
+  );
+  const tag = headingTag(heading);
+  return (
+    <div
+      ref={root}
+      className={ARKHE_CLASS}
+      {...partAttrs('collapsible', 'root')}
+      data-state={shown ? 'open' : 'closed'}>
+      <div {...partAttrs('collapsible', 'header')}>
+        {tag
+          ? createElement(tag, partAttrs('collapsible', 'heading'), trigger)
+          : trigger}
+        {actions === undefined ? null : (
+          <div {...partAttrs('collapsible', 'actions')}>{actions}</div>
+        )}
+      </div>
+      <div
+        {...partAttrs('collapsible', 'content')}
+        id={ids.content}
+        data-findable=''
+        hidden={!shown}>
+        <div {...partAttrs('collapsible', 'body')}>
+          {!lazy || seen ? children : null}
+        </div>
+      </div>
+    </div>
+  );
+};

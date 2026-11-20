@@ -7,7 +7,7 @@
  * @since 0.1.0
  */
 
-import type { FieldControlAttrs } from '@arkhe/core';
+import type { FieldControlAttrs, ToggleItem } from '@arkhe/core';
 import { createRawSnippet, type Snippet } from 'svelte';
 
 /**
@@ -71,5 +71,31 @@ export function valueSnippet(): Snippet<[string]> {
 export function rowSnippet(): Snippet<[string, number]> {
   return createRawSnippet<[string, number]>((row, index) => ({
     render: () => `<span>${index()}: ${row()}</span>`,
+  }));
+}
+
+/**
+ * Builds a toggle content snippet that prints the label, followed by " on"
+ * while pressed.
+ *
+ * @function toggleSnippet
+ * @returns {Snippet<[ToggleItem, boolean]>} Snippet.
+ */
+export function toggleSnippet(): Snippet<[ToggleItem, boolean]> {
+  return createRawSnippet<[ToggleItem, boolean]>((item, pressed) => ({
+    render: () => `<span>${item().label}${pressed() ? ' on' : ''}</span>`,
+  }));
+}
+
+/**
+ * Builds a snippet that renders a button labelled `text`.
+ *
+ * @function buttonSnippet
+ * @param {string} text - Button text.
+ * @returns {Snippet} Snippet.
+ */
+export function buttonSnippet(text: string): Snippet {
+  return createRawSnippet(() => ({
+    render: () => `<button type="button">${text}</button>`,
   }));
 }

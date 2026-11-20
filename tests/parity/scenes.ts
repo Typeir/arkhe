@@ -7,7 +7,14 @@
  * @since 0.1.0
  */
 
-import type { SelectOption, MenuEntry, TabItem } from '@arkhe/core';
+import type {
+  AccordionItem,
+  MenuEntry,
+  RadioItem,
+  SelectOption,
+  TabItem,
+  ToggleItem,
+} from '@arkhe/core';
 
 /**
  * Tabs for the tabs scene.
@@ -117,3 +124,40 @@ export const LONG_ITEMS: readonly SelectOption[] = Array.from(
   { length: 60 },
   (_, at) => ({ value: `rune-${at + 1}`, label: `Rune ${at + 1}` }),
 );
+
+/**
+ * Choices for the radio group scenes.
+ *
+ * @constant UNIT_ITEMS
+ * @type {readonly RadioItem[]}
+ */
+export const UNIT_ITEMS: readonly RadioItem[] = [
+  { value: 'metric', label: 'Metric' },
+  { value: 'imperial', label: 'Imperial' },
+  { value: 'stride', label: 'Stride', disabled: true },
+];
+
+/**
+ * Toggles for the toggle group scene.
+ *
+ * @constant ASPECT_ITEMS
+ * @type {readonly ToggleItem[]}
+ */
+export const ASPECT_ITEMS: readonly ToggleItem[] = [
+  { value: 'fire', label: 'Fire', icon: 'plus' },
+  { value: 'frost', label: 'Frost' },
+  { value: 'storm', label: 'Storm' },
+  { value: 'void', label: 'Void', disabled: true },
+];
+
+/**
+ * Sections for the accordion scene.
+ *
+ * @constant SECTION_ITEMS
+ * @type {readonly AccordionItem[]}
+ */
+export const SECTION_ITEMS: readonly AccordionItem[] = [
+  { value: 'senses', title: 'Senses' },
+  { value: 'actions', title: 'Actions' },
+  { value: 'lair', title: 'Lair', disabled: true },
+];

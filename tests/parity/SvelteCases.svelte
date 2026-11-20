@@ -28,6 +28,8 @@ Svelte side of the parity scenes. Each scene must match its twin in
     VirtualList,
   } from '@arkhe/svelte';
   import type { NumericValue } from '@arkhe/core';
+  import SvelteFormCases from './SvelteFormCases.svelte';
+  import SvelteSectionCases from './SvelteSectionCases.svelte';
   import {
     COMBO_ITEMS,
     LONG_ITEMS,
@@ -226,6 +228,10 @@ Svelte side of the parity scenes. Each scene must match its twin in
     getKey={(entry) => entry.value}>
     {#snippet item(entry, index)}{index}: {entry.label}{/snippet}
   </VirtualList>
+{:else if ['checkbox', 'radio-group', 'toggle-group'].includes(name)}
+  <SvelteFormCases {name} />
+{:else if ['collapsible', 'disclosure', 'accordion'].includes(name)}
+  <SvelteSectionCases {name} />
 {:else}
   missing scene {name}
 {/if}

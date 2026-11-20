@@ -43,6 +43,8 @@ import {
   loadSpecimenCard,
   nameReadout,
 } from '../specimen';
+import { ChoiceSection } from './ChoiceSection';
+import { CollapseSection } from './CollapseSection';
 import { SelectSection } from './SelectSection';
 import { SkeletonSection } from './SkeletonSection';
 
@@ -244,6 +246,8 @@ export const Specimen = (): JSX.Element => {
         <output>Picked: {picked}</output>
       </Section>
       <SelectSection />
+      <ChoiceSection />
+      <CollapseSection />
     </main>
   );
 };
