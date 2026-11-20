@@ -4,7 +4,7 @@ Test fixture: a hint probe inside a HintScope for `node`, and one outside.
 -->
 <script lang="ts">
   import type { HintNode } from '@arkhe/core';
-  import HintScope from '../../../packages/svelte/src/HintScope.svelte';
+  import HintScope from '../../../packages/svelte/src/hint/HintScope.svelte';
   import HintProbe from './HintProbe.svelte';
 
   /**

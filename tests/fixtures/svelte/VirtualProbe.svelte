@@ -4,7 +4,7 @@ Test fixture: a box wired to `useVirtualRows` over 100 rows, showing the
 range drawn, one row's set position and a button that scrolls to row 50.
 -->
 <script lang="ts">
-  import { useVirtualRows } from '../../../packages/svelte/src/virtualRows.svelte';
+  import { useVirtualRows } from '../../../packages/svelte/src/list/virtualRows.svelte';
 
   /**
    * Props of VirtualProbe.

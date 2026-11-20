@@ -27,7 +27,7 @@ export default defineConfig({
       },
       {
         find: /^@arkhe\/core\/fx$/,
-        replacement: pkg('core/src/fx/index.ts'),
+        replacement: pkg('core/src/feedback/fx/index.ts'),
       },
       { find: /^@arkhe\/core$/, replacement: pkg('core/src/index.ts') },
       { find: /^@arkhe\/react$/, replacement: pkg('react/src/index.ts') },

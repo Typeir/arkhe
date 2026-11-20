@@ -4,7 +4,7 @@ Test fixture: hands the hint node it gets to `onread`.
 -->
 <script lang="ts">
   import type { HintNode } from '@arkhe/core';
-  import { useHintNode } from '../../../packages/svelte/src/hint.svelte';
+  import { useHintNode } from '../../../packages/svelte/src/hint/hint.svelte';
 
   /**
    * Props of HintProbe.

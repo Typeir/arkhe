@@ -1,0 +1,111 @@
+<!--
+@component
+Renders a checkbox on a native input: a rhombus pip or a square box, a label
+beside it, then a hint or an error. Space toggles it; a `<fieldset disabled>`
+around it disables it; `checked` binds; a new error is announced politely.
+-->
+<script lang="ts">
+  import {
+    ARKHE_CLASS,
+    checkboxRootAttrs,
+    fieldDescribedBy,
+    fieldIds,
+    markIndeterminate,
+    partAttrs,
+    type CheckboxLook,
+    type CheckboxSize,
+  } from '@arkhe/core';
+  import FieldNote from '../field/FieldNote.svelte';
+  import Icon from '../base/Icon.svelte';
+
+  /**
+   * Props of Checkbox.
+   *
+   * @interface Props
+   * @property {string} label - Visible label; names the box.
+   * @property {boolean} [checked] - Checked state; bindable.
+   * @property {boolean} [defaultChecked] - First state when unbound.
+   * @property {(checked: boolean) => void} [onCheckedChange] - Reports changes.
+   * @property {boolean} [indeterminate] - Mixed state.
+   * @property {CheckboxLook} [look] - Pip or box; pip by default.
+   * @property {CheckboxSize} [size] - s, m or l; m by default.
+   * @property {boolean} [labelHidden] - Hides the label visually.
+   * @property {string} [name] - Form field name.
+   * @property {string} [value] - Value submitted while checked.
+   * @property {boolean} [required] - Must be checked to submit.
+   * @property {boolean} [disabled] - Blocks changes.
+   * @property {string} [hint] - Help text.
+   * @property {string} [error] - Error text; replaces the hint.
+   */
+  interface Props {
+    label: string;
+    checked?: boolean;
+    defaultChecked?: boolean;
+    onCheckedChange?: (checked: boolean) => void;
+    indeterminate?: boolean;
+    look?: CheckboxLook;
+    size?: CheckboxSize;
+    labelHidden?: boolean;
+    name?: string;
+    value?: string;
+    required?: boolean;
+    disabled?: boolean;
+    hint?: string;
+    error?: string;
+  }
+
+  let {
+    label,
+    defaultChecked,
+    checked = $bindable(defaultChecked),
+    onCheckedChange,
+    indeterminate,
+    look,
+    size,
+    labelHidden,
+    name,
+    value,
+    required,
+    disabled,
+    hint,
+    error,
+  }: Props = $props();
+  const id = $props.id();
+  const ids = fieldIds(id);
+</script>
+
+<div
+  class={ARKHE_CLASS}
+  {...partAttrs('checkbox', 'root')}
+  {...checkboxRootAttrs({
+    look,
+    size,
+    invalid: Boolean(error),
+    labelHidden,
+  })}>
+  <label {...partAttrs('checkbox', 'control')}>
+    <span {...partAttrs('checkbox', 'box')}>
+      <input
+        {@attach (node) => markIndeterminate(node, indeterminate)}
+        {...partAttrs('checkbox', 'input')}
+        type="checkbox"
+        id={ids.control}
+        bind:checked
+        onchange={(event) => onCheckedChange?.(event.currentTarget.checked)}
+        {name}
+        {value}
+        {required}
+        {disabled}
+        aria-describedby={fieldDescribedBy(ids, hint, error)}
+        aria-invalid={error ? true : undefined} />
+      {#if look === 'box'}
+        <span {...partAttrs('checkbox', 'mark')} aria-hidden="true">
+          <Icon name="check" />
+          <Icon name="minus" />
+        </span>
+      {/if}
+    </span>
+    <span {...partAttrs('checkbox', 'label')}>{label}</span>
+  </label>
+  <FieldNote {ids} {hint} {error} />
+</div>

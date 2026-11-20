@@ -4,7 +4,7 @@ Test fixture: a SheetField whose body is a search box and a Done button that
 shuts the sheet.
 -->
 <script lang="ts">
-  import SheetField from '../../../packages/svelte/src/SheetField.svelte';
+  import SheetField from '../../../packages/svelte/src/select/SheetField.svelte';
 
   /**
    * Props of SheetProbe.

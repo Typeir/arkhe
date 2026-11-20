@@ -10,7 +10,7 @@
  * @since 0.1.0
  */
 
-import type { Fx } from '../../packages/core/src/fx/api';
+import type { Fx } from '../../packages/core/src/feedback/fx/api';
 
 /**
  * Every engine call, in order, as `name` or `name:host-text`.

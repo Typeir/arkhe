@@ -5,7 +5,7 @@
     "noEmit": true,
     "paths": {
       "@arkhe/core": ["../core/src/index.ts"],
-      "@arkhe/core/fx": ["../core/src/fx/index.ts"]
+      "@arkhe/core/fx": ["../core/src/feedback/fx/index.ts"]
     }
   },
   "include": ["src"]

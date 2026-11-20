@@ -31,9 +31,9 @@ Component library: one markup and style contract, ported to React and Svelte, bu
 | Exact version pins in every manifest                                                            | `health:check` → exact-pins                                     |
 | Zero act() and console warnings in tests                                                        | `npm test` → no warnings                                        |
 
-## Proposed Rules (Claude, pending David)
+## Proposed Rules
 
-None. New proposals go in [Decisions](.github/docs/decisions.md) first.
+New proposals go in [Decisions](.github/docs/decisions.md) first.
 
 ## Completion Gate
 
@@ -51,18 +51,18 @@ Any failure → no completion. Node 22.23.4 (`.node-version`, fnm).
 
 ## Layout
 
-| Path                   | Holds                                                                   |
-| ---------------------- | ----------------------------------------------------------------------- |
-| `packages/core/src`    | Framework-free logic: parts, labels, icons, field ids, progress, status |
-| `packages/core/styles` | Tokens, mixins, component styles. `arkhe.scss` → `dist/arkhe.css`       |
-| `packages/react`       | React port. Components only map props and render                        |
-| `packages/svelte`      | Svelte 5 port, shipped as `.svelte` sources                             |
-| `apps/showcase`        | Same-origin landing that frames every target                            |
-| `tests/`               | Tests mirroring the repo: `tests/packages/react/src/Button.test.tsx`    |
-| `.github/scripts`      | Health check, showcase screenshots, ASCII-cwd shim                      |
+| Path                   | Holds                                                                       |
+| ---------------------- | --------------------------------------------------------------------------- |
+| `packages/core/src`    | Framework-free logic: parts, labels, icons, field ids, progress, status     |
+| `packages/core/styles` | Tokens, mixins, component styles. `arkhe.scss` → `dist/arkhe.css`           |
+| `packages/react`       | React port. Components only map props and render                            |
+| `packages/svelte`      | Svelte 5 port, shipped as `.svelte` sources                                 |
+| `apps/showcase`        | Same-origin landing that frames every target                                |
+| `tests/`               | Tests mirroring the repo: `tests/packages/react/src/action/Button.test.tsx` |
+| `.github/scripts`      | Health check, showcase screenshots, ASCII-cwd shim                          |
 
 ## Documentation Rules
 
 Root markdown: `AGENTS.md`, `CLAUDE.md`, `README.md` only; each package has its own `README.md` for its split repo. Docs → `.github/docs/`. Task files → `.ignore/tasks/`. Reports → `.ignore/reports/`.
 
-Commit messages: `[action]: imperative text`, e.g. `[feat]: add tabs`. Commit only when David asks.
+Commit messages: `[action]: imperative text`, e.g. `[feat]: add tabs`.
