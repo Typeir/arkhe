@@ -1,7 +1,7 @@
 import { Tooltip } from '@arkhe/react';
-import { tap } from '@tests/fixtures/tap';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { tap } from '@tests/fixtures/tap';
 import { useState } from 'react';
 import { renderToString } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
@@ -20,6 +20,9 @@ describe('Tooltip', () => {
     const hint = await screen.findByRole('tooltip');
     expect(hint).toHaveTextContent('Resistance halves damage.');
     expect(trigger).toHaveAccessibleDescription('Resistance halves damage.');
+    expect(
+      hint.querySelector('[data-part="arrow"] > [data-part="arrow-tip"]'),
+    ).not.toBeNull();
   });
 
   it('hides on Escape', async () => {

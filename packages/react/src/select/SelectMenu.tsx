@@ -21,25 +21,25 @@ import {
   fromEmptyValue,
   isGrouped,
   optionCollection,
+  type Placement,
   selectMachineProps,
+  type SelectOption,
   slug,
   toEmptyValue,
   uniqueByValue,
   withEmptyOption,
-  type SelectOption,
-  type Placement,
 } from '@arkhe/core';
-import { Portal, mergeProps, normalizeProps, useMachine } from '@zag-js/react';
+import { mergeProps, normalizeProps, Portal, useMachine } from '@zag-js/react';
 import * as select from '@zag-js/select';
-import { useId, useMemo, type JSX, type ReactNode } from 'react';
-import { useArkhe } from '../base/ArkheProvider.js';
+import { type JSX, type ReactNode, useId, useMemo } from 'react';
 import { useArkheEnvironment } from '../base/ArkheEnvironment.js';
-import { optionBody } from './ComboboxField.js';
-import { FieldNote } from '../field/FieldNote.js';
+import { useArkhe } from '../base/ArkheProvider.js';
 import { Icon } from '../base/Icon.js';
 import { useHydrated } from '../base/useHydrated.js';
 import { usePortalContainer } from '../base/usePortalContainer.js';
+import { FieldNote } from '../field/FieldNote.js';
 import { useVirtualRows } from '../list/useVirtualRows.js';
+import { optionBody } from './optionBody.js';
 
 /**
  * Props of SelectMenu.
@@ -93,12 +93,26 @@ export interface SelectMenuProps<T extends SelectOption> {
  * @param {SelectMenuProps<T>} props - Label, options, selection.
  * @returns {JSX.Element} Select.
  */
-export const SelectMenu = <T extends SelectOption>(
-  props: SelectMenuProps<T>,
-): JSX.Element => {
-  const { label, items, placeholder, emptyLabel } = props;
-  const renderItem =
-    props.renderItem ?? ((item: T) => optionBody(item, 'select'));
+export const SelectMenu = <T extends SelectOption>({
+  label,
+  items,
+  placeholder,
+  value,
+  defaultValue,
+  onValueChange,
+  renderItem = (item: T) => optionBody(item, 'select'),
+  name,
+  required,
+  autoComplete,
+  disabled,
+  placement,
+  emptyLabel,
+  size,
+  labelHidden,
+  hint,
+  error,
+  rowPitch,
+}: SelectMenuProps<T>): JSX.Element => {
   const { labels } = useArkhe();
   const env = useArkheEnvironment();
   const container = usePortalContainer();
@@ -113,24 +127,29 @@ export const SelectMenu = <T extends SelectOption>(
   );
   const { attach, ...rows } = useVirtualRows(
     shown.length,
-    isGrouped(shown) ? undefined : props.rowPitch,
+    isGrouped(shown) ? undefined : rowPitch,
   );
   const id = useId();
   const ids = fieldIds(id);
   const service = useMachine(select.machine, {
     ...selectMachineProps({
-      ...props,
       id,
-      invalid: Boolean(props.error),
+      label,
       labels,
-      value: toEmptyValue(props.value, emptyLabel),
-      defaultValue: toEmptyValue(props.defaultValue ?? null, emptyLabel),
+      value: toEmptyValue(value, emptyLabel),
+      defaultValue: toEmptyValue(defaultValue ?? null, emptyLabel),
+      name,
+      required,
+      invalid: Boolean(error),
+      autoComplete,
+      disabled,
+      placement,
       getRootNode: env.getRootNode,
     }),
     ...(rows.on ? { scrollToIndexFn: rows.scrollTo } : {}),
     collection,
     onValueChange: (details) =>
-      props.onValueChange?.(fromEmptyValue(details.value[0] ?? null)),
+      onValueChange?.(fromEmptyValue(details.value[0] ?? null)),
   });
   const api = select.connect(service, normalizeProps);
   const option = (item: T, index: number) => (
@@ -143,16 +162,32 @@ export const SelectMenu = <T extends SelectOption>(
         : renderItem(item)}
     </div>
   );
+  const options = () => {
+    if (rows.on) {
+      return shown
+        .slice(rows.range.start, rows.range.end)
+        .map((item, at) => option(item, rows.range.start + at));
+    }
+    if (!isGrouped(shown)) return shown.map(option);
+    return collection.group().map(([group, members]) => (
+      <div key={group} {...api.getItemGroupProps({ id: slug(group) })}>
+        <div {...api.getItemGroupLabelProps({ htmlFor: slug(group) })}>
+          {group}
+        </div>
+        {members.map(option)}
+      </div>
+    ));
+  };
   return (
     <div
       {...mergeProps(api.getRootProps(), { className: ARKHE_CLASS })}
-      data-size={props.size}
-      data-label-hidden={flag(props.labelHidden)}>
+      data-size={size}
+      data-label-hidden={flag(labelHidden)}>
       <label {...api.getLabelProps()}>{label}</label>
       <div {...api.getControlProps()}>
         <button
           {...api.getTriggerProps()}
-          aria-describedby={fieldDescribedBy(ids, props.hint, props.error)}>
+          aria-describedby={fieldDescribedBy(ids, hint, error)}>
           <span {...api.getValueTextProps()}>
             {api.valueAsString || placeholder}
           </span>
@@ -161,7 +196,7 @@ export const SelectMenu = <T extends SelectOption>(
           </span>
         </button>
       </div>
-      <FieldNote ids={ids} hint={props.hint} error={props.error} />
+      <FieldNote ids={ids} hint={hint} error={error} />
       <select {...api.getHiddenSelectProps()}>
         <option value=''>{emptyLabel}</option>
         {shown
@@ -188,25 +223,7 @@ export const SelectMenu = <T extends SelectOption>(
                 ref={attach}
                 style={rows.vars}
                 data-virtual={flag(rows.on)}>
-                {rows.on
-                  ? shown
-                      .slice(rows.range.start, rows.range.end)
-                      .map((item, at) => option(item, rows.range.start + at))
-                  : isGrouped(shown)
-                    ? collection.group().map(([group, members]) => (
-                        <div
-                          key={group}
-                          {...api.getItemGroupProps({ id: slug(group) })}>
-                          <div
-                            {...api.getItemGroupLabelProps({
-                              htmlFor: slug(group),
-                            })}>
-                            {group}
-                          </div>
-                          {members.map(option)}
-                        </div>
-                      ))
-                    : shown.map(option)}
+                {options()}
               </div>
             </div>
           </div>

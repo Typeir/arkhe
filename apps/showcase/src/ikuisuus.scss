@@ -1,0 +1,74 @@
+/**
+ * @fileoverview Ikuisuus's keyword look over Arkhé's HoverCard for the clone
+ * section. Arkhé draws the card as Ikuisuus does, so this holds the page
+ * styles around it and Ikuisuus's 14px root: its `rem` sizes are written
+ * against `--ik-rem`. Cards portal into `.ikuisuus-layer`.
+ */
+
+@font-face {
+  font-family: 'Junicode';
+  src: url('/fonts/JunicodeVF-Roman.woff2') format('woff2');
+  font-weight: 300 700;
+  font-display: swap;
+}
+
+$card: "[data-scope='hover-card'][data-part='content']";
+$header: "[data-scope='hover-card'][data-part='header']";
+
+.ikuisuus,
+.ikuisuus-layer {
+  --ik-rem: 0.875rem;
+  --ik-headings: 'Junicode', 'Times New Roman', Times, serif;
+
+  strong {
+    color: var(--color-emphasis);
+    font-weight: 700;
+  }
+
+  [data-scope='hover-card'][data-part='trigger'] {
+    border-bottom: var(--border-width-xs) dotted var(--color-accent);
+    color: var(--color-accent);
+    text-decoration: none;
+    text-transform: capitalize;
+    white-space: nowrap;
+    cursor: help;
+
+    &:hover,
+    &:focus-visible {
+      border-bottom-style: solid;
+      color: var(--color-accent-hover);
+    }
+  }
+}
+
+.ikuisuus .prose {
+  margin: 0;
+  font-size: var(--ik-rem);
+  line-height: 1.75;
+
+  [data-scope='hover-card'][data-part='trigger'] {
+    font-weight: 500;
+    text-decoration: underline;
+    transition: color 0.2s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+}
+
+.ikuisuus-layer {
+  #{$card} {
+    font-size: var(--ik-rem);
+    line-height: 1.5;
+  }
+
+  #{$header} {
+    font-size: calc(0.7 * var(--ik-rem));
+  }
+
+  [data-scope='hover-card'][data-part='body'] {
+    padding: calc(0.5 * var(--ik-rem)) calc(0.75 * var(--ik-rem));
+    font-size: calc(0.8125 * var(--ik-rem));
+  }
+}

@@ -9,8 +9,8 @@
  * @since 0.1.0
  */
 
-import { HoverCard, Tooltip } from '@arkhe/react';
 import type { ReactNode } from 'react';
+import { Button, HoverCard, Tooltip } from '@arkhe/react';
 
 /**
  * Hint scenes by name.
@@ -51,7 +51,11 @@ export const HINT_SCENES: Readonly<Record<string, () => ReactNode>> = {
     </HoverCard>
   ),
   'hover-card': () => (
-    <HoverCard title='Charge' openDelay={0} content='Spend to act twice.'>
+    <HoverCard
+      title='Charge'
+      openDelay={0}
+      content='Spend to act twice.'
+      actions={<Button>Copy</Button>}>
       charge
     </HoverCard>
   ),

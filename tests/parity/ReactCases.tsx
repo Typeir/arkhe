@@ -8,6 +8,7 @@
  * @since 0.1.0
  */
 
+import type { NumericValue } from '@arkhe/core';
 import {
   ArkheProvider,
   Button,
@@ -26,8 +27,11 @@ import {
   TextArea,
   TextInput,
 } from '@arkhe/react';
-import type { NumericValue } from '@arkhe/core';
-import { useState, type JSX, type ReactNode } from 'react';
+import { type JSX, type ReactNode, useState } from 'react';
+import { FORM_SCENES } from './ReactFormCases';
+import { HINT_SCENES } from './ReactHintCases';
+import { SECTION_SCENES } from './ReactSectionCases';
+import { SELECT_SCENES } from './ReactSelectCases';
 import {
   TAB_ITEMS,
   TAB_STAGES,
@@ -35,11 +39,13 @@ import {
   TWIN_OPTIONS,
   TWIN_TABS,
 } from './scenes';
-import { FORM_SCENES } from './ReactFormCases';
-import { HINT_SCENES } from './ReactHintCases';
-import { SECTION_SCENES } from './ReactSectionCases';
-import { SELECT_SCENES } from './ReactSelectCases';
 
+/**
+ * Button scene: every variant, a toggle and a link.
+ *
+ * @component
+ * @returns {JSX.Element} Scene.
+ */
 const Buttons = (): JSX.Element => {
   const [pressed, setPressed] = useState(false);
   return (
@@ -73,6 +79,12 @@ const Buttons = (): JSX.Element => {
   );
 };
 
+/**
+ * Tabs scene whose items change on a button press.
+ *
+ * @component
+ * @returns {JSX.Element} Scene.
+ */
 const ChangingTabs = (): JSX.Element => {
   const [stage, setStage] = useState(0);
   return (
@@ -87,6 +99,12 @@ const ChangingTabs = (): JSX.Element => {
   );
 };
 
+/**
+ * Number field held by its parent.
+ *
+ * @component
+ * @returns {JSX.Element} Scene.
+ */
 const ControlledNumeric = (): JSX.Element => {
   const [value, setValue] = useState<NumericValue>(5);
   const [log, setLog] = useState<readonly NumericValue[]>([]);
@@ -106,6 +124,12 @@ const ControlledNumeric = (): JSX.Element => {
   );
 };
 
+/**
+ * Modal scene whose description can be dropped.
+ *
+ * @component
+ * @returns {JSX.Element} Scene.
+ */
 const DescribedModal = (): JSX.Element => {
   const [described, setDescribed] = useState(true);
   return (
@@ -118,6 +142,12 @@ const DescribedModal = (): JSX.Element => {
   );
 };
 
+/**
+ * Skeleton scene that loads on a button press.
+ *
+ * @component
+ * @returns {JSX.Element} Scene.
+ */
 const LoadingSkeleton = (): JSX.Element => {
   const [loading, setLoading] = useState(true);
   const [revealed, setRevealed] = useState(0);
@@ -140,6 +170,12 @@ const LoadingSkeleton = (): JSX.Element => {
   );
 };
 
+/**
+ * React scenes by name; each must match its Svelte twin.
+ *
+ * @constant SCENES
+ * @type {Readonly<Record<string, () => ReactNode>>}
+ */
 const SCENES: Readonly<Record<string, () => ReactNode>> = {
   buttons: () => <Buttons />,
   chips: () => (

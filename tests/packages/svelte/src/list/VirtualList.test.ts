@@ -1,6 +1,6 @@
+import { fireEvent, render, screen, within } from '@testing-library/svelte';
 import { sizeBox } from '@tests/fixtures/scrollBox';
 import { rowSnippet } from '@tests/fixtures/svelte/snippets';
-import { fireEvent, render, screen, within } from '@testing-library/svelte';
 import { describe, expect, it, vi } from 'vitest';
 import VirtualList from '../../../../../packages/svelte/src/list/VirtualList.svelte';
 
@@ -16,6 +16,8 @@ describe('VirtualList', () => {
       item: rowSnippet(),
     });
     const list = screen.getByRole('list', { name: 'Entries' });
+    expect(list.localName).toBe('ul');
+    expect(list.firstElementChild?.localName).toBe('li');
     const rows = within(list).getAllByRole('listitem');
     expect(rows).toHaveLength(8);
     expect(rows[0]).toHaveAttribute('aria-posinset', '1');

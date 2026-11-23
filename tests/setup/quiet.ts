@@ -11,7 +11,19 @@
 
 import { afterEach, beforeEach } from 'vitest';
 
+/**
+ * The console methods before the guard wraps them.
+ *
+ * @constant original
+ * @type {{ warn: typeof console.warn, error: typeof console.error }}
+ */
 const original = { warn: console.warn, error: console.error };
+/**
+ * Warnings and errors seen during the current test.
+ *
+ * @constant seen
+ * @type {string[]}
+ */
 const seen: string[] = [];
 
 beforeEach(() => {

@@ -27,12 +27,23 @@ export type Call = readonly [string, ...unknown[]];
  * @property {Uint8ClampedArray} pixel - What `getImageData` returns.
  */
 export interface FakeContext {
+  /**
+   * Commands recorded so far, in order.
+   *
+   * @type {Call[]}
+   */
   readonly calls: Call[];
   fillStyle: string;
   pixel: Uint8ClampedArray;
   [method: string]: unknown;
 }
 
+/**
+ * Canvas context methods the fake records.
+ *
+ * @constant METHODS
+ * @type {readonly string[]}
+ */
 const METHODS = [
   'setTransform',
   'save',
@@ -78,6 +89,11 @@ export function fakeContext(): FakeContext {
  * @class FakePath
  */
 export class FakePath {
+  /**
+   * Commands recorded so far, in order.
+   *
+   * @type {Call[]}
+   */
   readonly calls: Call[] = [];
 
   /**
@@ -148,7 +164,17 @@ export function stubCanvas(webgl: unknown = null): FakeContext[] {
  * @class FakeIntersectionObserver
  */
 export class FakeIntersectionObserver {
+  /**
+   * Every observer made, oldest first.
+   *
+   * @type {FakeIntersectionObserver[]}
+   */
   static readonly all: FakeIntersectionObserver[] = [];
+  /**
+   * Elements observed now.
+   *
+   * @type {Set<Element>}
+   */
   readonly targets = new Set<Element>();
 
   /**
@@ -214,7 +240,18 @@ export class FakeIntersectionObserver {
  * @class FakeResizeObserver
  */
 export class FakeResizeObserver {
+  /**
+   * Every observer made, oldest first.
+   *
+   * @type {FakeResizeObserver[]}
+   */
   static readonly all: FakeResizeObserver[] = [];
+
+  /**
+   * Elements observed now.
+   *
+   * @type {Set<Element>}
+   */
   readonly targets = new Set<Element>();
 
   /**

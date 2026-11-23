@@ -1,8 +1,8 @@
 import {
+  type ToggleItem,
   toggleReduce,
   toggleRootAttrs,
   toggleShown,
-  type ToggleItem,
 } from '@arkhe/core';
 import { describe, expect, it } from 'vitest';
 

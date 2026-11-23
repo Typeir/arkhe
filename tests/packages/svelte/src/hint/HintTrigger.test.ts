@@ -1,5 +1,5 @@
-import { textSnippet } from '@tests/fixtures/svelte/snippets';
 import { render, screen } from '@testing-library/svelte';
+import { textSnippet } from '@tests/fixtures/svelte/snippets';
 import { describe, expect, it } from 'vitest';
 import HintTrigger from '../../../../../packages/svelte/src/hint/HintTrigger.svelte';
 

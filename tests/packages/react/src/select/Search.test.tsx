@@ -36,6 +36,31 @@ describe('Search at request time', () => {
     expect(search).toHaveBeenCalledTimes(asked);
   });
 
+  it('dims the last results while a newer query runs', async () => {
+    let release: () => void = () => undefined;
+    const search = vi.fn((query: string) =>
+      query === 'gob'
+        ? Promise.resolve(RESULTS.slice(1))
+        : new Promise<typeof RESULTS>((resolve) => {
+            release = () => resolve(RESULTS);
+          }),
+    );
+    render(<Search label='Search' search={search} debounce={0} />);
+    const input = screen.getByRole('combobox');
+    await userEvent.click(input);
+    fireEvent.change(input, { target: { value: 'gob' } });
+    await screen.findByRole('option', { name: 'Goblin' });
+    const list = screen.getByRole('listbox');
+    expect(list).not.toHaveAttribute('data-stale');
+    fireEvent.change(input, { target: { value: 'f' } });
+    await waitFor(() => expect(list).toHaveAttribute('data-stale'));
+    expect(list).toHaveAttribute('aria-busy', 'true');
+    expect(screen.getByRole('option', { name: 'Goblin' })).toBeInTheDocument();
+    release();
+    await screen.findByRole('option', { name: 'Fireball' });
+    expect(list).not.toHaveAttribute('data-stale');
+  });
+
   it('says when the request fails', async () => {
     render(
       <Search
@@ -93,7 +118,7 @@ describe('Search', () => {
   it('is a search landmark whose Enter key reads search', () => {
     render(<Search label='Find' items={RESULTS} />);
     const input = screen.getByRole('combobox', { name: 'Find' });
-    expect(screen.getByRole('search')).toContainElement(input);
+    expect(input.closest('search')).not.toBeNull();
     expect(input).toHaveAttribute('enterkeyhint', 'search');
   });
 });

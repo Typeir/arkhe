@@ -4,28 +4,31 @@ Renders a disclosure: a styled native `<details>`, working before hydration
 and findable by the browser, which opens, closes and reveals it. Plain
 summaries only; a section that needs a heading is a Collapsible.
 -->
-<script lang="ts">
-  import { ARKHE_CLASS, partAttrs } from '@arkhe/core';
+<script module lang="ts">
   import type { Snippet } from 'svelte';
-  import Icon from '../base/Icon.svelte';
 
   /**
    * Props of Disclosure.
    *
-   * @interface Props
+   * @interface DisclosureProps
    * @property {string} summary - Summary text; never a heading.
    * @property {boolean} [defaultOpen] - Starts open.
    * @property {string} [name] - Group name; one disclosure of the group is open at a time.
    * @property {Snippet} children - Content.
    */
-  interface Props {
+  export interface DisclosureProps {
     summary: string;
     defaultOpen?: boolean;
     name?: string;
     children: Snippet;
   }
+</script>
 
-  let { summary, defaultOpen, name, children }: Props = $props();
+<script lang="ts">
+  import { ARKHE_CLASS, partAttrs } from '@arkhe/core';
+  import Icon from '../base/Icon.svelte';
+
+  let { summary, defaultOpen, name, children }: DisclosureProps = $props();
 </script>
 
 <details

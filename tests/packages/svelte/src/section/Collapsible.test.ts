@@ -1,7 +1,8 @@
 import { Collapsible } from '@arkhe/svelte';
-import { buttonSnippet, textSnippet } from '@tests/fixtures/svelte/snippets';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import BoundUnset from '@tests/fixtures/svelte/BoundUnset.svelte';
+import { buttonSnippet, textSnippet } from '@tests/fixtures/svelte/snippets';
 import { describe, expect, it, vi } from 'vitest';
 
 function region(container: HTMLElement): HTMLElement {
@@ -94,5 +95,42 @@ describe('Collapsible', () => {
     await userEvent.click(trigger);
     await userEvent.click(trigger);
     expect(screen.getByText('Old roads.')).toBeInTheDocument();
+  });
+
+  it('is a section with a header only when it has a heading', () => {
+    const { container } = render(Collapsible, {
+      title: 'Layer',
+      heading: 3,
+      children: textSnippet('Body'),
+    });
+    const root = container.querySelector(
+      '[data-scope="collapsible"][data-part="root"]',
+    ) as HTMLElement;
+    expect(root.localName).toBe('section');
+    expect(root.querySelector('[data-part="header"]')?.localName).toBe(
+      'header',
+    );
+  });
+
+  it('stays plain containers without a heading', () => {
+    const { container } = render(Collapsible, {
+      title: 'Layer',
+      children: textSnippet('Body'),
+    });
+    const root = container.querySelector(
+      '[data-scope="collapsible"][data-part="root"]',
+    ) as HTMLElement;
+    expect(root.localName).toBe('div');
+    expect(root.querySelector('[data-part="header"]')?.localName).toBe('div');
+  });
+
+  it('starts from defaultOpen under a binding that starts unset', async () => {
+    render(BoundUnset, { kind: 'collapsible' });
+    const trigger = screen.getByRole('button', { name: 'Notes' });
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('held undefined')).toBeInTheDocument();
+    await userEvent.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByText('held false')).toBeInTheDocument();
   });
 });

@@ -18,13 +18,19 @@ import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import {
-  OWNER,
-  PACKAGES,
   branches,
   git,
+  OWNER,
+  PACKAGES,
   splitPackage,
 } from './split-package.mjs';
 
+/**
+ * Repository root, two levels above this script.
+ *
+ * @constant REPO_ROOT
+ * @type {string}
+ */
 const REPO_ROOT = resolve(import.meta.dirname, '../..');
 
 /**

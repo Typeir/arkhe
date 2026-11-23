@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
 import { stubCanvas } from '@tests/fixtures/canvas';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { Palette } from '../../../../../../../packages/core/src/feedback/fx/skeleton/palette';
 import { buildAtlas } from '../../../../../../../packages/core/src/feedback/fx/skeleton/atlas';
 import {
   GLYPHS,
   LEVELS,
 } from '../../../../../../../packages/core/src/feedback/fx/skeleton/constants';
-import type { Palette } from '../../../../../../../packages/core/src/feedback/fx/skeleton/palette';
 
 const PALETTE: Palette = {
   key: 'p',

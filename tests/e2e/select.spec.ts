@@ -39,6 +39,15 @@ for (const target of TARGETS) {
       await expect(page.getByText('Known: Ward')).toBeVisible();
     });
 
+    test('search sits in a native search landmark', async ({ page }) => {
+      const input = page.getByRole('combobox', { name: 'Search', exact: true });
+      const landmark = page.getByRole('search').filter({ has: input });
+      await expect(landmark).toHaveCount(1);
+      expect(await landmark.evaluate((element) => element.localName)).toBe(
+        'search',
+      );
+    });
+
     test('search submits free text and completes on Tab', async ({ page }) => {
       const input = page.getByRole('combobox', { name: 'Search', exact: true });
       await input.click();

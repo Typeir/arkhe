@@ -5,33 +5,26 @@ segments, the legend naming the group, then a hint or an error. Tab reaches
 the chosen radio, arrows move the choice, all natively; `value` binds; a new
 error is announced politely.
 -->
-<script lang="ts">
-  import {
-    ARKHE_CLASS,
-    fieldDescribedBy,
-    fieldIds,
-    partAttrs,
-    radioRootAttrs,
-    uniqueByValue,
-    type CheckboxSize,
-    type RadioItem,
-    type RadioLook,
-    type RadioOrientation,
+<script module lang="ts">
+  import type {
+    CheckboxSize,
+    RadioItem,
+    RadioLook,
+    RadioOrientation,
   } from '@arkhe/core';
-  import FieldNote from '../field/FieldNote.svelte';
 
   /**
    * Props of RadioGroup.
    *
-   * @interface Props
+   * @interface RadioGroupProps
    * @property {string} label - Legend; names the group.
    * @property {readonly RadioItem[]} items - Choices, in order; a repeated value is dropped.
    * @property {string | null} [value] - Chosen value; bindable, null chooses none.
-   * @property {string} [defaultValue] - First choice when unbound.
+   * @property {string} [defaultValue] - First choice when uncontrolled.
    * @property {(value: string) => void} [onValueChange] - Reports a new choice.
-   * @property {RadioLook} [look] - Pips or segments; pips by default.
-   * @property {CheckboxSize} [size] - Pip size; m by default.
-   * @property {RadioOrientation} [orientation] - Direction; horizontal by default.
+   * @property {RadioLook} [look] - Pips or segments. Defaults to `pip`.
+   * @property {CheckboxSize} [size] - Pip size. Defaults to `m`.
+   * @property {RadioOrientation} [orientation] - Direction. Defaults to `horizontal`.
    * @property {boolean} [labelHidden] - Hides the legend visually.
    * @property {string} [name] - Form field name; generated when absent.
    * @property {boolean} [required] - A choice is needed to submit.
@@ -39,7 +32,7 @@ error is announced politely.
    * @property {string} [hint] - Help text.
    * @property {string} [error] - Error text; replaces the hint.
    */
-  interface Props {
+  export interface RadioGroupProps {
     label: string;
     items: readonly RadioItem[];
     value?: string | null;
@@ -55,12 +48,26 @@ error is announced politely.
     hint?: string;
     error?: string;
   }
+</script>
+
+<script lang="ts">
+  import {
+    ARKHE_CLASS,
+    fieldDescribedBy,
+    fieldIds,
+    hasText,
+    partAttrs,
+    radioRootAttrs,
+    uniqueByValue,
+  } from '@arkhe/core';
+  import { untrack } from 'svelte';
+  import FieldNote from '../field/FieldNote.svelte';
 
   let {
     label,
     items,
+    value = $bindable(),
     defaultValue,
-    value = $bindable(defaultValue),
     onValueChange,
     look,
     size,
@@ -71,10 +78,27 @@ error is announced politely.
     disabled,
     hint,
     error,
-  }: Props = $props();
+  }: RadioGroupProps = $props();
   const id = $props.id();
   const ids = fieldIds(id);
+  const initial = untrack(() => defaultValue ?? null);
+  const chosen = $derived(value === undefined ? initial : value);
   const shown = $derived(uniqueByValue(items));
+  const commit = (next: string) => {
+    value = next;
+    onValueChange?.(next);
+  };
+  const restore = (root: HTMLFieldSetElement) => {
+    const form = root.form;
+    if (!form) return undefined;
+    const reset = () => {
+      queueMicrotask(() => (value = initial));
+    };
+    form.addEventListener('reset', reset);
+    return () => {
+      form.removeEventListener('reset', reset);
+    };
+  };
 </script>
 
 <fieldset
@@ -91,8 +115,9 @@ error is announced politely.
   role="radiogroup"
   {disabled}
   aria-describedby={fieldDescribedBy(ids, hint, error)}
-  aria-invalid={error ? true : undefined}
-  aria-required={required}>
+  aria-invalid={hasText(error) ? true : undefined}
+  aria-required={required}
+  {@attach restore}>
   <legend {...partAttrs('radio-group', 'legend')} id={ids.label}
     >{label}</legend>
   <div {...partAttrs('radio-group', 'items')}>
@@ -103,8 +128,11 @@ error is announced politely.
           type="radio"
           name={name ?? ids.control}
           value={item.value}
-          bind:group={value}
-          onchange={() => onValueChange?.(item.value)}
+          checked={chosen === item.value}
+          defaultChecked={initial === item.value}
+          onchange={() => {
+            commit(item.value);
+          }}
           {required}
           disabled={item.disabled} />
         <span {...partAttrs('radio-group', 'label')}>{item.label}</span>

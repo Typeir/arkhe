@@ -9,9 +9,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  PACKAGES,
   branches,
   copyTree,
+  PACKAGES,
   pinCore,
   splitPackage,
 } from '../../.github/scripts/split-package.mjs';

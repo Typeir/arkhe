@@ -1,6 +1,6 @@
 import type { ArkheEnvironmentValue } from '@arkhe/core';
-import EnvironmentProbe from '@tests/fixtures/svelte/EnvironmentProbe.svelte';
 import { render } from '@testing-library/svelte';
+import EnvironmentProbe from '@tests/fixtures/svelte/EnvironmentProbe.svelte';
 import { describe, expect, it } from 'vitest';
 
 describe('useArkheEnvironment', () => {

@@ -130,3 +130,22 @@ export function codeLines(content) {
     .split('\n')
     .filter((line) => line.trim() && !line.trim().startsWith('//')).length;
 }
+
+/**
+ * Lines of `content` matching `test`, outside block comments unless `raw`.
+ *
+ * @function hits
+ * @param {string} file - File path.
+ * @param {string} content - Source text.
+ * @param {(line: string) => boolean} test - Line predicate.
+ * @param {string} message - Failure message.
+ * @param {boolean} [raw] - Scan comments too.
+ * @returns {Failure[]} One failure per matching line.
+ */
+export function hits(file, content, test, message, raw = false) {
+  return (raw ? content : stripBlockComments(content))
+    .split('\n')
+    .flatMap((line, index) =>
+      test(line) ? [{ file, line: index + 1, message }] : [],
+    );
+}

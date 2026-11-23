@@ -3,25 +3,25 @@
  * its scroll box, the spacer properties for the rest, and a scroll that
  * brings any row into view. Without a pitch it draws every row.
  *
- * @module packages/svelte/src/virtualRows.svelte
+ * @module packages/svelte/src/list/virtualRows.svelte
  * @version 1.0.0
  * @author Typeir
  * @since 0.2.0
  */
 
+import type { Attachment } from 'svelte/attachments';
 import {
+  rowPosition,
+  type RowPosition,
+  scrollToRow,
   UNMEASURED_VIEW,
   VIRTUAL_OVERSCAN,
-  rowPosition,
-  scrollToRow,
   virtualRange,
-  virtualVars,
-  watchView,
-  type RowPosition,
   type VirtualRange,
+  virtualVars,
   type VirtualVars,
+  watchView,
 } from '@arkhe/core';
-import type { Attachment } from 'svelte/attachments';
 
 /**
  * Virtual rows of one list; reactive.
@@ -51,7 +51,7 @@ export interface VirtualRows {
  * @function useVirtualRows
  * @param {() => number} count - Rows in the set.
  * @param {() => number | undefined} pitch - Row height in rem; none draws every row.
- * @param {number} [overscan] - Rows past each edge of the view.
+ * @param {number} [overscan] - Rows past each edge of the view. Defaults to `VIRTUAL_OVERSCAN`.
  * @returns {VirtualRows} Rows to draw and their wiring.
  */
 export function useVirtualRows(
@@ -60,13 +60,13 @@ export function useVirtualRows(
   overscan: number = VIRTUAL_OVERSCAN,
 ): VirtualRows {
   let view = $state.raw(UNMEASURED_VIEW);
-  let box: HTMLElement | undefined;
-  const range = $derived.by(() =>
+  let box: HTMLElement | null = null;
+  const range = $derived(
     pitch() === undefined
       ? { start: 0, end: count() }
       : virtualRange(count(), view, overscan),
   );
-  const visible = $derived.by(() =>
+  const visible = $derived(
     pitch() === undefined
       ? { start: 0, end: count() }
       : virtualRange(count(), view, 0),
@@ -92,7 +92,8 @@ export function useVirtualRows(
     },
     scrollTo: ({ index }) => {
       const rem = pitch();
-      const next = box && rem !== undefined && scrollToRow(box, index, rem);
+      if (box === null || rem === undefined) return;
+      const next = scrollToRow(box, index, rem);
       if (next) view = next;
     },
     get vars() {

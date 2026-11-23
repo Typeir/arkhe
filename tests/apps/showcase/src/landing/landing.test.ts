@@ -2,8 +2,8 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  TARGETS,
   startLanding,
+  TARGETS,
 } from '../../../../../apps/showcase/src/landing/landing';
 import { SETTINGS_MESSAGE } from '../../../../../apps/showcase/src/target';
 

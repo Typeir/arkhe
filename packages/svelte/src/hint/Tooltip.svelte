@@ -4,33 +4,17 @@ Renders a trigger that shows a short description on hover, keyboard focus
 and tap, on Zag's tooltip machine; a tap outside or Escape closes it. One is
 open at a time. The content is phrasing only, never links or controls (an
 ARIA tooltip); anything interactive, a link trigger included, belongs in a
-HoverCard. The body mounts
-on first open, portalled into the environment's container, so server markup
-holds the trigger alone.
+HoverCard. The body mounts on first open, portalled into the environment's
+container, so server markup holds the trigger alone.
 -->
-<script lang="ts">
-  import {
-    ARKHE_CLASS,
-    floatingMachineProps,
-    type Placement,
-  } from '@arkhe/core';
-  import * as tooltip from '@zag-js/tooltip';
-  import {
-    mergeProps,
-    normalizeProps,
-    portal,
-    useMachine,
-  } from '@zag-js/svelte';
-  import { untrack, type Snippet } from 'svelte';
-  import type { HTMLAttributes } from 'svelte/elements';
-  import { useArkheEnvironment } from '../base/environment.js';
-  import { useHint, useHintNode } from './hint.svelte.js';
-  import HintTrigger from './HintTrigger.svelte';
+<script module lang="ts">
+  import type { Placement } from '@arkhe/core';
+  import type { Snippet } from 'svelte';
 
   /**
    * Props of Tooltip.
    *
-   * @interface Props
+   * @interface TooltipProps
    * @property {string | Snippet} content - Description; non-interactive phrasing content.
    * @property {Snippet} children - Trigger content.
    * @property {boolean} [inline] - Makes the trigger inline text with a tab stop; it may hold other triggers.
@@ -38,10 +22,10 @@ holds the trigger alone.
    * @property {boolean} [defaultOpen] - First open state when uncontrolled.
    * @property {(open: boolean) => void} [onOpenChange] - Reports open-state changes.
    * @property {Placement} [placement] - Side. Defaults to `top`.
-   * @property {number} [openDelay] - Milliseconds before opening. Defaults to 400.
-   * @property {number} [closeDelay] - Milliseconds before closing. Defaults to 150.
+   * @property {number} [openDelay] - Milliseconds before opening. Defaults to `400`.
+   * @property {number} [closeDelay] - Milliseconds before closing. Defaults to `150`.
    */
-  interface Props {
+  export interface TooltipProps {
     content: string | Snippet;
     children: Snippet;
     inline?: boolean;
@@ -52,6 +36,27 @@ holds the trigger alone.
     openDelay?: number;
     closeDelay?: number;
   }
+</script>
+
+<script lang="ts">
+  import type { HTMLAttributes } from 'svelte/elements';
+  import {
+    ARKHE_CLASS,
+    floatingMachineProps,
+    partAttrs,
+    TOOLTIP_GUTTER,
+  } from '@arkhe/core';
+  import {
+    mergeProps,
+    normalizeProps,
+    portal,
+    useMachine,
+  } from '@zag-js/svelte';
+  import * as tooltip from '@zag-js/tooltip';
+  import { untrack } from 'svelte';
+  import { useArkheEnvironment } from '../base/environment.js';
+  import { useHint, useHintNode } from './hint.svelte.js';
+  import HintTrigger from './HintTrigger.svelte';
 
   let {
     content,
@@ -63,13 +68,13 @@ holds the trigger alone.
     placement = 'top',
     openDelay = 400,
     closeDelay = 150,
-  }: Props = $props();
+  }: TooltipProps = $props();
   const id = $props.id();
   const env = useArkheEnvironment();
   const node = useHintNode();
   const initial = untrack(() => defaultOpen ?? false);
   const shown = $derived(open ?? initial);
-  const change = (next: boolean) => {
+  const commit = (next: boolean) => {
     if (next === shown) return;
     open = next;
     onOpenChange?.(next);
@@ -79,9 +84,10 @@ holds the trigger alone.
       id,
       open: shown,
       onOpenChange: (next: boolean) => {
-        if (node.request(next)) change(next);
+        if (node.request(next)) commit(next);
       },
       placement,
+      gutter: TOOLTIP_GUTTER,
       getRootNode: env().getRootNode,
     }),
     openDelay,
@@ -91,7 +97,7 @@ holds the trigger alone.
   const api = $derived(tooltip.connect(service, normalizeProps));
   const hint = useHint(() => ({
     open: api.open,
-    setOpen: change,
+    setOpen: commit,
     trigger: api.getTriggerProps() as HTMLAttributes<HTMLElement>,
     positionerId: api.getPositionerProps().id ?? '',
     getRootNode: env().getRootNode,
@@ -100,7 +106,7 @@ holds the trigger alone.
   }));
 </script>
 
-<span class={ARKHE_CLASS} data-scope="tooltip" data-part="root"
+<span class={ARKHE_CLASS} {...partAttrs('tooltip', 'root')}
   ><HintTrigger attrs={hint.trigger} {inline}>{@render children()}</HintTrigger
   >{#if hint.mounted}<div
       class={ARKHE_CLASS}
@@ -110,6 +116,9 @@ holds the trigger alone.
       }}>
       <div {...mergeProps(api.getPositionerProps(), { hidden: !api.open })}>
         <div {...api.getContentProps()}>
+          <div {...api.getArrowProps()}>
+            <div {...api.getArrowTipProps()}></div>
+          </div>
           {#if typeof content === 'string'}{content}{:else}{@render content()}{/if}
         </div>
       </div>

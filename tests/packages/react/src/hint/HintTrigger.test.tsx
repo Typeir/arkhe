@@ -1,14 +1,13 @@
+import type { AnchorHTMLAttributes, ReactNode } from 'react';
 import { HintNode } from '@arkhe/core';
 import { ArkheProvider } from '@arkhe/react';
 import { act, render, renderHook, screen } from '@testing-library/react';
-import type { AnchorHTMLAttributes, ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import {
   HintContext,
   HintTrigger,
   useHint,
   useHintNode,
-  useOpenState,
 } from '../../../../../packages/react/src/hint/HintTrigger';
 
 const Routed = (props: AnchorHTMLAttributes<HTMLAnchorElement>) => (
@@ -45,27 +44,6 @@ describe('HintTrigger', () => {
     const span = screen.getByText('a', { exact: false, selector: 'span' });
     expect(span).toHaveAttribute('tabindex', '0');
     expect(span.querySelector('button')).not.toBeNull();
-  });
-});
-
-describe('useOpenState', () => {
-  it('keeps its own state from defaultOpen and reports changes once', () => {
-    const report = vi.fn();
-    const { result } = renderHook(() => useOpenState(undefined, true, report));
-    expect(result.current.shown).toBe(true);
-    act(() => result.current.change(true));
-    expect(report).not.toHaveBeenCalled();
-    act(() => result.current.change(false));
-    expect(result.current.shown).toBe(false);
-    expect(report).toHaveBeenCalledExactlyOnceWith(false);
-  });
-
-  it('follows open when controlled', () => {
-    const report = vi.fn();
-    const { result } = renderHook(() => useOpenState(true, false, report));
-    act(() => result.current.change(false));
-    expect(result.current.shown).toBe(true);
-    expect(report).toHaveBeenCalledWith(false);
   });
 });
 

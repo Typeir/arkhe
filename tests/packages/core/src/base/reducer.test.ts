@@ -1,14 +1,14 @@
 import {
-  accordionReduce,
-  collapsibleReduce,
-  dispatch,
-  toggleReduce,
   type AccordionAction,
+  accordionReduce,
   type AccordionRules,
   type CollapsibleAction,
+  collapsibleReduce,
   type CollapsibleRules,
+  dispatch,
   type Reducer,
   type ToggleAction,
+  toggleReduce,
   type ToggleRules,
 } from '@arkhe/core';
 import { describe, expect, it, vi } from 'vitest';

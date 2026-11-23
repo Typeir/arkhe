@@ -12,6 +12,12 @@
 
 import { fireEvent, getConfig } from '@testing-library/dom';
 
+/**
+ * Pointer fields of a primary touch.
+ *
+ * @constant TOUCH
+ * @type {{ pointerType: string, pointerId: number, isPrimary: boolean }}
+ */
 const TOUCH = { pointerType: 'touch', pointerId: 7, isPrimary: true };
 
 /**

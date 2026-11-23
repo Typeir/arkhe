@@ -13,35 +13,37 @@
 
 import {
   ARKHE_CLASS,
-  REACT_EVENTS,
-  EMPTY_VALUE,
   comboboxMachineProps,
+  EMPTY_VALUE,
   fieldDescribedBy,
   fieldIds,
+  filterOptions,
   flag,
   fromEmptyValue,
-  filterOptions,
   guardComboboxKeys,
   isGrouped,
+  listNote,
   optionCollection,
-  queryAfterChange,
-  toEmptyValue,
-  withEmptyOption,
-  type SelectOption,
   type OptionFilter,
   type Placement,
+  queryAfterChange,
+  REACT_EVENTS,
+  type SelectOption,
+  toEmptyValue,
+  withEmptyOption,
 } from '@arkhe/core';
 import * as combobox from '@zag-js/combobox';
-import { Portal, mergeProps, normalizeProps, useMachine } from '@zag-js/react';
-import { useId, useMemo, useState, type JSX, type ReactNode } from 'react';
-import { useArkhe } from '../base/ArkheProvider.js';
+import { mergeProps, normalizeProps, Portal, useMachine } from '@zag-js/react';
+import { type JSX, type ReactNode, useId, useMemo, useState } from 'react';
 import { useArkheEnvironment } from '../base/ArkheEnvironment.js';
-import { ComboboxList, type ListNote } from './ComboboxList.js';
-import { FieldNote } from '../field/FieldNote.js';
+import { useArkhe } from '../base/ArkheProvider.js';
 import { Icon } from '../base/Icon.js';
 import { useHydrated } from '../base/useHydrated.js';
 import { usePortalContainer } from '../base/usePortalContainer.js';
+import { FieldNote } from '../field/FieldNote.js';
 import { useVirtualRows } from '../list/useVirtualRows.js';
+import { ComboboxList } from './ComboboxList.js';
+import { optionBody } from './optionBody.js';
 
 /**
  * Props of ComboboxField.
@@ -61,6 +63,7 @@ import { useVirtualRows } from '../list/useVirtualRows.js';
  * @property {OptionFilter<T>} [filter] - Match rule; `false` when the host filters.
  * @property {boolean} [loading] - Shows the loading line instead of options.
  * @property {boolean} [failed] - Shows the error line instead of options.
+ * @property {boolean} [stale] - Dims the options while newer ones load.
  * @property {(text: string) => void} [onSubmit] - Takes free text on Enter when nothing is highlighted.
  * @property {(item: T) => ReactNode} [renderItem] - Option body. Defaults to label and description.
  * @property {boolean} [disabled] - Blocks input.
@@ -90,6 +93,7 @@ export interface ComboboxFieldProps<T extends SelectOption> {
   readonly filter?: OptionFilter<T>;
   readonly loading?: boolean;
   readonly failed?: boolean;
+  readonly stale?: boolean;
   readonly onSubmit?: (text: string) => void;
   readonly renderItem?: (item: T) => ReactNode;
   readonly disabled?: boolean;
@@ -107,49 +111,46 @@ export interface ComboboxFieldProps<T extends SelectOption> {
 }
 
 /**
- * Renders the default option body: icon, label, then a muted description.
- *
- * @function optionBody
- * @param {SelectOption} item - Option.
- * @param {'combobox' | 'select'} scope - Zag scope of the list.
- * @returns {ReactNode} Body.
- */
-export function optionBody(
-  item: SelectOption,
-  scope: 'combobox' | 'select',
-): ReactNode {
-  return (
-    <>
-      {item.icon ? <Icon name={item.icon} /> : null}
-      <span data-scope={scope} data-part='item-label'>
-        {item.label}
-      </span>
-      {item.description ? (
-        <span data-scope={scope} data-part='item-description'>
-          {item.description}
-        </span>
-      ) : null}
-    </>
-  );
-}
-
-/**
  * Renders a labelled combobox and its portalled option list.
  *
  * @component
  * @param {ComboboxFieldProps<T>} props - Label, options, selection, search hooks.
  * @returns {JSX.Element} Combobox.
  */
-export const ComboboxField = <T extends SelectOption>(
-  props: ComboboxFieldProps<T>,
-): JSX.Element => {
-  const { label, filter, loading, failed, emptyLabel } = props;
+export const ComboboxField = <T extends SelectOption>({
+  label,
+  items: options,
+  placeholder,
+  value,
+  defaultValue,
+  onValueChange,
+  onSelect,
+  clearOnSelect,
+  onInputChange,
+  onQuery,
+  filter,
+  loading,
+  failed,
+  stale,
+  onSubmit,
+  renderItem = (item: T) => optionBody(item, 'combobox'),
+  disabled,
+  placement,
+  emptyLabel,
+  size,
+  labelHidden,
+  inline,
+  name,
+  hint,
+  error,
+  enterKeyHint,
+  required,
+  rowPitch,
+}: ComboboxFieldProps<T>): JSX.Element => {
   const items = useMemo(
-    () => withEmptyOption(props.items, emptyLabel) as readonly T[],
-    [props.items, emptyLabel],
+    () => withEmptyOption(options, emptyLabel) as readonly T[],
+    [options, emptyLabel],
   );
-  const renderItem =
-    props.renderItem ?? ((item: T) => optionBody(item, 'combobox'));
   const { labels, locale } = useArkhe();
   const env = useArkheEnvironment();
   const container = usePortalContainer();
@@ -165,45 +166,44 @@ export const ComboboxField = <T extends SelectOption>(
   );
   const { attach, ...rows } = useVirtualRows(
     shown.length,
-    isGrouped(shown) ? undefined : props.rowPitch,
+    isGrouped(shown) ? undefined : rowPitch,
   );
-  const note: ListNote | undefined = loading
-    ? 'loading'
-    : failed
-      ? 'failed'
-      : shown.length === 0
-        ? 'empty'
-        : undefined;
+  const note = listNote(loading, failed, shown.length);
   const id = useId();
   const ids = fieldIds(id);
   const service = useMachine(combobox.machine, {
     ...comboboxMachineProps({
-      ...props,
       id,
-      invalid: Boolean(props.error),
+      label,
       labels,
       locale,
-      value: toEmptyValue(props.value, emptyLabel),
-      defaultValue: toEmptyValue(props.defaultValue ?? null, emptyLabel),
-      submits: props.onSubmit !== undefined,
+      value: toEmptyValue(value, emptyLabel),
+      defaultValue: toEmptyValue(defaultValue ?? null, emptyLabel),
+      clearOnSelect,
+      submits: onSubmit !== undefined,
+      loading,
+      disabled,
+      required,
+      invalid: Boolean(error),
+      placeholder,
+      placement,
       getRootNode: env.getRootNode,
     }),
-    ...(props.inline && !props.clearOnSelect
+    ...(inline && !clearOnSelect
       ? { selectionBehavior: 'preserve' as const }
       : {}),
     ...(rows.on ? { scrollToIndexFn: rows.scrollTo } : {}),
     collection,
     onInputValueChange: (details) => {
       setQuery(queryAfterChange(details));
-      props.onInputChange?.(details.inputValue);
-      if (details.reason === 'input-change')
-        props.onQuery?.(details.inputValue);
+      onInputChange?.(details.inputValue);
+      if (details.reason === 'input-change') onQuery?.(details.inputValue);
     },
     onValueChange: (details) =>
-      props.onValueChange?.(fromEmptyValue(details.value[0] ?? null)),
+      onValueChange?.(fromEmptyValue(details.value[0] ?? null)),
     onSelect: (details) => {
       const item = items.find((option) => option.value === details.itemValue);
-      if (item) props.onSelect?.(item);
+      if (item) onSelect?.(item);
     },
   });
   const api = combobox.connect(service, normalizeProps);
@@ -229,16 +229,17 @@ export const ComboboxField = <T extends SelectOption>(
       note={note}
       emptyText={labels.selectEmpty}
       option={option}
-      inline={props.inline}
+      inline={inline}
       rows={rows}
       attach={attach}
+      stale={stale}
     />
   );
   return (
     <div
       {...mergeProps(api.getRootProps(), { className: ARKHE_CLASS })}
-      data-size={props.size}
-      data-label-hidden={flag(props.labelHidden)}>
+      data-size={size}
+      data-label-hidden={flag(labelHidden)}>
       <label {...api.getLabelProps()}>{label}</label>
       <div {...api.getControlProps()}>
         <input
@@ -248,49 +249,48 @@ export const ComboboxField = <T extends SelectOption>(
               {
                 highlighted: () => api.highlightedValue,
                 inputValue: () => api.inputValue,
-                select: (value) => api.selectValue(value),
-                close: () => api.setOpen(false),
-                submit: props.onSubmit,
+                select: (next) => {
+                  api.selectValue(next);
+                },
+                close: () => {
+                  api.setOpen(false);
+                },
+                submit: onSubmit,
               },
               REACT_EVENTS,
             ),
-            props.inline ? { onFocus: focusInline } : {},
+            inline ? { onFocus: focusInline } : {},
             {
-              enterKeyHint: props.enterKeyHint,
-              'aria-describedby': fieldDescribedBy(
-                ids,
-                props.hint,
-                props.error,
-              ),
+              enterKeyHint,
+              'aria-describedby': fieldDescribedBy(ids, hint, error),
             },
           )}
         />
         <button {...api.getClearTriggerProps()}>
           <Icon name='x' />
         </button>
-        {props.inline ? null : (
+        {inline ? null : (
           <button {...api.getTriggerProps()}>
             <Icon name='chevron-down' />
           </button>
         )}
       </div>
-      <FieldNote ids={ids} hint={props.hint} error={props.error} />
-      {props.name === undefined ? null : (
+      <FieldNote ids={ids} hint={hint} error={error} />
+      {name === undefined ? null : (
         <input
           type='hidden'
-          name={props.name}
+          name={name}
           value={fromEmptyValue(api.value[0] ?? null) ?? ''}
         />
       )}
-      {props.inline ? (
-        list
-      ) : hydrated ? (
+      {inline ? list : null}
+      {inline || !hydrated ? null : (
         <Portal container={container} getRootNode={env.getRootNode}>
           <div className={ARKHE_CLASS}>
             <div {...api.getPositionerProps()}>{list}</div>
           </div>
         </Portal>
-      ) : null}
+      )}
     </div>
   );
 };

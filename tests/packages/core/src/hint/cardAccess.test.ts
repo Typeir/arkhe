@@ -1,9 +1,12 @@
 // @vitest-environment jsdom
 import {
   CardAccess,
-  HintNode,
+  cardContentProps,
   cardTriggerAria,
   elementById,
+  HintNode,
+  REACT_EVENTS,
+  SVELTE_EVENTS,
   tabbables,
 } from '@arkhe/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -49,6 +52,22 @@ function press(target: Element, key: string, shiftKey = false) {
 
 afterEach(() => {
   document.body.innerHTML = '';
+});
+
+describe('cardContentProps', () => {
+  it('drops the pointer leave only while pinned', () => {
+    const leave = () => undefined;
+    const props = { id: 'c', onPointerLeave: leave, onpointerleave: leave };
+    expect(cardContentProps(props, false, REACT_EVENTS)).toBe(props);
+    expect(cardContentProps(props, true, REACT_EVENTS)).toEqual({
+      id: 'c',
+      onpointerleave: leave,
+    });
+    expect(cardContentProps(props, true, SVELTE_EVENTS)).toEqual({
+      id: 'c',
+      onPointerLeave: leave,
+    });
+  });
 });
 
 describe('cardTriggerAria', () => {

@@ -1,6 +1,6 @@
+import { fireEvent, render, screen } from '@testing-library/svelte';
 import { sizeBox } from '@tests/fixtures/scrollBox';
 import VirtualProbe from '@tests/fixtures/svelte/VirtualProbe.svelte';
-import { fireEvent, render, screen } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
 
 describe('useVirtualRows', () => {

@@ -24,8 +24,26 @@ export interface Tolerance {
   readonly reason: string;
 }
 
+/**
+ * Attributes that carry an instance id, rewritten to stable names.
+ *
+ * @constant INSTANCE_ID_ATTRIBUTES
+ * @type {readonly string[]}
+ */
 const INSTANCE_ID_ATTRIBUTES = ['data-ownedby', 'data-uid'];
+/**
+ * Visible stand-in for a significant space in the snapshot lines.
+ *
+ * @constant SPACE
+ * @type {string}
+ */
 const SPACE = '␠';
+/**
+ * Elements whose surrounding whitespace counts.
+ *
+ * @constant INLINE_ELEMENTS
+ * @type {Set<string>}
+ */
 const INLINE_ELEMENTS = new Set([
   'a',
   'abbr',

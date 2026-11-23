@@ -2,8 +2,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { LEVELS } from '../../../../../../../packages/core/src/feedback/fx/skeleton/constants';
 import {
-  SKELETON_TOKENS,
   readPalette,
+  SKELETON_TOKENS,
 } from '../../../../../../../packages/core/src/feedback/fx/skeleton/palette';
 
 const CHANNELS: Record<string, readonly number[]> = {

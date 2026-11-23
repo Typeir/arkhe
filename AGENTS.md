@@ -4,13 +4,14 @@
 
 Component library: one markup and style contract, ported to React and Svelte, built on Zag state machines. It serves Ikuisuus and Flamelost first. Nothing is rounded.
 
-## Hard Rules (David's rulings)
+## Hard Rules
 
 | Rule                                                                                            | Acceptance Check                                                |
 | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | Caveman speak: concise, technical, no filler                                                    | Replies carry no filler                                         |
-| JSDoc on exports only, no inline comments. Ikuisuus is the golden                               | `npm run health:check` → jsdoc-\*, no-inline-\*                 |
+| JSDoc on every declaration, exported or not; no inline comments. Ikuisuus is the golden         | `npm run health:check` → jsdoc-\*, no-inline-\*                 |
 | Components as `const`; other top-level functions as `function`; locals as `const` arrows        | `health:check` → function-style                                 |
+| Private class members use `#`; no TypeScript `private` / `protected`                            | `health:check` → private-fields                                 |
 | Nothing rounded: square corners, hexagon pills, rhombus, knotwork. No circles, no radius tokens | Review; `_shape.scss`: only `pill` bevels, falls back to square |
 | Zag directly; no Ark UI                                                                         | No `@ark-ui/*` in any manifest                                  |
 | Labels and accessible names are Arkhé's own and translatable                                    | Every string comes from `ArkheLabels`                           |
@@ -29,6 +30,7 @@ Component library: one markup and style contract, ported to React and Svelte, bu
 | React and Svelte export the same value names                                                    | `health:check` → export-parity                                  |
 | React and Svelte render the same DOM, step by step                                              | `npm test` → `tests/parity`                                     |
 | Exact version pins in every manifest                                                            | `health:check` → exact-pins                                     |
+| Browser support: Chromium only. No Safari or Firefox fallbacks, polyfills or caveats            | Review; MWG fallbacks for non-Chromium gaps are skipped         |
 | Zero act() and console warnings in tests                                                        | `npm test` → no warnings                                        |
 
 ## Proposed Rules

@@ -1,5 +1,5 @@
-import { Menu } from '@arkhe/react';
 import type { MenuEntry } from '@arkhe/core';
+import { Menu } from '@arkhe/react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderToString } from 'react-dom/server';
@@ -14,6 +14,20 @@ const ITEMS: readonly MenuEntry[] = [
 ];
 
 describe('Menu', () => {
+  it('treats any icon, even an empty name, as icon-only and keeps the name', () => {
+    render(
+      <Menu
+        trigger='Options'
+        icon=''
+        items={ITEMS}
+        onSelect={() => undefined}
+      />,
+    );
+    const trigger = screen.getByRole('button', { name: 'Options' });
+    expect(trigger).toHaveAttribute('data-icon-only', '');
+    expect(trigger).not.toHaveTextContent('Options');
+  });
+
   it('renders an icon-only trigger named by its text', async () => {
     render(
       <Menu

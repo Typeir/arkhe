@@ -1,6 +1,6 @@
-import { tap } from '@tests/fixtures/tap';
 import { screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import { tap } from '@tests/fixtures/tap';
 import { afterAll, afterEach, describe, expect, it } from 'vitest';
 import {
   byteSize,
@@ -13,10 +13,10 @@ import { SHARD_LOADS } from './data';
 import { DENSE_TRIGGERS } from './fixtures';
 import {
   hydrateSvelte,
-  stopSsr,
-  svelteServerHtml,
   type SceneName,
+  stopSsr,
   type SveltePage,
+  svelteServerHtml,
 } from './sveltePage';
 
 const BYTES_PER_TRIGGER = 360;

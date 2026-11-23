@@ -11,8 +11,8 @@
 'use client';
 
 import {
-  NumericSync,
   type NumericMachineApi,
+  NumericSync,
   type NumericValue,
 } from '@arkhe/core';
 import { useEffect, useState } from 'react';
@@ -50,6 +50,8 @@ export function useNumericSync(
     };
   });
   const { sync } = handle;
-  useEffect(() => sync.receive(value), [sync, value]);
+  useEffect(() => {
+    sync.receive(value);
+  }, [sync, value]);
   return handle;
 }

@@ -9,8 +9,14 @@
 
 'use client';
 
-import { ARKHE_CLASS, formatLabel, partAttrs, removeChip } from '@arkhe/core';
 import type { JSX } from 'react';
+import {
+  ARKHE_CLASS,
+  formatLabel,
+  hasText,
+  partAttrs,
+  removeChip,
+} from '@arkhe/core';
 import { useArkhe } from '../base/ArkheProvider.js';
 import { Icon } from '../base/Icon.js';
 
@@ -61,14 +67,16 @@ export const Chip = ({
       className={ARKHE_CLASS}
       {...partAttrs('chip', 'root')}
       data-tone={tone}>
-      {icon ? <Icon name={icon} /> : null}
+      {hasText(icon) ? <Icon name={icon} /> : null}
       <span {...partAttrs('chip', 'label')}>{label}</span>
       {onRemove ? (
         <button
           type='button'
           {...partAttrs('chip', 'remove')}
           aria-label={formatLabel(labels.chipRemove, { label })}
-          onClick={(event) => removeChip(event.currentTarget, onRemove)}>
+          onClick={(event) => {
+            removeChip(event.currentTarget, onRemove);
+          }}>
           <Icon name='x' />
         </button>
       ) : null}

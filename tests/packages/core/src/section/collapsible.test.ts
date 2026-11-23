@@ -4,6 +4,7 @@ import {
   collapsibleReduce,
   findableRegion,
   headingTag,
+  sectionTags,
 } from '@arkhe/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -80,5 +81,12 @@ describe('collapsibleReduce', () => {
       true,
     );
     expect(collapsibleReduce(false, { type: 'reveal' }, rules)).toBe(true);
+  });
+});
+
+describe('sectionTags', () => {
+  it('makes a section with a scoped header only when there is a heading', () => {
+    expect(sectionTags(3)).toEqual({ root: 'section', header: 'header' });
+    expect(sectionTags(undefined)).toEqual({ root: 'div', header: 'div' });
   });
 });

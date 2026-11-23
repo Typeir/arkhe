@@ -1,7 +1,7 @@
-import Combobox from '../../../../../packages/svelte/src/select/ComboboxField.svelte';
 import { render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
+import Combobox from '../../../../../packages/svelte/src/select/ComboboxField.svelte';
 
 const SPELLS = [
   { value: 'fireball', label: 'Fireball', description: 'Level 3' },

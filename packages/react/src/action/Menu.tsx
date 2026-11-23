@@ -21,8 +21,8 @@ import {
   type Placement,
 } from '@arkhe/core';
 import * as menu from '@zag-js/menu';
-import { Portal, mergeProps, normalizeProps, useMachine } from '@zag-js/react';
-import { useId, type JSX } from 'react';
+import { mergeProps, normalizeProps, Portal, useMachine } from '@zag-js/react';
+import { type JSX, useId, useState } from 'react';
 import { useArkheEnvironment } from '../base/ArkheEnvironment.js';
 import { Icon } from '../base/Icon.js';
 import { useHydrated } from '../base/useHydrated.js';
@@ -69,18 +69,31 @@ export const Menu = ({
       placement,
       getRootNode: env.getRootNode,
     }),
-    onSelect: (details) => onSelect(details.value),
+    onSelect: (details) => {
+      onSelect(details.value);
+    },
   });
   const api = menu.connect(service, normalizeProps);
+  const [opened, setOpened] = useState(false);
+  if (api.open && !opened) setOpened(true);
+  const controls = opened ? api.getTriggerProps()['aria-controls'] : undefined;
   return (
     <>
       <button
         {...mergeProps(api.getTriggerProps(), {
           className: ARKHE_CLASS,
-          'aria-label': icon ? trigger : undefined,
+          'aria-label': icon !== undefined ? trigger : undefined,
+          onPointerEnter: () => {
+            setOpened(true);
+          },
+          onFocus: () => {
+            setOpened(true);
+          },
         })}
+        aria-controls={controls}
+        data-controls={controls}
         data-icon-only={flag(icon !== undefined)}>
-        {icon ? (
+        {icon !== undefined ? (
           <Icon name={icon} />
         ) : (
           <>
@@ -89,7 +102,7 @@ export const Menu = ({
           </>
         )}
       </button>
-      {hydrated ? (
+      {hydrated && opened ? (
         <Portal container={container} getRootNode={env.getRootNode}>
           <div className={ARKHE_CLASS}>
             <div {...api.getPositionerProps()}>
@@ -107,8 +120,10 @@ export const Menu = ({
                         value: entry.value,
                         disabled: entry.disabled,
                       })}
-                      data-danger={entry.danger ? '' : undefined}>
-                      {entry.icon ? <Icon name={entry.icon} /> : null}
+                      data-danger={flag(entry.danger)}>
+                      {entry.icon !== undefined ? (
+                        <Icon name={entry.icon} />
+                      ) : null}
                       {entry.label}
                     </li>
                   ),

@@ -104,11 +104,15 @@ describe('luminance', () => {
 
 describe('token contrast', () => {
   it.each(['dark', 'light'] as const)(
-    '%s meets 4.5:1 for text and 3:1 for parts',
+    '%s meets 4.5:1 for text and 3:1 for parts on page, surface and card',
     (theme) => {
       const colours = palette(theme);
       expect(Object.keys(colours).length).toBeGreaterThan(15);
-      const grounds = [colours['bg'] ?? '', colours['surface'] ?? ''];
+      const grounds = [
+        colours['bg'] ?? '',
+        colours['surface'] ?? '',
+        colours['bg-tertiary'] ?? '',
+      ];
       for (const [names, floor] of [
         [TEXT, 4.5],
         [PARTS, 3],

@@ -14,24 +14,24 @@
 
 import {
   Announcer,
-  FxLoader,
-  DEFAULT_LOCALE,
-  resolveLabels,
   type ArkheLabels,
+  DEFAULT_LOCALE,
   type EffectsSetting,
+  FxLoader,
   type FxModule,
   type IconSet,
+  resolveLabels,
 } from '@arkhe/core';
 import {
+  type AnchorHTMLAttributes,
+  type ComponentType,
   createContext,
+  type JSX,
+  type ReactNode,
   useContext,
   useLayoutEffect,
   useMemo,
   useState,
-  type AnchorHTMLAttributes,
-  type ComponentType,
-  type JSX,
-  type ReactNode,
 } from 'react';
 import { useStableRecord } from './useStableRecord.js';
 
@@ -85,6 +85,13 @@ function loadFx(): Promise<FxModule> {
   return import('@arkhe/core/fx');
 }
 
+/**
+ * What components read outside any provider: English labels, Lucide icons,
+ * plain anchors, an unmounted announcer.
+ *
+ * @constant DEFAULT_CONTEXT
+ * @type {ArkheContextValue}
+ */
 const DEFAULT_CONTEXT: ArkheContextValue = {
   labels: resolveLabels(),
   locale: DEFAULT_LOCALE,
@@ -95,6 +102,12 @@ const DEFAULT_CONTEXT: ArkheContextValue = {
   hoverCards: true,
 };
 
+/**
+ * Adapters of the subtree, from the nearest provider.
+ *
+ * @constant ArkheContext
+ * @type {import('react').Context<ArkheContextValue>}
+ */
 const ArkheContext = createContext<ArkheContextValue>(DEFAULT_CONTEXT);
 
 /**
@@ -133,6 +146,7 @@ export interface ArkheProviderProps {
  * @param {IconSet<IconComponent>} [props.icons] - Icons by Lucide name.
  * @param {LinkComponent} [props.link] - Link renderer.
  * @param {EffectsSetting} [props.effects] - Canvas effect options, or `false`.
+ * @param {boolean} [props.hoverCards] - `false` opens hover cards on click only.
  * @param {ReactNode} props.children - App subtree.
  * @returns {JSX.Element} Provider.
  */
@@ -163,9 +177,7 @@ export const ArkheProvider = ({
     }),
     [stableLabels, locale, iconSet, link, announcer, engine, hoverCards],
   );
-  return (
-    <ArkheContext.Provider value={value}>{children}</ArkheContext.Provider>
-  );
+  return <ArkheContext value={value}>{children}</ArkheContext>;
 };
 
 /**

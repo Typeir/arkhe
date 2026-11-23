@@ -14,8 +14,26 @@ import { mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { preview } from 'vite';
 
+/**
+ * Repository root, two levels above this script.
+ *
+ * @constant ROOT
+ * @type {string}
+ */
 const ROOT = resolve(import.meta.dirname, '../..');
+/**
+ * Folder the shots go to: the first argument, else `.ignore/shots`.
+ *
+ * @constant OUT
+ * @type {string}
+ */
 const OUT = resolve(process.argv[2] ?? join(ROOT, '.ignore/shots'));
+/**
+ * Port the showcase preview serves on while shooting.
+ *
+ * @constant PORT
+ * @type {number}
+ */
 const PORT = 5191;
 
 /**

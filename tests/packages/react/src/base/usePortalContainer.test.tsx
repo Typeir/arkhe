@@ -1,6 +1,6 @@
+import type { ReactNode } from 'react';
 import { ArkheEnvironment } from '@arkhe/react';
 import { renderHook } from '@testing-library/react';
-import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
 import { usePortalContainer } from '../../../../../packages/react/src/base/usePortalContainer';
 

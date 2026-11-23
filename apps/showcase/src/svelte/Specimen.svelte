@@ -13,33 +13,32 @@ Svelte specimen: every Arkhé component with the shared specimen data.
     Menu,
     Modal,
     NumericInput,
+    type NumericValue,
     Popover,
     Progress,
     Status,
-    Tabs,
     TextArea,
     TextInput,
     Tooltip,
-    type NumericValue,
   } from '@arkhe/svelte';
   import {
+    clampTen,
+    loadSpecimenCard,
+    nameReadout,
     SPECIMEN_BUTTON_SIZES,
     SPECIMEN_CHIPS,
     SPECIMEN_ICONS,
     SPECIMEN_MENU,
     SPECIMEN_PROGRESS,
     SPECIMEN_SECTIONS,
-    SPECIMEN_TABS,
-    SPECIMEN_TAB_TEXT,
     SPECIMEN_TONES,
-    clampTen,
-    loadSpecimenCard,
-    nameReadout,
   } from '../specimen';
   import ChoiceSection from './ChoiceSection.svelte';
   import CollapseSection from './CollapseSection.svelte';
+  import IkuisuusSection from './IkuisuusSection.svelte';
   import SelectSection from './SelectSection.svelte';
   import SkeletonSection from './SkeletonSection.svelte';
+  import TabsSection from './TabsSection.svelte';
 
   let pressed = $state(false);
   let name = $state('Rhomus');
@@ -125,7 +124,9 @@ Svelte specimen: every Arkhé component with the shared specimen data.
       <Chip label="with icon" icon="check" tone="accent" />
       {#each chips as chip (chip)}<Chip
           label={chip}
-          onRemove={() => remove(chip)} />{/each}
+          onRemove={() => {
+            remove(chip);
+          }} />{/each}
     </div>
   </section>
 
@@ -170,14 +171,7 @@ Svelte specimen: every Arkhé component with the shared specimen data.
     </div>
   </section>
 
-  <section class="specimen" id="tabs">
-    <h2>{SPECIMEN_SECTIONS.tabs}</h2>
-    <div class="row">
-      <Tabs items={SPECIMEN_TABS} label="Sheet">
-        {#snippet panel(key)}{SPECIMEN_TAB_TEXT[key]}{/snippet}
-      </Tabs>
-    </div>
-  </section>
+  <TabsSection />
 
   <section class="specimen" id="modal">
     <h2>{SPECIMEN_SECTIONS.modal}</h2>
@@ -217,6 +211,7 @@ Svelte specimen: every Arkhé component with the shared specimen data.
         <HoverCard title="Fireball" load={loadSpecimenCard}>
           fireball
           {#snippet loaded(text)}<span>{text}</span>{/snippet}
+          {#snippet actions()}<Button size="xs">Copy</Button>{/snippet}
         </HoverCard>, which loads on first open.
       </p>
       <Popover trigger="Filters" title="Filter by">
@@ -233,4 +228,5 @@ Svelte specimen: every Arkhé component with the shared specimen data.
   <SelectSection />
   <ChoiceSection />
   <CollapseSection />
+  <IkuisuusSection />
 </main>

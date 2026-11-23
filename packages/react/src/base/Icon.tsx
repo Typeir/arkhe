@@ -9,7 +9,13 @@
 
 'use client';
 
-import { ARKHE_CLASS, flag, partAttrs, resolveIcon } from '@arkhe/core';
+import {
+  ARKHE_CLASS,
+  flag,
+  hasText,
+  partAttrs,
+  resolveIcon,
+} from '@arkhe/core';
 import { createElement, type JSX } from 'react';
 import { useArkhe } from './ArkheProvider.js';
 import { LUCIDE_ICONS } from './lucideIcons.js';
@@ -47,9 +53,9 @@ export const Icon = ({ name, label }: IconProps): JSX.Element => {
       {...partAttrs('icon', 'root')}
       data-name={name}
       data-missing={flag(!Glyph)}
-      role={label ? 'img' : undefined}
+      role={hasText(label) ? 'img' : undefined}
       aria-label={label}
-      aria-hidden={label ? undefined : true}>
+      aria-hidden={hasText(label) ? undefined : true}>
       {Glyph ? createElement(Glyph, { 'aria-hidden': true }) : null}
     </span>
   );

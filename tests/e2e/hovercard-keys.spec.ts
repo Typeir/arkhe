@@ -15,13 +15,19 @@ for (const target of TARGETS) {
       await trigger.focus();
       const card = page.getByRole('dialog', { name: 'Charge' });
       await expect(card).toBeVisible();
-      const pin = card.getByRole('button', { name: 'Pin Charge' });
+      const grip = card.getByRole('button', {
+        name: 'Move Charge. Arrow keys move it.',
+      });
       await page.keyboard.press('Tab');
-      await expect(pin).toBeFocused();
+      await expect(grip).toBeFocused();
       await page.keyboard.press('Shift+Tab');
       await expect(trigger).toBeFocused();
       await page.keyboard.press('Tab');
-      await expect(pin).toBeFocused();
+      await expect(grip).toBeFocused();
+      await page.keyboard.press('Tab');
+      await expect(
+        card.getByRole('button', { name: 'Pin Charge' }),
+      ).toBeFocused();
       await card.getByRole('button', { name: 'action' }).focus();
       await page.keyboard.press('Tab');
       await expect(card).toBeHidden();
@@ -36,7 +42,8 @@ for (const target of TARGETS) {
       await trigger.focus();
       await page.keyboard.press('Enter');
       const card = page.getByRole('dialog', { name: 'Charge' });
-      await expect(card.getByRole('button', { name: 'Close' })).toBeVisible();
+      await expect(card.getByRole('button', { name: /^Close / })).toBeVisible();
+      await page.keyboard.press('Tab');
       await page.keyboard.press('Tab');
       await expect(
         card.getByRole('button', { name: 'Unpin Charge' }),
@@ -52,10 +59,12 @@ for (const target of TARGETS) {
       await page.keyboard.press('Enter');
       const outer = page.getByRole('dialog', { name: 'Charge' });
       const action = outer.getByRole('button', { name: 'action' });
-      await expect(outer.getByRole('button', { name: 'Close' })).toBeVisible();
-      await page.keyboard.press('Tab');
-      await page.keyboard.press('Tab');
-      await page.keyboard.press('Tab');
+      await expect(
+        outer.getByRole('button', { name: /^Close / }),
+      ).toBeVisible();
+      for (let stop = 0; stop < 4; stop += 1) {
+        await page.keyboard.press('Tab');
+      }
       await expect(action).toBeFocused();
       const inner = page.getByRole('dialog', { name: 'Action' });
       await expect(inner).toBeVisible();

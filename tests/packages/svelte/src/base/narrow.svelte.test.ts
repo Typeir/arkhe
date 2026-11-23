@@ -1,6 +1,6 @@
+import { render, screen } from '@testing-library/svelte';
 import { resetNarrow, setNarrow } from '@tests/fixtures/narrow';
 import NarrowProbe from '@tests/fixtures/svelte/NarrowProbe.svelte';
-import { render, screen } from '@testing-library/svelte';
 import { flushSync } from 'svelte';
 import { afterEach, describe, expect, it } from 'vitest';
 

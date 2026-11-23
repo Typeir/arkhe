@@ -3,26 +3,30 @@
 Sets where the Arkhé components below live: the root node Zag queries, and
 the element portals mount into.
 -->
-<script lang="ts">
-  import { createEnvironment, type RootNode } from '@arkhe/core';
+<script module lang="ts">
+  import type { RootNode } from '@arkhe/core';
   import type { Snippet } from 'svelte';
-  import { provideArkheEnvironment } from './environment.js';
 
   /**
    * Props of ArkheEnvironment.
    *
-   * @interface Props
+   * @interface ArkheEnvironmentProps
    * @property {() => RootNode} [rootNode] - Returns the root node, e.g. a shadow root.
    * @property {HTMLElement} [container] - Portal target. Defaults to the root node's body.
    * @property {Snippet} children - Subtree.
    */
-  interface Props {
+  export interface ArkheEnvironmentProps {
     rootNode?: () => RootNode;
     container?: HTMLElement;
     children: Snippet;
   }
+</script>
 
-  let { rootNode, container, children }: Props = $props();
+<script lang="ts">
+  import { createEnvironment } from '@arkhe/core';
+  import { provideArkheEnvironment } from './environment.js';
+
+  let { rootNode, container, children }: ArkheEnvironmentProps = $props();
   const environment = $derived(createEnvironment({ rootNode, container }));
   provideArkheEnvironment(() => environment);
 </script>

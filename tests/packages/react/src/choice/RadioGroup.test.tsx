@@ -1,5 +1,5 @@
-import { RadioGroup } from '@arkhe/react';
 import type { RadioItem } from '@arkhe/core';
+import { RadioGroup } from '@arkhe/react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
@@ -12,6 +12,18 @@ const UNITS: readonly RadioItem[] = [
 ];
 
 describe('RadioGroup', () => {
+  it('returns to defaultValue on a form reset', async () => {
+    render(
+      <form>
+        <RadioGroup label='Units' items={UNITS} defaultValue='metric' />
+      </form>,
+    );
+    await userEvent.click(screen.getByRole('radio', { name: 'Imperial' }));
+    (screen.getByRole('radiogroup').closest('form') as HTMLFormElement).reset();
+    expect(screen.getByRole('radio', { name: 'Metric' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Imperial' })).not.toBeChecked();
+  });
+
   it('is a fieldset named by its legend, one radio per value', () => {
     render(<RadioGroup label='Units' items={UNITS} />);
     const group = screen.getByRole('radiogroup', { name: 'Units' });

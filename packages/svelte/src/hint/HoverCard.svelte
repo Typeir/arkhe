@@ -13,58 +13,40 @@ is over it. A card stays open while a card nested in it is open. A new
 environment's container, so server markup holds the trigger alone and the
 body may hold any content. Give `content`, or `load` with `loaded`.
 -->
-<script lang="ts" generics="T">
-  import {
-    ARKHE_CLASS,
-    CardAccess,
-    cardTriggerAria,
-    elementById,
-    floatingMachineProps,
-    formatLabel,
-    type Placement,
-  } from '@arkhe/core';
-  import * as hoverCard from '@zag-js/hover-card';
-  import {
-    mergeProps,
-    normalizeProps,
-    portal,
-    useMachine,
-  } from '@zag-js/svelte';
-  import { untrack, type Snippet } from 'svelte';
-  import Button from '../action/Button.svelte';
-  import { useContentLoader } from '../feedback/contentLoader.svelte.js';
-  import { useArkhe } from '../base/context.js';
-  import { useArkheEnvironment } from '../base/environment.js';
-  import { useHint, useHintNode } from './hint.svelte.js';
-  import HintScope from './HintScope.svelte';
-  import HintTrigger from './HintTrigger.svelte';
-  import Status from '../feedback/Status.svelte';
+<script module lang="ts">
+  import type { Placement } from '@arkhe/core';
+  import type { Snippet } from 'svelte';
 
   /**
    * Props of HoverCard.
    *
-   * @interface Props
+   * @interface HoverCardProps
+   * @template T
    * @property {string} title - Card heading; also names the pin button.
    * @property {Snippet} children - Trigger content.
    * @property {string} [href] - Makes the trigger the provider's link to this address, and adds the link to the card's header.
+   * @property {boolean} [headerLink] - `false` leaves the link out of the header; the trigger stays a link. Defaults to `true`.
+   * @property {Snippet} [actions] - Host controls in the header, before the built-in buttons.
    * @property {boolean} [inline] - Makes the trigger inline text with a tab stop; it may hold other triggers.
    * @property {Snippet} [content] - Card body.
    * @property {() => Promise<T>} [load] - Fetches the body on first open.
    * @property {Snippet<[T]>} [loaded] - Renders what `load` returned.
-   * @property {boolean} [pinnable] - Shows a pin button. Defaults to true.
+   * @property {boolean} [pinnable] - Shows a pin button. Defaults to `true`.
    * @property {boolean} [open] - Open state; bindable. A function binding vetoes.
    * @property {boolean} [defaultOpen] - First open state when uncontrolled.
    * @property {(open: boolean) => void} [onOpenChange] - Reports open-state changes.
    * @property {Placement} [placement] - Side. Defaults to `bottom-start`.
-   * @property {number} [openDelay] - Milliseconds before opening. Defaults to 400.
-   * @property {number} [closeDelay] - Milliseconds before closing. Defaults to 200.
-   * @property {'narrow' | 'wide'} [width] - Card width; between the two by default.
+   * @property {number} [openDelay] - Milliseconds before opening. Defaults to `400`.
+   * @property {number} [closeDelay] - Milliseconds before closing. Defaults to `200`.
+   * @property {'narrow' | 'wide'} [width] - Card width. Unset, it sits between the two.
    * @property {boolean} [card] - `false` opens this card on click only; overrides the provider's `hoverCards`.
    */
-  interface Props {
+  export interface HoverCardProps<T> {
     title: string;
     children: Snippet;
     href?: string;
+    headerLink?: boolean;
+    actions?: Snippet;
     inline?: boolean;
     content?: Snippet;
     load?: () => Promise<T>;
@@ -79,11 +61,45 @@ body may hold any content. Give `content`, or `load` with `loaded`.
     width?: 'narrow' | 'wide';
     card?: boolean;
   }
+</script>
+
+<script lang="ts" generics="T">
+  import {
+    ARKHE_CLASS,
+    CardAccess,
+    cardContentProps,
+    cardTriggerAria,
+    elementById,
+    flag,
+    floatingMachineProps,
+    HINT_GUTTER,
+    partAttrs,
+    SVELTE_EVENTS,
+  } from '@arkhe/core';
+  import * as hoverCard from '@zag-js/hover-card';
+  import {
+    mergeProps,
+    normalizeProps,
+    portal,
+    useMachine,
+  } from '@zag-js/svelte';
+  import { untrack } from 'svelte';
+  import { useArkhe } from '../base/context.js';
+  import { useArkheEnvironment } from '../base/environment.js';
+  import { useContentLoader } from '../feedback/contentLoader.svelte.js';
+  import Status from '../feedback/Status.svelte';
+  import { useCardDrag } from './cardDrag.svelte.js';
+  import CardHeader from './CardHeader.svelte';
+  import { useHint, useHintNode } from './hint.svelte.js';
+  import HintScope from './HintScope.svelte';
+  import HintTrigger from './HintTrigger.svelte';
 
   let {
     title,
     children,
     href,
+    headerLink = true,
+    actions,
     inline,
     content,
     load,
@@ -97,7 +113,7 @@ body may hold any content. Give `content`, or `load` with `loaded`.
     closeDelay = 200,
     width,
     card,
-  }: Props = $props();
+  }: HoverCardProps<T> = $props();
   const id = $props.id();
   const arkhe = useArkhe();
   const env = useArkheEnvironment();
@@ -106,7 +122,8 @@ body may hold any content. Give `content`, or `load` with `loaded`.
   const initial = untrack(() => defaultOpen ?? false);
   const shown = $derived(open ?? initial);
   let pinned = $state(false);
-  const change = (next: boolean) => {
+  let detached = $state(false);
+  const commit = (next: boolean) => {
     if (next === shown) return;
     open = next;
     onOpenChange?.(next);
@@ -117,8 +134,9 @@ body may hold any content. Give `content`, or `load` with `loaded`.
       open: shown,
       hold: pinned,
       placement,
+      gutter: HINT_GUTTER,
       onOpenChange: (next: boolean) => {
-        if (node.request(next)) change(next);
+        if (node.request(next)) commit(next);
       },
       getRootNode: env().getRootNode,
     }),
@@ -131,15 +149,20 @@ body may hold any content. Give `content`, or `load` with `loaded`.
   const triggerId = $derived(api.getTriggerProps().id ?? '');
   const contentId = $derived(api.getContentProps().id ?? '');
   const togglePin = () => {
-    if (pinned) change(service.state.matches('open'));
+    if (pinned) commit(service.state.matches('open'));
     pinned = !pinned;
+    detached = false;
   };
   const unpinAndClose = () => {
     pinned = false;
-    change(false);
+    detached = false;
+    commit(false);
   };
   $effect(() => {
-    if (!shownCard) return;
+    if (!shown) detached = false;
+  });
+  $effect(() => {
+    if (!shownCard) return undefined;
     const byId = (key: string) => elementById(env().getRootNode(), key);
     const [trigger, content] = [triggerId, contentId];
     const access = new CardAccess({
@@ -147,8 +170,14 @@ body may hold any content. Give `content`, or `load` with `loaded`.
       trigger: () => byId(trigger),
       content: () => byId(content),
       node,
-      close: () => untrack(() => change(false)),
-      release: () => untrack(unpinAndClose),
+      close: () => {
+        untrack(() => {
+          commit(false);
+        });
+      },
+      release: () => {
+        untrack(unpinAndClose);
+      },
     });
     access.pin(pinned);
     return access.attach();
@@ -156,7 +185,7 @@ body may hold any content. Give `content`, or `load` with `loaded`.
   const hint = useHint(() => ({
     open: api.open,
     setOpen: (next: boolean) => {
-      if (next || !pinned) change(next);
+      if (next || !pinned) commit(next);
     },
     trigger: api.getTriggerProps(),
     positionerId: api.getPositionerProps().id ?? '',
@@ -166,20 +195,32 @@ body may hold any content. Give `content`, or `load` with `loaded`.
     activate: href === undefined ? togglePin : undefined,
     keys: href === undefined && Boolean(inline),
   }));
+  const cardOpen = $derived(api.open && hint.mounted);
+  const move = useCardDrag({
+    open: () => cardOpen,
+    contentId: () => contentId,
+    triggerId: () => triggerId,
+    getRootNode: () => env().getRootNode(),
+    detached: () => detached,
+    setDetached: (on: boolean) => {
+      if (on) pinned = true;
+      detached = on;
+    },
+    pin: () => {
+      pinned = true;
+    },
+    title: () => title,
+    labels: () => arkhe().labels,
+    announce: (text: string) => {
+      arkhe().announcer.announce(text);
+    },
+  });
   $effect(() => {
     if (api.open) body.load();
   });
-  const pinLabel = $derived(
-    formatLabel(pinned ? arkhe().labels.unpin : arkhe().labels.pin, {
-      label: title,
-    }),
-  );
-  const linkLabel = $derived(
-    formatLabel(arkhe().labels.openLink, { label: title }),
-  );
 </script>
 
-<span class={ARKHE_CLASS} data-scope="hover-card" data-part="root"
+<span class={ARKHE_CLASS} {...partAttrs('hover-card', 'root')}
   ><HintTrigger
     attrs={{
       ...hint.trigger,
@@ -195,48 +236,38 @@ body may hold any content. Give `content`, or `load` with `loaded`.
     {inline}>{@render children()}</HintTrigger
   >{#if hint.mounted}<div
       class={ARKHE_CLASS}
+      {...partAttrs('hover-card', 'frame')}
+      data-detached={flag(detached)}
       use:portal={{
         container: env().container(),
         getRootNode: env().getRootNode,
       }}>
       <div {...mergeProps(api.getPositionerProps(), { hidden: !api.open })}>
         <div
-          {...mergeProps(api.getContentProps(), {
-            role: 'dialog',
-            'aria-labelledby': `${id}title`,
-          })}
-          data-pinned={pinned ? '' : undefined}
+          {...mergeProps(
+            cardContentProps(api.getContentProps(), pinned, SVELTE_EVENTS),
+            {
+              role: 'dialog',
+              'aria-labelledby': `${id}title`,
+            },
+          )}
+          data-pinned={flag(pinned)}
           data-width={width}>
-          <div data-scope="hover-card" data-part="header">
-            <span data-scope="hover-card" data-part="title" id={`${id}title`}
-              >{title}</span>
-            {#if href !== undefined}
-              <Button
-                variant="ghost"
-                icon="external-link"
-                label={linkLabel}
-                {href} />
-            {/if}
-            {#if pinnable}
-              <Button
-                variant="ghost"
-                icon={pinned ? 'pin-off' : 'pin'}
-                label={pinLabel}
-                pressed={pinned}
-                onclick={togglePin} />
-            {/if}
-            {#if pinned}
-              <Button
-                variant="ghost"
-                icon="x"
-                label={arkhe().labels.close}
-                onclick={() => {
-                  elementById(env().getRootNode(), triggerId)?.focus();
-                  unpinAndClose();
-                }} />
-            {/if}
-          </div>
-          <div data-scope="hover-card" data-part="body" id={`${id}body`}>
+          <CardHeader
+            {title}
+            titleId={`${id}title`}
+            href={headerLink ? href : undefined}
+            {actions}
+            {pinnable}
+            {pinned}
+            {detached}
+            onMove={move}
+            onTogglePin={togglePin}
+            onClose={() => {
+              elementById(env().getRootNode(), triggerId)?.focus();
+              unpinAndClose();
+            }} />
+          <div {...partAttrs('hover-card', 'body')} id={`${id}body`}>
             <HintScope {node}>
               {@render content?.()}
               {#if body.state.status === 'loading'}

@@ -1,15 +1,15 @@
 // @vitest-environment jsdom
 import {
-  UNMEASURED_VIEW,
-  VIRTUAL_OVERSCAN,
   measureView,
   rowPosition,
   rowScrollTop,
   scrollToRow,
+  UNMEASURED_VIEW,
+  VIRTUAL_OVERSCAN,
   virtualRange,
   virtualVars,
-  watchView,
   type VirtualView,
+  watchView,
 } from '@arkhe/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 

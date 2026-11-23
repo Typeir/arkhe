@@ -12,20 +12,20 @@
 
 import {
   ARKHE_CLASS,
-  REACT_EVENTS,
   fieldDescribedBy,
   fieldIds,
   guardInputProps,
   numericMachineProps,
   type NumericValue,
+  REACT_EVENTS,
 } from '@arkhe/core';
 import * as numberInput from '@zag-js/number-input';
 import { mergeProps, normalizeProps, useMachine } from '@zag-js/react';
-import { useId, type JSX } from 'react';
-import { useArkhe } from '../base/ArkheProvider.js';
+import { type JSX, useId } from 'react';
 import { useArkheEnvironment } from '../base/ArkheEnvironment.js';
-import { FieldNote } from './FieldNote.js';
+import { useArkhe } from '../base/ArkheProvider.js';
 import { Icon } from '../base/Icon.js';
+import { FieldNote } from './FieldNote.js';
 import { useNumericSync } from './useNumericSync.js';
 
 /**
@@ -72,8 +72,22 @@ export interface NumericInputProps {
  * @param {NumericInputProps} props - Label, value, bounds, callbacks.
  * @returns {JSX.Element} Number field.
  */
-export const NumericInput = (props: NumericInputProps): JSX.Element => {
-  const { label, value, onValueChange, onValueCommit, min, max } = props;
+export const NumericInput = ({
+  label,
+  value,
+  defaultValue,
+  onValueChange,
+  onValueCommit,
+  min,
+  max,
+  step,
+  name,
+  required,
+  disabled,
+  readOnly,
+  hint,
+  error,
+}: NumericInputProps): JSX.Element => {
   const { labels, locale } = useArkhe();
   const env = useArkheEnvironment();
   const { sync, track } = useNumericSync(value);
@@ -81,16 +95,28 @@ export const NumericInput = (props: NumericInputProps): JSX.Element => {
   const ids = fieldIds(id);
   const service = useMachine(numberInput.machine, {
     ...numericMachineProps({
-      ...props,
       id,
-      invalid: Boolean(props.error),
+      label,
       labels,
       locale,
+      value,
+      defaultValue,
+      min,
+      max,
+      step,
+      name,
+      required,
+      invalid: Boolean(error),
+      disabled,
+      readOnly,
       getRootNode: env.getRootNode,
     }),
-    onValueChange: (details) => sync.emit(details.valueAsNumber, onValueChange),
-    onValueCommit: (details) =>
-      sync.commit(details.valueAsNumber, onValueCommit, { min, max }),
+    onValueChange: (details) => {
+      sync.emit(details.valueAsNumber, onValueChange);
+    },
+    onValueCommit: (details) => {
+      sync.commit(details.valueAsNumber, onValueCommit, { min, max });
+    },
   });
   const api = track(numberInput.connect(service, normalizeProps));
   return (
@@ -107,13 +133,13 @@ export const NumericInput = (props: NumericInputProps): JSX.Element => {
             sync,
             REACT_EVENTS,
           )}
-          aria-describedby={fieldDescribedBy(ids, props.hint, props.error)}
+          aria-describedby={fieldDescribedBy(ids, hint, error)}
         />
         <button {...api.getIncrementTriggerProps()}>
           <Icon name='plus' />
         </button>
       </div>
-      <FieldNote ids={ids} hint={props.hint} error={props.error} />
+      <FieldNote ids={ids} hint={hint} error={error} />
     </div>
   );
 };

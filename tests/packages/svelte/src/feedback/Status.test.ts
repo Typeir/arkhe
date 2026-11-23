@@ -1,8 +1,8 @@
 import { Status } from '@arkhe/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 import { announced } from '@tests/fixtures/announced';
 import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
 import { textSnippet } from '@tests/fixtures/svelte/snippets';
-import { render, waitFor } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
 
 describe('Status', () => {

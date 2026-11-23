@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
 import { placeAt } from '@tests/fixtures/canvas';
 import { afterEach, describe, expect, it } from 'vitest';
+import type { SkeletonStyle } from '../../../../../../../packages/core/src/feedback/fx/skeleton/painter';
 import {
   CELL_H,
   DECODE_BASE_MS,
   LATE_START_MS,
   STAGGER_PER_PX,
 } from '../../../../../../../packages/core/src/feedback/fx/skeleton/constants';
-import type { SkeletonStyle } from '../../../../../../../packages/core/src/feedback/fx/skeleton/painter';
 import { SkeletonRegion } from '../../../../../../../packages/core/src/feedback/fx/skeleton/region';
 
 const STYLE = { painter: 'path' } as unknown as SkeletonStyle;

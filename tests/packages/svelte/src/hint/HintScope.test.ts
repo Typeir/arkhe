@@ -1,6 +1,6 @@
 import { HintNode } from '@arkhe/core';
-import HintScoped from '@tests/fixtures/svelte/HintScoped.svelte';
 import { render } from '@testing-library/svelte';
+import HintScoped from '@tests/fixtures/svelte/HintScoped.svelte';
 import { describe, expect, it } from 'vitest';
 
 describe('HintScope', () => {

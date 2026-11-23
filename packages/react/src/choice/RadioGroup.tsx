@@ -12,18 +12,19 @@
 
 import {
   ARKHE_CLASS,
+  type CheckboxSize,
   fieldDescribedBy,
   fieldIds,
+  hasText,
   partAttrs,
   radioChecked,
-  radioRootAttrs,
-  uniqueByValue,
-  type CheckboxSize,
   type RadioItem,
   type RadioLook,
   type RadioOrientation,
+  radioRootAttrs,
+  uniqueByValue,
 } from '@arkhe/core';
-import { useId, type JSX } from 'react';
+import { type JSX, useId } from 'react';
 import { FieldNote } from '../field/FieldNote.js';
 
 /**
@@ -35,9 +36,9 @@ import { FieldNote } from '../field/FieldNote.js';
  * @property {string | null} [value] - Chosen value; makes the group controlled, null chooses none.
  * @property {string} [defaultValue] - First choice when uncontrolled.
  * @property {(value: string) => void} [onValueChange] - Reports a new choice.
- * @property {RadioLook} [look] - Pips or segments; pips by default.
- * @property {CheckboxSize} [size] - Pip size; m by default.
- * @property {RadioOrientation} [orientation] - Direction; horizontal by default.
+ * @property {RadioLook} [look] - Pips or segments. Defaults to pips.
+ * @property {CheckboxSize} [size] - Pip size. Defaults to m.
+ * @property {RadioOrientation} [orientation] - Direction. Defaults to horizontal.
  * @property {boolean} [labelHidden] - Hides the legend visually.
  * @property {string} [name] - Form field name; generated when absent.
  * @property {boolean} [required] - A choice is needed to submit.
@@ -102,7 +103,7 @@ export const RadioGroup = ({
       role='radiogroup'
       disabled={disabled}
       aria-describedby={fieldDescribedBy(ids, hint, error)}
-      aria-invalid={error ? true : undefined}
+      aria-invalid={hasText(error) ? true : undefined}
       aria-required={required}>
       <legend {...partAttrs('radio-group', 'legend')} id={ids.label}>
         {label}

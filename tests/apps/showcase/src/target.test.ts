@@ -1,11 +1,11 @@
 import { FxLoader } from '@arkhe/core';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
-  SETTINGS_MESSAGE,
   applySettings,
   bootTarget,
   effectsFromQuery,
   exposeEffects,
+  SETTINGS_MESSAGE,
   settingsFromQuery,
 } from '../../../../apps/showcase/src/target';
 

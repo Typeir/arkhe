@@ -1,4 +1,9 @@
-import { SEARCH_DEBOUNCE, SearchRequest, type SearchState } from '@arkhe/core';
+import {
+  SEARCH_DEBOUNCE,
+  searchBusy,
+  SearchRequest,
+  type SearchState,
+} from '@arkhe/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 beforeEach(() => vi.useFakeTimers());
@@ -64,9 +69,17 @@ describe('SearchRequest', () => {
     const { states, request, run } = setup();
     request.query('gob', run);
     const count = states.length;
-    request.dispose();
+    request.destroy();
     await vi.advanceTimersByTimeAsync(1000);
     expect(run).not.toHaveBeenCalled();
     expect(states).toHaveLength(count);
+  });
+});
+
+describe('searchBusy', () => {
+  it('shows the loading line with no results, else dims them', () => {
+    expect(searchBusy(true, 0)).toEqual({ loading: true, stale: false });
+    expect(searchBusy(true, 3)).toEqual({ loading: false, stale: true });
+    expect(searchBusy(false, 3)).toEqual({ loading: false, stale: false });
   });
 });

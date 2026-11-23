@@ -2,18 +2,21 @@
 @component
 Renders a multi-line text area. Native attributes pass through; `value` binds.
 -->
-<script lang="ts">
-  import { ARKHE_CLASS, partAttrs } from '@arkhe/core';
+<script module lang="ts">
   import type { HTMLTextareaAttributes } from 'svelte/elements';
 
   /**
    * Props of TextArea: native textarea attributes, minus `class`.
    *
-   * @typedef {Omit<HTMLTextareaAttributes, 'class'>} Props
+   * @typedef {Omit<HTMLTextareaAttributes, 'class'>} TextAreaProps
    */
-  type Props = Omit<HTMLTextareaAttributes, 'class'>;
+  export type TextAreaProps = Omit<HTMLTextareaAttributes, 'class'>;
+</script>
 
-  let { value = $bindable(), ...rest }: Props = $props();
+<script lang="ts">
+  import { ARKHE_CLASS, partAttrs } from '@arkhe/core';
+
+  let { value = $bindable(), ...rest }: TextAreaProps = $props();
 </script>
 
 <textarea

@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  canRunFx,
   DEFAULT_FX_OPTIONS,
   InertFx,
   PAINTED_ATTR,
-  canRunFx,
 } from '../../../../../../packages/core/src/feedback/fx/api';
 
 describe('DEFAULT_FX_OPTIONS', () => {

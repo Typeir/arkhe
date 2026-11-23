@@ -1,7 +1,7 @@
-import { DEFAULT_LABELS, FxLoader } from '@arkhe/core';
-import { ArkheProvider, useArkhe, type ArkheContextValue } from '@arkhe/react';
-import { render } from '@testing-library/react';
 import type { AnchorHTMLAttributes, ReactNode } from 'react';
+import { DEFAULT_LABELS, FxLoader } from '@arkhe/core';
+import { type ArkheContextValue, ArkheProvider, useArkhe } from '@arkhe/react';
+import { render } from '@testing-library/react';
 import { FX_LOG, resetFx } from '@tests/fixtures/fakeFx';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

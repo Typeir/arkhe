@@ -1,10 +1,10 @@
 import { NumericInput } from '@arkhe/svelte';
-import BoundNumeric from '@tests/fixtures/svelte/BoundNumeric.svelte';
-import ClampedNumeric from '@tests/fixtures/svelte/ClampedNumeric.svelte';
-import { typeNumber } from '@tests/fixtures/typeNumber';
-import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import BoundNumeric from '@tests/fixtures/svelte/BoundNumeric.svelte';
+import ClampedNumeric from '@tests/fixtures/svelte/ClampedNumeric.svelte';
+import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
+import { typeNumber } from '@tests/fixtures/typeNumber';
 import { describe, expect, it, vi } from 'vitest';
 
 describe('NumericInput', () => {

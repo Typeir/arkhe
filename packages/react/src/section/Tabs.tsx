@@ -16,22 +16,26 @@ import {
   findablePanels,
   flag,
   staleTabFallback,
+  type TabItem,
+  tabsLayer,
+  type TabsLook,
   tabsMachineProps,
   uniqueByValue,
-  type TabItem,
 } from '@arkhe/core';
 import { mergeProps, normalizeProps, useMachine } from '@zag-js/react';
 import * as tabs from '@zag-js/tabs';
 import {
+  type JSX,
+  type ReactNode,
+  useContext,
   useEffect,
   useEffectEvent,
   useId,
   useRef,
   useState,
-  type JSX,
-  type ReactNode,
 } from 'react';
 import { useArkheEnvironment } from '../base/ArkheEnvironment.js';
+import { TabsGroundContext } from './tabsGround.js';
 
 /**
  * Panel source: a render function, or one node per value.
@@ -51,6 +55,7 @@ export type TabPanels =
  * @property {string} [defaultValue] - First value when uncontrolled.
  * @property {(value: string) => void} [onValueChange] - Selection callback.
  * @property {TabPanels} panels - Panel per value.
+ * @property {TabsLook} [look] - `line`: triggers on a rule. `folder`: drawer tabs that alternate grounds as they nest. Defaults to `line`.
  */
 export interface TabsProps {
   readonly items: readonly TabItem[];
@@ -59,6 +64,7 @@ export interface TabsProps {
   readonly defaultValue?: string;
   readonly onValueChange?: (value: string) => void;
   readonly panels: TabPanels;
+  readonly look?: TabsLook;
 }
 
 /**
@@ -77,8 +83,10 @@ export const Tabs = ({
   defaultValue,
   onValueChange,
   panels,
+  look = 'line',
 }: TabsProps): JSX.Element => {
   const env = useArkheEnvironment();
+  const { layer, inner } = tabsLayer(look, useContext(TabsGroundContext));
   const shown = uniqueByValue(items);
   const [warned] = useState(() => new Set<string>());
   const service = useMachine(
@@ -96,21 +104,25 @@ export const Tabs = ({
   );
   const api = tabs.connect(service, normalizeProps);
   const fallback =
-    value === undefined ? staleTabFallback(api.value, shown) : undefined;
+    value === undefined ? staleTabFallback(api.value, shown) : null;
   useEffect(() => {
-    if (fallback !== undefined) api.setValue(fallback);
+    if (fallback !== null) api.setValue(fallback);
   }, [api, fallback]);
   const root = useRef<HTMLDivElement>(null);
-  const select = useEffectEvent((next: string) => api.setValue(next));
+  const commit = useEffectEvent((next: string) => {
+    api.setValue(next);
+  });
   useEffect(() => {
     if (!root.current) return undefined;
-    return findablePanels(root.current, select);
+    return findablePanels(root.current, commit);
   }, []);
   const panelFor = (key: string) =>
     typeof panels === 'function' ? panels(key) : panels[key];
   return (
     <div
       {...mergeProps(api.getRootProps(), { className: ARKHE_CLASS })}
+      data-look={look}
+      data-layer={layer}
       ref={root}>
       <div {...api.getListProps()}>
         {shown.map((item) => (
@@ -131,7 +143,9 @@ export const Tabs = ({
           {...api.getContentProps({ value: item.value })}
           data-value={item.value}
           data-findable={flag(!item.disabled)}>
-          {panelFor(item.value)}
+          <TabsGroundContext value={inner}>
+            {panelFor(item.value)}
+          </TabsGroundContext>
         </div>
       ))}
     </div>

@@ -13,18 +13,18 @@
 'use client';
 
 import {
-  ARKHE_CLASS,
   announceText,
+  ARKHE_CLASS,
   partAttrs,
-  statusLook,
   type StatusKind,
+  statusLook,
 } from '@arkhe/core';
 import {
+  type JSX,
+  type ReactNode,
   useEffect,
   useLayoutEffect,
   useRef,
-  type JSX,
-  type ReactNode,
 } from 'react';
 import { useArkhe } from '../base/ArkheProvider.js';
 import { Icon } from '../base/Icon.js';
@@ -59,13 +59,10 @@ export const Status = ({ kind, children }: StatusProps): JSX.Element => {
   useLayoutEffect(() => {
     politeness.current = look.politeness;
   });
-  useEffect(
-    () =>
-      region.current
-        ? announceText(region.current, announcer, () => politeness.current)
-        : undefined,
-    [announcer],
-  );
+  useEffect(() => {
+    if (!region.current) return undefined;
+    return announceText(region.current, announcer, () => politeness.current);
+  }, [announcer]);
   return (
     <span
       ref={region}

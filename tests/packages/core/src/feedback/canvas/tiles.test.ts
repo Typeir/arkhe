@@ -3,8 +3,8 @@ import {
   CAP_PX,
   MAX_SIDE,
   planTiles,
-  tilePxHeight,
   type TileLimits,
+  tilePxHeight,
 } from '../../../../../../packages/core/src/feedback/canvas/tiles';
 
 const STEP = 12;

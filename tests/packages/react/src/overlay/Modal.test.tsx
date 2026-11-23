@@ -1,5 +1,4 @@
 import { ArkheEnvironment, ArkheProvider, Modal } from '@arkhe/react';
-import { liveWatcher, stubCloseWatcher } from '@tests/fixtures/closeWatcher';
 import {
   act,
   fireEvent,
@@ -7,8 +6,9 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
-import { useState } from 'react';
 import userEvent from '@testing-library/user-event';
+import { liveWatcher, stubCloseWatcher } from '@tests/fixtures/closeWatcher';
+import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 function shadowApp() {
@@ -57,6 +57,7 @@ describe('Modal', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Rest' });
     expect(dialog).toHaveAccessibleDescription('Recover your charges.');
     expect(dialog).toHaveTextContent('Body');
+    expect(dialog.querySelector('header')).toBeNull();
   });
 
   it('closes on Escape and returns focus to the trigger', async () => {

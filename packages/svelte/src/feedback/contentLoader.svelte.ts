@@ -2,7 +2,7 @@
  * @fileoverview Svelte glue for `ContentLoader`: one loader per source, read
  * through a Svelte subscriber.
  *
- * @module packages/svelte/src/contentLoader.svelte
+ * @module packages/svelte/src/feedback/contentLoader.svelte
  * @version 1.0.0
  * @author Typeir
  * @since 0.1.0
@@ -11,6 +11,12 @@
 import { ContentLoader, type LoadState } from '@arkhe/core';
 import { createSubscriber } from 'svelte/reactivity';
 
+/**
+ * State of a handle without a source.
+ *
+ * @constant IDLE
+ * @type {LoadState<never>}
+ */
 const IDLE: LoadState<never> = { status: 'idle' };
 
 /**
@@ -56,7 +62,7 @@ export function useContentLoader<T>(
 ): ContentLoaderHandle<T> {
   const current = $derived.by(() => {
     const next = source();
-    if (!next) return undefined;
+    if (!next) return null;
     const loader = new ContentLoader(next);
     return { loader, read: watch(loader) };
   });

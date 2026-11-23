@@ -11,8 +11,8 @@
 
 'use client';
 
-import { partAttrs, type FieldIds } from '@arkhe/core';
-import { useEffect, type JSX } from 'react';
+import { type FieldIds, hasText, partAttrs } from '@arkhe/core';
+import { type JSX, useEffect } from 'react';
 import { useArkhe } from '../base/ArkheProvider.js';
 
 /**
@@ -43,16 +43,16 @@ export const FieldNote = ({
 }: FieldNoteProps): JSX.Element | null => {
   const { announcer } = useArkhe();
   useEffect(() => {
-    if (error) announcer.announce(error);
+    if (hasText(error)) announcer.announce(error);
   }, [error, announcer]);
-  if (error) {
+  if (hasText(error)) {
     return (
       <p {...partAttrs('field', 'error')} id={ids.error}>
         {error}
       </p>
     );
   }
-  return hint ? (
+  return hasText(hint) ? (
     <p {...partAttrs('field', 'hint')} id={ids.hint}>
       {hint}
     </p>

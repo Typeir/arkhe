@@ -1,6 +1,7 @@
 import { Checkbox } from '@arkhe/svelte';
 import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import BoundUnset from '@tests/fixtures/svelte/BoundUnset.svelte';
 import { describe, expect, it, vi } from 'vitest';
 
 describe('Checkbox', () => {
@@ -100,5 +101,15 @@ describe('Checkbox', () => {
     });
     expect(new FormData(form).get('slain')).toBe('yes');
     form.remove();
+  });
+
+  it('starts from defaultChecked under a binding that starts unset', async () => {
+    render(BoundUnset, { kind: 'checkbox' });
+    const box = screen.getByRole('checkbox');
+    expect(box).toBeChecked();
+    expect(screen.getByText('held undefined')).toBeInTheDocument();
+    await userEvent.click(box);
+    expect(box).not.toBeChecked();
+    expect(screen.getByText('held false')).toBeInTheDocument();
   });
 });

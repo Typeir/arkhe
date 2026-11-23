@@ -4,45 +4,18 @@ Renders a labelled button that opens a list of options, on Zag's select
 machine, with the list portalled into the environment's container. Not
 exported: it is the body of Select when not searchable. A hidden native
 select mirrors the value for forms; with virtual rows it holds only the chosen
-option. The list portals in once mounted on the
-client, so server markup holds none.
+option. The list portals in once mounted on the client, so server markup
+holds none.
 -->
-<script lang="ts" generics="T extends SelectOption">
-  import {
-    ARKHE_CLASS,
-    EMPTY_VALUE,
-    fieldDescribedBy,
-    fieldIds,
-    flag,
-    fromEmptyValue,
-    isGrouped,
-    optionCollection,
-    selectMachineProps,
-    slug,
-    toEmptyValue,
-    uniqueByValue,
-    withEmptyOption,
-    type SelectOption,
-    type Placement,
-  } from '@arkhe/core';
-  import * as select from '@zag-js/select';
-  import {
-    mergeProps,
-    normalizeProps,
-    portal,
-    useMachine,
-  } from '@zag-js/svelte';
-  import { onMount, type Snippet } from 'svelte';
-  import { useArkhe } from '../base/context.js';
-  import { useArkheEnvironment } from '../base/environment.js';
-  import FieldNote from '../field/FieldNote.svelte';
-  import Icon from '../base/Icon.svelte';
-  import { useVirtualRows } from '../list/virtualRows.svelte.js';
+<script module lang="ts">
+  import type { Placement, SelectOption } from '@arkhe/core';
+  import type { Snippet } from 'svelte';
 
   /**
    * Props of SelectMenu.
    *
-   * @interface Props
+   * @interface SelectMenuProps
+   * @template {SelectOption} T
    * @property {string} label - Visible label.
    * @property {readonly T[]} items - Options; a repeated value is dropped.
    * @property {string} [placeholder] - Shown while nothing is chosen.
@@ -62,7 +35,7 @@ client, so server markup holds none.
    * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
    * @property {number} [rowPitch] - Row height in rem; draws only the rows in view. Flat lists only.
    */
-  interface Props {
+  export interface SelectMenuProps<T extends SelectOption> {
     label: string;
     items: readonly T[];
     placeholder?: string;
@@ -82,61 +55,109 @@ client, so server markup holds none.
     error?: string;
     rowPitch?: number;
   }
+</script>
 
-  let { value = $bindable(), ...props }: Props = $props();
+<script lang="ts" generics="T extends SelectOption">
+  import {
+    ARKHE_CLASS,
+    EMPTY_VALUE,
+    fieldDescribedBy,
+    fieldIds,
+    flag,
+    fromEmptyValue,
+    isGrouped,
+    optionCollection,
+    partAttrs,
+    selectMachineProps,
+    slug,
+    toEmptyValue,
+    uniqueByValue,
+    withEmptyOption,
+  } from '@arkhe/core';
+  import * as select from '@zag-js/select';
+  import {
+    mergeProps,
+    normalizeProps,
+    portal,
+    useMachine,
+  } from '@zag-js/svelte';
+  import { useArkhe } from '../base/context.js';
+  import { useArkheEnvironment } from '../base/environment.js';
+  import Icon from '../base/Icon.svelte';
+  import { useMounted } from '../base/mounted.svelte.js';
+  import FieldNote from '../field/FieldNote.svelte';
+  import { useVirtualRows } from '../list/virtualRows.svelte.js';
+
+  let {
+    label,
+    items,
+    placeholder,
+    value = $bindable(),
+    defaultValue,
+    onValueChange,
+    item,
+    name,
+    required,
+    autoComplete,
+    disabled,
+    placement,
+    emptyLabel,
+    size,
+    labelHidden,
+    hint,
+    error,
+    rowPitch,
+  }: SelectMenuProps<T> = $props();
   const id = $props.id();
   const ids = fieldIds(id);
   const arkhe = useArkhe();
   const env = useArkheEnvironment();
   const shown = $derived(
-    uniqueByValue(
-      withEmptyOption(props.items, props.emptyLabel),
-    ) as readonly T[],
+    uniqueByValue(withEmptyOption(items, emptyLabel)) as readonly T[],
   );
   const collection = $derived(select.collection(optionCollection(shown)));
   const rows = useVirtualRows(
     () => shown.length,
-    () => (isGrouped(shown) ? undefined : props.rowPitch),
+    () => (isGrouped(shown) ? undefined : rowPitch),
   );
+  const commit = (next: string | null) => {
+    value = next;
+    onValueChange?.(next);
+  };
   const service = useMachine(select.machine, () => ({
     ...selectMachineProps({
       id,
-      label: props.label,
+      label,
       labels: arkhe().labels,
-      value: toEmptyValue(value, props.emptyLabel),
-      defaultValue: toEmptyValue(props.defaultValue ?? null, props.emptyLabel),
-      name: props.name,
-      required: props.required,
-      invalid: Boolean(props.error),
-      autoComplete: props.autoComplete,
-      disabled: props.disabled,
-      placement: props.placement,
+      value: toEmptyValue(value, emptyLabel),
+      defaultValue: toEmptyValue(defaultValue ?? null, emptyLabel),
+      name,
+      required,
+      invalid: Boolean(error),
+      autoComplete,
+      disabled,
+      placement,
       getRootNode: env().getRootNode,
     }),
     ...(rows.on ? { scrollToIndexFn: rows.scrollTo } : {}),
     collection,
     onValueChange: (details: select.ValueChangeDetails<T>) => {
-      const next = fromEmptyValue(details.value[0] ?? null);
-      value = next;
-      props.onValueChange?.(next);
+      commit(fromEmptyValue(details.value[0] ?? null));
     },
   }));
   const api = $derived(select.connect(service, normalizeProps));
-  let mounted = $state(false);
-  onMount(() => {
-    mounted = true;
-  });
+  const mounted = useMounted();
 </script>
 
 {#snippet option(entry: T, index: number)}
   <div {...api.getItemProps({ item: entry })} {...rows.position(index)}>
-    {#if props.item && !(entry.value === EMPTY_VALUE && props.emptyLabel !== undefined)}
-      {@render props.item(entry)}
+    {#if item && !(entry.value === EMPTY_VALUE && emptyLabel !== undefined)}
+      {@render item(entry)}
     {:else}
       {#if entry.icon}<Icon name={entry.icon} />{/if}
-      <span data-scope="select" data-part="item-label">{entry.label}</span>
+      <span {...partAttrs('select', 'item-label')}>{entry.label}</span>
       {#if entry.description}
-        <span data-scope="select" data-part="item-description"
+        <span {...partAttrs('select', 'item-description')}
           >{entry.description}</span>
       {/if}
     {/if}
@@ -146,28 +167,28 @@ client, so server markup holds none.
 <div
   {...mergeProps(api.getRootProps(), {
     class: ARKHE_CLASS,
-    'data-size': props.size,
-    'data-label-hidden': flag(props.labelHidden),
+    'data-size': size,
+    'data-label-hidden': flag(labelHidden),
   })}>
-  <label {...api.getLabelProps()}>{props.label}</label>
+  <label {...api.getLabelProps()}>{label}</label>
   <div {...api.getControlProps()}>
     <button
       {...api.getTriggerProps()}
-      aria-describedby={fieldDescribedBy(ids, props.hint, props.error)}
+      aria-describedby={fieldDescribedBy(ids, hint, error)}
       ><span {...api.getValueTextProps()}
-        >{api.valueAsString || props.placeholder || ''}</span
+        >{api.valueAsString || (placeholder ?? '')}</span
       ><span {...api.getIndicatorProps()}><Icon name="chevron-down" /></span
       ></button>
   </div>
-  <FieldNote {ids} hint={props.hint} error={props.error} />
+  <FieldNote {ids} {hint} {error} />
   <select {...api.getHiddenSelectProps()}>
-    <option value="">{props.emptyLabel ?? ''}</option>
+    <option value="">{emptyLabel ?? ''}</option>
     {#each shown.filter((entry) => entry.value !== EMPTY_VALUE && (!rows.on || api.value.includes(entry.value))) as entry (entry.value)}
       <option value={entry.value} disabled={entry.disabled}
         >{entry.label}</option>
     {/each}
   </select>
-  {#if mounted}
+  {#if mounted.current}
     <div
       class={ARKHE_CLASS}
       use:portal={{

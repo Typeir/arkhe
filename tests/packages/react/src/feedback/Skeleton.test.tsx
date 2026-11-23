@@ -1,13 +1,13 @@
+import type { ReactNode } from 'react';
 import { ArkheProvider, Skeleton, SkeletonGroup } from '@arkhe/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { announced } from '@tests/fixtures/announced';
 import {
+  finishReveals,
   FX_LOG,
   FX_MODE,
-  finishReveals,
   resetFx,
 } from '@tests/fixtures/fakeFx';
-import { act, render, waitFor } from '@testing-library/react';
-import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@arkhe/core/fx', () => import('@tests/fixtures/fakeFx'));

@@ -5,23 +5,13 @@ choice and opens a sheet from the bottom edge, titled by the label, holding
 the search box and the list, so the on-screen keyboard never covers them.
 The sheet focuses its search box. Not exported.
 -->
-<script lang="ts">
-  import {
-    ARKHE_CLASS,
-    fieldDescribedBy,
-    fieldIds,
-    flag,
-    partAttrs,
-  } from '@arkhe/core';
+<script module lang="ts">
   import type { Snippet } from 'svelte';
-  import FieldNote from '../field/FieldNote.svelte';
-  import Icon from '../base/Icon.svelte';
-  import Modal from '../overlay/Modal.svelte';
 
   /**
    * Props of SheetField.
    *
-   * @interface Props
+   * @interface SheetFieldProps
    * @property {string} label - Visible label; titles the sheet.
    * @property {string} [text] - The current choice, shown on the button.
    * @property {string} [placeholder] - Shown on the button without a choice.
@@ -35,7 +25,7 @@ The sheet focuses its search box. Not exported.
    * @property {string} [error] - Error text; replaces the hint and marks the button invalid.
    * @property {Snippet<[() => void]>} children - Sheet body; its argument shuts the sheet.
    */
-  interface Props {
+  export interface SheetFieldProps {
     label: string;
     text?: string;
     placeholder?: string;
@@ -49,6 +39,20 @@ The sheet focuses its search box. Not exported.
     error?: string;
     children: Snippet<[() => void]>;
   }
+</script>
+
+<script lang="ts">
+  import {
+    ARKHE_CLASS,
+    fieldDescribedBy,
+    fieldIds,
+    flag,
+    hasText,
+    partAttrs,
+  } from '@arkhe/core';
+  import Icon from '../base/Icon.svelte';
+  import FieldNote from '../field/FieldNote.svelte';
+  import Modal from '../overlay/Modal.svelte';
 
   let {
     label,
@@ -63,12 +67,12 @@ The sheet focuses its search box. Not exported.
     hint,
     error,
     children,
-  }: Props = $props();
+  }: SheetFieldProps = $props();
   const id = $props.id();
   const ids = fieldIds(id);
-  let trigger = $state<HTMLButtonElement>();
+  let trigger = $state<HTMLButtonElement | null>(null);
   let open = $state(false);
-  let body = $state<HTMLDivElement>();
+  let body = $state<HTMLDivElement | null>(null);
   const close = () => (open = false);
 </script>
 
@@ -87,11 +91,11 @@ The sheet focuses its search box. Not exported.
       aria-expanded={open}
       aria-labelledby={`${id}label ${id}text`}
       aria-describedby={fieldDescribedBy(ids, hint, error)}
-      data-placeholder-shown={flag(!text)}
+      data-placeholder-shown={flag(!hasText(text))}
       {disabled}
       onclick={() => (open = true)}
       ><span {...partAttrs('select', 'value-text')} id={`${id}text`}
-        >{text || placeholder || ''}</span
+        >{hasText(text) ? text : (placeholder ?? '')}</span
       ><span {...partAttrs('select', 'indicator')}
         ><Icon name="chevron-down" /></span
       ></button>

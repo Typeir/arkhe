@@ -1,3 +1,4 @@
+import { ANNOUNCE_DELAY } from '@arkhe/core';
 import {
   act,
   cleanup as cleanupReact,
@@ -41,15 +42,32 @@ const SVELTE: Port = {
   unmount: cleanupSvelte,
 };
 
+async function steady(
+  port: Port,
+  tolerances: readonly Tolerance[],
+): Promise<string[]> {
+  await port.settle();
+  if (document.querySelector('[data-live-announcer]')) {
+    await new Promise((resolve) => setTimeout(resolve, ANNOUNCE_DELAY));
+    await port.settle();
+  }
+  let shot = normalizeDom(document.body, tolerances);
+  for (let tries = 0; tries < 20; tries += 1) {
+    await port.settle();
+    const next = normalizeDom(document.body, tolerances);
+    if (next.join('\n') === shot.join('\n')) return next;
+    shot = next;
+  }
+  return shot;
+}
+
 async function snapshots(port: Port, scene: ParityCase): Promise<string[][]> {
   port.mount(scene.name);
-  await port.settle();
   const tolerances = [...SHARED_TOLERANCES, ...(scene.tolerances ?? [])];
-  const shots = [normalizeDom(document.body, tolerances)];
+  const shots = [await steady(port, tolerances)];
   for (const step of scene.steps ?? []) {
     await step.run();
-    await port.settle();
-    shots.push(normalizeDom(document.body, tolerances));
+    shots.push(await steady(port, tolerances));
   }
   port.unmount();
   document.body.replaceChildren();

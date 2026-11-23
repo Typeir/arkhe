@@ -62,7 +62,7 @@ describe('resolveTabValue', () => {
 
 describe('staleTabFallback', () => {
   it('stays put while the shown tab is enabled', () => {
-    expect(staleTabFallback('Spell list', ITEMS)).toBeUndefined();
+    expect(staleTabFallback('Spell list', ITEMS)).toBeNull();
   });
 
   it('moves to the first enabled tab once the shown tab is gone or disabled', () => {
@@ -73,7 +73,7 @@ describe('staleTabFallback', () => {
 
   it('gives nothing when no tab is enabled', () => {
     const locked = [{ value: 'stats', label: 'Stats', disabled: true }];
-    expect(staleTabFallback('stats', locked)).toBeUndefined();
+    expect(staleTabFallback('stats', locked)).toBeNull();
   });
 });
 

@@ -8,9 +8,15 @@
  * @since 0.1.0
  */
 
-import { DEFAULT_ENVIRONMENT, type ArkheEnvironmentValue } from '@arkhe/core';
+import { type ArkheEnvironmentValue, DEFAULT_ENVIRONMENT } from '@arkhe/core';
 import { getContext, setContext } from 'svelte';
 
+/**
+ * Context key of the environment, shared by every copy of Arkhé.
+ *
+ * @constant KEY
+ * @type {symbol}
+ */
 const KEY = Symbol.for('arkhe.environment');
 
 /**

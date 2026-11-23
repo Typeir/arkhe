@@ -3,25 +3,28 @@
 Makes a card's hint node the parent of the hints rendered in its body, so
 only the body links nested hints to the card, not its trigger.
 -->
-<script lang="ts">
+<script module lang="ts">
   import type { HintNode } from '@arkhe/core';
-  import { untrack, type Snippet } from 'svelte';
-  import { provideHintNode } from './hint.svelte.js';
+  import type { Snippet } from 'svelte';
 
   /**
    * Props of HintScope.
    *
-   * @interface Props
+   * @interface HintScopeProps
    * @property {HintNode} node - The card's node.
    * @property {Snippet} children - Card body.
    */
-  interface Props {
+  export interface HintScopeProps {
     node: HintNode;
     children: Snippet;
   }
+</script>
 
-  let { node, children }: Props = $props();
-  provideHintNode(untrack(() => node));
+<script lang="ts">
+  import { provideHintNode } from './hint.svelte.js';
+
+  let { node, children }: HintScopeProps = $props();
+  provideHintNode(() => node);
 </script>
 
 {@render children()}

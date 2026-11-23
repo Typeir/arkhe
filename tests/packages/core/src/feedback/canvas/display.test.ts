@@ -2,8 +2,8 @@
 import { stubBrowser } from '@tests/fixtures/canvas';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  DisplayWatcher,
   type DisplayChange,
+  DisplayWatcher,
 } from '../../../../../../packages/core/src/feedback/canvas/display';
 
 const resize = (w: number, h: number) => {

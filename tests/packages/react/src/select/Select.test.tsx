@@ -1,5 +1,4 @@
 import { Picker, Search, Select } from '@arkhe/react';
-import { resetNarrow, setNarrow } from '@tests/fixtures/narrow';
 import {
   fireEvent,
   render,
@@ -8,6 +7,7 @@ import {
   within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { resetNarrow, setNarrow } from '@tests/fixtures/narrow';
 import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 

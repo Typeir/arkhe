@@ -5,34 +5,37 @@ speaks its text on mount and on each change; errors interrupt, the rest wait.
 The root is a `span`, so a status fits phrasing content such as a hover card
 inside a paragraph.
 -->
-<script lang="ts">
-  import {
-    ARKHE_CLASS,
-    announceText,
-    partAttrs,
-    statusLook,
-    type StatusKind,
-  } from '@arkhe/core';
+<script module lang="ts">
+  import type { StatusKind } from '@arkhe/core';
   import type { Snippet } from 'svelte';
-  import { useArkhe } from '../base/context.js';
-  import Icon from '../base/Icon.svelte';
 
   /**
    * Props of Status.
    *
-   * @interface Props
+   * @interface StatusProps
    * @property {StatusKind} kind - Kind of status.
-   * @property {Snippet} [children] - Text; defaults to the kind's label.
+   * @property {Snippet} [children] - Text. Defaults to the kind's label.
    */
-  interface Props {
+  export interface StatusProps {
     kind: StatusKind;
     children?: Snippet;
   }
+</script>
 
-  let { kind, children }: Props = $props();
+<script lang="ts">
+  import {
+    announceText,
+    ARKHE_CLASS,
+    partAttrs,
+    statusLook,
+  } from '@arkhe/core';
+  import { useArkhe } from '../base/context.js';
+  import Icon from '../base/Icon.svelte';
+
+  let { kind, children }: StatusProps = $props();
   const arkhe = useArkhe();
   const look = $derived(statusLook(kind, arkhe().labels));
-  let region = $state<HTMLSpanElement>();
+  let region = $state<HTMLSpanElement | null>(null);
   $effect(() =>
     region
       ? announceText(region, arkhe().announcer, () => look.politeness)

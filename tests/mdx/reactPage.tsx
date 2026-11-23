@@ -9,10 +9,10 @@
  * @since 0.1.0
  */
 
-import { ArkheProvider } from '@arkhe/react';
-import { act } from '@testing-library/react';
 import type { MDXContent } from 'mdx/types';
 import type { ReactNode } from 'react';
+import { ArkheProvider } from '@arkhe/react';
+import { act } from '@testing-library/react';
 import { createRoot, hydrateRoot, type Root } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
 import { onServer } from './audit';

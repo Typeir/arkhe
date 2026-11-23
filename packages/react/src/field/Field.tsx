@@ -13,12 +13,13 @@
 import {
   ARKHE_CLASS,
   fieldControlAttrs,
+  type FieldControlAttrs,
   fieldIds,
   flag,
+  hasText,
   partAttrs,
-  type FieldControlAttrs,
 } from '@arkhe/core';
-import { useId, type JSX, type ReactNode } from 'react';
+import { type JSX, type ReactNode, useId } from 'react';
 import { FieldNote } from './FieldNote.js';
 
 /**
@@ -60,7 +61,7 @@ export const Field = ({
   children,
 }: FieldProps): JSX.Element => {
   const ids = fieldIds(useId());
-  const showHint = Boolean(hint) && !error;
+  const showHint = hasText(hint) && !hasText(error);
   return (
     <div
       className={ARKHE_CLASS}

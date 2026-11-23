@@ -1,6 +1,6 @@
 import { Disclosure } from '@arkhe/svelte';
-import { textSnippet } from '@tests/fixtures/svelte/snippets';
 import { render, screen } from '@testing-library/svelte';
+import { textSnippet } from '@tests/fixtures/svelte/snippets';
 import { describe, expect, it } from 'vitest';
 
 describe('Disclosure', () => {

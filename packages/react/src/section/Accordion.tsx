@@ -11,22 +11,23 @@
 
 'use client';
 
+import type { JSX } from 'react';
 import {
-  ARKHE_CLASS,
+  type AccordionAction,
   accordionAllOpen,
   accordionHeld,
+  type AccordionItem,
   accordionReduce,
+  ARKHE_CLASS,
   dispatch,
+  type HeadingLevel,
   partAttrs,
   uniqueByValue,
-  type AccordionAction,
-  type AccordionItem,
-  type HeadingLevel,
 } from '@arkhe/core';
-import { useState, type JSX } from 'react';
-import { useArkhe } from '../base/ArkheProvider.js';
-import { Collapsible } from './Collapsible.js';
 import type { TabPanels } from './Tabs.js';
+import { useArkhe } from '../base/ArkheProvider.js';
+import { useControllable } from '../base/useControllable.js';
+import { Collapsible } from './Collapsible.js';
 
 /**
  * Props of Accordion.
@@ -37,9 +38,9 @@ import type { TabPanels } from './Tabs.js';
  * @property {readonly string[]} [value] - Open values; makes it controlled.
  * @property {readonly string[]} [defaultValue] - First open values when uncontrolled.
  * @property {(value: readonly string[]) => void} [onValueChange] - Reports changes.
- * @property {boolean} [multiple] - Several open at once; true by default.
- * @property {boolean} [collapsible] - The last open section may close; true by default.
- * @property {HeadingLevel} [heading] - Heading level of every trigger; 3 by default.
+ * @property {boolean} [multiple] - Several open at once. Defaults to true.
+ * @property {boolean} [collapsible] - The last open section may close. Defaults to true.
+ * @property {HeadingLevel} [heading] - Heading level of every trigger. Defaults to 3.
  * @property {boolean} [expandAll] - Adds an expand / collapse all button while `multiple`.
  */
 export interface AccordionProps {
@@ -74,16 +75,16 @@ export const Accordion = ({
   expandAll,
 }: AccordionProps): JSX.Element => {
   const { labels } = useArkhe();
-  const [own, setOwn] = useState<readonly string[]>(defaultValue ?? []);
-  const open = value ?? own;
+  const { current: open, commit } = useControllable<readonly string[]>({
+    value,
+    defaultValue: defaultValue ?? [],
+    onChange: onValueChange,
+  });
   const all = uniqueByValue(items);
   const rules = { items: all, multiple, collapsible };
-  const commit = (next: readonly string[]) => {
-    if (value === undefined) setOwn(next);
-    onValueChange?.(next);
-  };
-  const act = (action: AccordionAction) =>
+  const act = (action: AccordionAction) => {
     dispatch(accordionReduce, open, action, rules, commit);
+  };
   const full = accordionAllOpen(all, open);
   const panelFor = (key: string) =>
     typeof panels === 'function' ? panels(key) : panels[key];
@@ -94,7 +95,9 @@ export const Accordion = ({
           type='button'
           {...partAttrs('accordion', 'toggle-all')}
           aria-expanded={full}
-          onClick={() => act({ type: 'toggle-all' })}>
+          onClick={() => {
+            act({ type: 'toggle-all' });
+          }}>
           {full ? labels.collapseAll : labels.expandAll}
         </button>
       ) : null}
@@ -105,7 +108,9 @@ export const Accordion = ({
           heading={heading}
           open={open.includes(item.value)}
           disabled={item.disabled || accordionHeld(open, item.value, rules)}
-          onOpenChange={(next) => act({ type: 'set', item, open: next })}>
+          onOpenChange={(next) => {
+            act({ type: 'set', item, open: next });
+          }}>
           {panelFor(item.value)}
         </Collapsible>
       ))}

@@ -9,8 +9,8 @@
  */
 
 import {
-  SETTINGS_MESSAGE,
   applySettings,
+  SETTINGS_MESSAGE,
   type ShowcaseSettings,
 } from '../target';
 
@@ -40,8 +40,20 @@ export const TARGETS: readonly ShowcaseTarget[] = [
   { id: 'static', title: 'Static HTML + CSS', path: 'targets/static/' },
 ];
 
+/**
+ * Local storage key for the landing settings.
+ *
+ * @constant STORE_KEY
+ * @type {string}
+ */
 const STORE_KEY = 'arkhe-showcase';
 
+/**
+ * Reads the stored landing settings; empty when there are none or storage is blocked.
+ *
+ * @function readStored
+ * @returns {Partial<ShowcaseSettings> & { hidden?: string[], stacked?: boolean }} Stored settings.
+ */
 function readStored(): Partial<ShowcaseSettings> & {
   hidden?: string[];
   stacked?: boolean;
@@ -53,6 +65,13 @@ function readStored(): Partial<ShowcaseSettings> & {
   }
 }
 
+/**
+ * Stores the landing settings; a blocked storage keeps nothing.
+ *
+ * @function store
+ * @param {object} value - Settings to keep.
+ * @returns {void}
+ */
 function store(value: object): void {
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify(value));
@@ -61,6 +80,13 @@ function store(value: object): void {
   }
 }
 
+/**
+ * Keeps a target frame as tall as its document, so the landing scrolls instead of each frame.
+ *
+ * @function fitHeight
+ * @param {HTMLIFrameElement} frame - Target frame.
+ * @returns {void}
+ */
 function fitHeight(frame: HTMLIFrameElement): void {
   const doc = frame.contentDocument;
   if (!doc) return;
@@ -99,7 +125,9 @@ export function startLanding(stage: HTMLElement, controls: HTMLElement): void {
     const frame = document.createElement('iframe');
     frame.title = `${target.title} target`;
     frame.src = `${target.path}${query}`;
-    frame.addEventListener('load', () => fitHeight(frame));
+    frame.addEventListener('load', () => {
+      fitHeight(frame);
+    });
     panel.append(frame);
     stage.append(panel);
     return { target, panel, frame, link };
@@ -116,19 +144,17 @@ export function startLanding(stage: HTMLElement, controls: HTMLElement): void {
         location.origin,
       );
     }
+    const isOn = (key: string | undefined, value: string): boolean => {
+      if (key === 'theme') return state.settings.theme === value;
+      if (key === 'scale') return String(state.settings.scale) === value;
+      if (key === 'layout') return (value === 'stacked') === state.stacked;
+      return !state.hidden.has(value);
+    };
     for (const button of controls.querySelectorAll<HTMLButtonElement>(
       '[data-set]',
     )) {
       const [key, value] = (button.dataset.set ?? '').split('=');
-      const on =
-        key === 'theme'
-          ? state.settings.theme === value
-          : key === 'scale'
-            ? String(state.settings.scale) === value
-            : key === 'layout'
-              ? (value === 'stacked') === state.stacked
-              : !state.hidden.has(value);
-      button.setAttribute('aria-pressed', String(on));
+      button.setAttribute('aria-pressed', String(isOn(key, value)));
     }
     store({
       ...state.settings,
@@ -142,10 +168,12 @@ export function startLanding(stage: HTMLElement, controls: HTMLElement): void {
     );
     if (!button) return;
     const [key, value] = (button.dataset.set ?? '').split('=');
-    if (key === 'theme')
+    if (key === 'theme') {
       state.settings = { ...state.settings, theme: value as 'dark' | 'light' };
-    if (key === 'scale')
+    }
+    if (key === 'scale') {
       state.settings = { ...state.settings, scale: Number(value) };
+    }
     if (key === 'layout') state.stacked = value === 'stacked';
     if (key === 'target') {
       if (state.hidden.has(value)) state.hidden.delete(value);

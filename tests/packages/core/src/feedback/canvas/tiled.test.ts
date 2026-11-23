@@ -112,11 +112,11 @@ describe('TiledSurface', () => {
     expect(canvases(host)).toBe(0);
   });
 
-  it('removes every canvas and sentinel on teardown', () => {
+  it('removes every canvas and sentinel on destroy', () => {
     const { ctx } = testContext();
     const surface = new TiledSurface(ctx, mockRegion(host, 2000, mockSlice()));
     for (const s of sentinels(host)) reportAll(s, true);
-    surface.teardown();
+    surface.destroy();
     expect(host.children).toHaveLength(0);
     expect(ctx.budget.count).toBe(0);
   });

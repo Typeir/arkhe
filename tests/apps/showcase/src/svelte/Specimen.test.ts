@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
-import Specimen from '../../../../../apps/showcase/src/svelte/Specimen.svelte';
 import { SPECIMEN_SECTIONS } from '../../../../../apps/showcase/src/specimen';
+import Specimen from '../../../../../apps/showcase/src/svelte/Specimen.svelte';
 
 describe('Svelte Specimen', () => {
   it('renders every section', () => {

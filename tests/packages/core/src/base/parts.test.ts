@@ -1,4 +1,4 @@
-import { ARKHE_CLASS, flag, partAttrs } from '@arkhe/core';
+import { ARKHE_CLASS, flag, hasText, partAttrs } from '@arkhe/core';
 import { describe, expect, it } from 'vitest';
 
 describe('partAttrs', () => {
@@ -21,5 +21,17 @@ describe('flag', () => {
     [undefined, undefined],
   ])('maps %s to %o', (on, expected) => {
     expect(flag(on)).toBe(expected);
+  });
+});
+
+describe('hasText', () => {
+  it.each([
+    ['Spell list', true],
+    [' ', true],
+    ['', false],
+    [undefined, false],
+    [null, false],
+  ])('maps %o to %s', (text, expected) => {
+    expect(hasText(text)).toBe(expected);
   });
 });

@@ -43,7 +43,7 @@ describe('forced colours', () => {
     ['[data-tabs-indicator])::after', 'background: Highlight'],
     ['[data-menu-item])[data-highlighted]', 'background: Highlight'],
     ['[data-combobox-item])[data-highlighted]', 'color: HighlightText'],
-    ['[data-combobox-item])[data-state=checked]', 'border-inline-start'],
+    ['[data-combobox-item])[data-state=checked]', 'color: Highlight'],
     ['[data-combobox-control])[data-focus]', 'solid Highlight'],
     ['[data-number-input-control])[data-focus]', 'solid Highlight'],
   ])('%s keeps a system-colour cue', (selector, declaration) => {

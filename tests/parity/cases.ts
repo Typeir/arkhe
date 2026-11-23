@@ -277,4 +277,19 @@ export const PARITY_CASES: readonly ParityCase[] = [
     name: 'accordion',
     steps: [click('Expand all'), click('Senses'), click('Expand all')],
   },
+  {
+    name: 'tabs-folder',
+    steps: [
+      {
+        label: 'open Notes in the outer folder',
+        run: () =>
+          userEvent.click(
+            within(screen.getByRole('tablist', { name: 'Outer' })).getByRole(
+              'tab',
+              { name: 'Notes' },
+            ),
+          ),
+      },
+    ],
+  },
 ];

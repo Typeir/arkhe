@@ -1,16 +1,16 @@
-import { expect, test, type Locator } from '@playwright/test';
+import { expect, type Locator, test } from '@playwright/test';
 
 const TARGETS = ['react', 'svelte'] as const;
 
-async function centreRow(box: Locator, role: string): Promise<string | null> {
+async function centreRow(box: Locator, row: string): Promise<string | null> {
   return box.evaluate((element, wanted) => {
     const rect = element.getBoundingClientRect();
     const hit = document.elementFromPoint(
       rect.left + rect.width / 2,
       rect.top + rect.height / 2,
     );
-    return hit?.closest(`[role="${wanted}"]`)?.textContent?.trim() ?? null;
-  }, role);
+    return hit?.closest(wanted)?.textContent?.trim() ?? null;
+  }, row);
 }
 
 for (const target of TARGETS) {
@@ -48,7 +48,9 @@ for (const target of TARGETS) {
       await expect
         .poll(() => list.evaluate((element) => element.scrollTop))
         .toBeGreaterThan(10000);
-      await expect.poll(() => centreRow(list, 'option')).toMatch(/^Rune \d+$/);
+      await expect
+        .poll(() => centreRow(list, '[role="option"]'))
+        .toMatch(/^Rune \d+$/);
       const heights = await list
         .getByRole('option')
         .evaluateAll((rows) =>
@@ -70,9 +72,7 @@ for (const target of TARGETS) {
       await list.evaluate((element) => {
         element.scrollTop = element.scrollHeight / 2;
       });
-      await expect
-        .poll(() => centreRow(list, 'listitem'))
-        .toMatch(/^Rune \d+$/);
+      await expect.poll(() => centreRow(list, 'li')).toMatch(/^Rune \d+$/);
     });
   });
 

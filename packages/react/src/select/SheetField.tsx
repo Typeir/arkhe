@@ -17,11 +17,12 @@ import {
   fieldDescribedBy,
   fieldIds,
   flag,
+  hasText,
   partAttrs,
 } from '@arkhe/core';
-import { useId, useRef, useState, type JSX, type ReactNode } from 'react';
-import { FieldNote } from '../field/FieldNote.js';
+import { type JSX, type ReactNode, useId, useRef, useState } from 'react';
 import { Icon } from '../base/Icon.js';
+import { FieldNote } from '../field/FieldNote.js';
 import { Modal } from '../overlay/Modal.js';
 
 /**
@@ -102,11 +103,13 @@ export const SheetField = ({
           aria-expanded={open}
           aria-labelledby={`${id}label ${id}text`}
           aria-describedby={fieldDescribedBy(ids, hint, error)}
-          data-placeholder-shown={flag(!text)}
+          data-placeholder-shown={flag(!hasText(text))}
           disabled={disabled}
-          onClick={() => setOpen(true)}>
+          onClick={() => {
+            setOpen(true);
+          }}>
           <span {...partAttrs('select', 'value-text')} id={`${id}text`}>
-            {text || placeholder}
+            {hasText(text) ? text : placeholder}
           </span>
           <span {...partAttrs('select', 'indicator')}>
             <Icon name='chevron-down' />
@@ -133,7 +136,11 @@ export const SheetField = ({
         onOpenChange={setOpen}
         sheet
         initialFocus={() => body.current?.querySelector('input') ?? null}>
-        <div ref={body}>{children(() => setOpen(false))}</div>
+        <div ref={body}>
+          {children(() => {
+            setOpen(false);
+          })}
+        </div>
       </Modal>
     </div>
   );

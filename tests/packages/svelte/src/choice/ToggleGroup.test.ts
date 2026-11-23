@@ -1,8 +1,9 @@
-import { ToggleGroup } from '@arkhe/svelte';
 import type { ToggleItem } from '@arkhe/core';
-import { toggleSnippet } from '@tests/fixtures/svelte/snippets';
+import { ToggleGroup } from '@arkhe/svelte';
 import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import BoundUnset from '@tests/fixtures/svelte/BoundUnset.svelte';
+import { toggleSnippet } from '@tests/fixtures/svelte/snippets';
 import { describe, expect, it, vi } from 'vitest';
 
 const ASPECTS: readonly ToggleItem[] = [
@@ -123,5 +124,14 @@ describe('ToggleGroup', () => {
     expect(
       screen.getByRole('button', { name: 'Frost on' }),
     ).toBeInTheDocument();
+  });
+
+  it('starts from defaultValue under a binding that starts unset', async () => {
+    render(BoundUnset, { kind: 'toggle' });
+    const dex = screen.getByRole('button', { name: 'Dexterity' });
+    expect(dex).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('held undefined')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Strength' }));
+    expect(screen.getByText(/^held \[.*"str".*\]$/)).toBeInTheDocument();
   });
 });

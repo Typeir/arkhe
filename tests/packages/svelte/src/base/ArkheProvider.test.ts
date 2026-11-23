@@ -1,12 +1,12 @@
-import { DEFAULT_LABELS, FxLoader } from '@arkhe/core';
 import type { ArkheContextValue } from '@arkhe/svelte';
-import ContextProbe from '@tests/fixtures/svelte/ContextProbe.svelte';
-import {
-  renderWithProvider,
-  type ProviderProps,
-} from '@tests/fixtures/svelte/renderWithProvider';
+import { DEFAULT_LABELS, FxLoader } from '@arkhe/core';
 import { render } from '@testing-library/svelte';
 import { FX_LOG, resetFx } from '@tests/fixtures/fakeFx';
+import ContextProbe from '@tests/fixtures/svelte/ContextProbe.svelte';
+import {
+  type ProviderProps,
+  renderWithProvider,
+} from '@tests/fixtures/svelte/renderWithProvider';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@arkhe/core/fx', () => import('@tests/fixtures/fakeFx'));

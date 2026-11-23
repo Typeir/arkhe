@@ -4,8 +4,8 @@ Test fixture: renders `component` with `innerProps` inside an ArkheProvider buil
 from `provider`.
 -->
 <script lang="ts" generics="P extends Record<string, unknown>">
-  import { ArkheProvider } from '@arkhe/svelte';
   import type { Component, ComponentProps } from 'svelte';
+  import { ArkheProvider } from '@arkhe/svelte';
 
   /**
    * Props of WithProvider.

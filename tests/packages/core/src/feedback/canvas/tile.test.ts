@@ -15,7 +15,7 @@ const tileOf = (over = {}, height = 2000) => {
   const env = testContext(over);
   const slice = mockSlice();
   const surface = new TiledSurface(env.ctx, mockRegion(host, height, slice));
-  surface.teardown();
+  surface.destroy();
   const tile = new CanvasTile(surface, { y: 792, h: 792 }, slice);
   return { ...env, slice, surface, tile };
 };

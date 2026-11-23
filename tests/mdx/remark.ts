@@ -31,9 +31,33 @@ interface MdNode {
  */
 type BuildElement = (inner: string) => MdNode | null;
 
+/**
+ * A unit marker: `[= … =]`.
+ *
+ * @constant UNIT
+ * @type {RegExp}
+ */
 const UNIT = /\[=\s*(.*?)\s*=\]/g;
+/**
+ * A keyword marker: `[# … #]`.
+ *
+ * @constant KEYWORD
+ * @type {RegExp}
+ */
 const KEYWORD = /\[#\s*(.*?)\s*#\]/g;
+/**
+ * A quantity with a unit, whole or a fraction.
+ *
+ * @constant QUANTITY
+ * @type {RegExp}
+ */
 const QUANTITY = /^(\d+)(?:\s*\/\s*(\d+))?\s+(stride|league|burden|volume)$/;
+/**
+ * The `kw:` body of a keyword marker.
+ *
+ * @constant KEYWORD_INNER
+ * @type {RegExp}
+ */
 const KEYWORD_INNER = /^kw:\s*(.+)$/;
 
 /**

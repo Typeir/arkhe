@@ -10,7 +10,7 @@
 
 'use client';
 
-import { useMemo, type RefObject } from 'react';
+import { type RefObject, useMemo } from 'react';
 import { useArkheEnvironment } from './ArkheEnvironment.js';
 
 /**

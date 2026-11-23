@@ -1,7 +1,7 @@
+import type { AnchorHTMLAttributes } from 'react';
 import { ArkheProvider, Button } from '@arkhe/react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { AnchorHTMLAttributes } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 describe('Button', () => {

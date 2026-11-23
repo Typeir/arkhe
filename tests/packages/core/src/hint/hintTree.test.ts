@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
-  HintNode,
   type HintHandle,
+  HintNode,
 } from '../../../../../packages/core/src/hint/hintTree';
 
 function hint(node: HintNode, ids: string[], leaving = false) {

@@ -1,7 +1,7 @@
-import { ArkheProvider, Status } from '@arkhe/react';
-import { announced } from '@tests/fixtures/announced';
-import { render, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
+import { ArkheProvider, Status } from '@arkhe/react';
+import { render, waitFor } from '@testing-library/react';
+import { announced } from '@tests/fixtures/announced';
 import { describe, expect, it } from 'vitest';
 
 const app = (children: ReactNode) => <ArkheProvider>{children}</ArkheProvider>;

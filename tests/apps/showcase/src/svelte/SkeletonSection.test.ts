@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
-import SkeletonSection from '../../../../../apps/showcase/src/svelte/SkeletonSection.svelte';
 import {
   SPECIMEN_REVEAL,
   SPECIMEN_REVEAL_ROWS,
 } from '../../../../../apps/showcase/src/specimen';
+import SkeletonSection from '../../../../../apps/showcase/src/svelte/SkeletonSection.svelte';
 
 const groups = () =>
   document.querySelectorAll('[data-scope="skeleton"][data-part="group"]');

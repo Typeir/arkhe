@@ -1,4 +1,3 @@
-import { sizeBox } from '@tests/fixtures/scrollBox';
 import {
   fireEvent,
   render,
@@ -7,6 +6,7 @@ import {
   within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { sizeBox } from '@tests/fixtures/scrollBox';
 import { describe, expect, it } from 'vitest';
 import { ComboboxField } from '../../../../../packages/react/src/select/ComboboxField';
 

@@ -35,17 +35,53 @@ export const TEST_EXEMPT = [
   /\.scss$/,
 ];
 
+/**
+ * An exact version pin.
+ *
+ * @constant EXACT_VERSION
+ * @type {RegExp}
+ */
 const EXACT_VERSION = /^\d+\.\d+\.\d+(-[\w.]+)?$/;
+/**
+ * A caret range on an exact version; the form peer dependencies take.
+ *
+ * @constant CARET_VERSION
+ * @type {RegExp}
+ */
 const CARET_VERSION = /^\^\d+\.\d+\.\d+(-[\w.]+)?$/;
+/**
+ * Manifest fields whose versions are checked.
+ *
+ * @constant DEPENDENCY_FIELDS
+ * @type {string[]}
+ */
 const DEPENDENCY_FIELDS = [
   'dependencies',
   'devDependencies',
   'peerDependencies',
   'optionalDependencies',
 ];
+/**
+ * A value a barrel declares and exports itself (const, let, function, class, enum).
+ *
+ * @constant DECLARED_EXPORT
+ * @type {RegExp}
+ */
 const DECLARED_EXPORT =
   /^export\s+(?:default\s+)?(?:async\s+)?(?:const(?!\s+enum\b)|let|var|function\*?|class|enum)\s+([\w$]+)/gm;
+/**
+ * The React port's barrel.
+ *
+ * @constant REACT_INDEX
+ * @type {string}
+ */
 const REACT_INDEX = 'packages/react/src/index.ts';
+/**
+ * The Svelte port's barrel.
+ *
+ * @constant SVELTE_INDEX
+ * @type {string}
+ */
 const SVELTE_INDEX = 'packages/svelte/src/index.ts';
 
 /**

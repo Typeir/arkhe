@@ -13,26 +13,29 @@
 
 import {
   ARKHE_CLASS,
+  type CollapsibleAction,
   collapsibleIds,
   collapsibleReduce,
   dispatch,
   findableRegion,
+  type HeadingLevel,
   headingTag,
   partAttrs,
-  type CollapsibleAction,
-  type HeadingLevel,
+  sectionTags,
 } from '@arkhe/core';
 import {
   createElement,
+  type JSX,
+  type ReactNode,
+  type RefObject,
   useEffect,
   useEffectEvent,
   useId,
   useRef,
   useState,
-  type JSX,
-  type ReactNode,
 } from 'react';
 import { Icon } from '../base/Icon.js';
+import { useControllable } from '../base/useControllable.js';
 
 /**
  * Props of Collapsible.
@@ -80,22 +83,24 @@ export const Collapsible = ({
   children,
 }: CollapsibleProps): JSX.Element => {
   const ids = collapsibleIds(useId());
-  const [own, setOwn] = useState(defaultOpen);
-  const shown = open ?? own;
+  const { current: shown, commit } = useControllable({
+    value: open,
+    defaultValue: defaultOpen,
+    onChange: onOpenChange,
+  });
   const [seen, setSeen] = useState(shown);
   if (shown && !seen) setSeen(true);
-  const root = useRef<HTMLDivElement>(null);
-  const commit = (next: boolean) => {
-    if (open === undefined) setOwn(next);
-    onOpenChange?.(next);
-  };
-  const act = (action: CollapsibleAction) =>
+  const root = useRef<HTMLElement>(null);
+  const act = (action: CollapsibleAction) => {
     dispatch(collapsibleReduce, shown, action, { disabled }, commit);
-  const found = useEffectEvent(() => act({ type: 'reveal' }));
-  useEffect(
-    () => (root.current ? findableRegion(root.current, found) : undefined),
-    [],
-  );
+  };
+  const found = useEffectEvent(() => {
+    act({ type: 'reveal' });
+  });
+  useEffect(() => {
+    if (!root.current) return undefined;
+    return findableRegion(root.current, found);
+  }, []);
   const trigger = (
     <button
       type='button'
@@ -104,7 +109,9 @@ export const Collapsible = ({
       aria-expanded={shown}
       aria-controls={ids.content}
       aria-disabled={disabled ? true : undefined}
-      onClick={() => act({ type: 'toggle' })}>
+      onClick={() => {
+        act({ type: 'toggle' });
+      }}>
       <span {...partAttrs('collapsible', 'marker')}>
         <Icon name='chevron-down' />
       </span>
@@ -112,20 +119,21 @@ export const Collapsible = ({
     </button>
   );
   const tag = headingTag(heading);
+  const { root: Root, header: Header } = sectionTags(heading);
   return (
-    <div
-      ref={root}
+    <Root
+      ref={root as RefObject<HTMLDivElement | null>}
       className={ARKHE_CLASS}
       {...partAttrs('collapsible', 'root')}
       data-state={shown ? 'open' : 'closed'}>
-      <div {...partAttrs('collapsible', 'header')}>
+      <Header {...partAttrs('collapsible', 'header')}>
         {tag
           ? createElement(tag, partAttrs('collapsible', 'heading'), trigger)
           : trigger}
         {actions === undefined ? null : (
           <div {...partAttrs('collapsible', 'actions')}>{actions}</div>
         )}
-      </div>
+      </Header>
       <div
         {...partAttrs('collapsible', 'content')}
         id={ids.content}
@@ -135,6 +143,6 @@ export const Collapsible = ({
           {!lazy || seen ? children : null}
         </div>
       </div>
-    </div>
+    </Root>
   );
 };

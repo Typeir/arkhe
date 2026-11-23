@@ -23,7 +23,17 @@ describe('FxLoader', () => {
     expect(await loader.request()).toBe(engine);
     expect(loader.engine).toBe(engine);
     expect(load).toHaveBeenCalledTimes(1);
-    expect(createFx).toHaveBeenCalledWith({ maxFps: 60 });
+    expect(createFx).toHaveBeenCalledWith({ maxFps: 60 }, window);
+  });
+
+  it('makes the engine for the window of the host that asks', async () => {
+    const { createFx, load } = module();
+    const frame = document.createElement('iframe');
+    document.body.append(frame);
+    const host = (frame.contentDocument as Document).createElement('div');
+    await new FxLoader({}, load).request(host);
+    expect(createFx).toHaveBeenCalledWith({}, frame.contentWindow);
+    frame.remove();
   });
 
   it('never loads when effects are off', async () => {

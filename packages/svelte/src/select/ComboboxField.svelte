@@ -9,46 +9,15 @@ inside it makes Zag move the caret to the end of the text. Both still land
 before the next key, so Enter never acts on a stale list. The list portals in
 once mounted on the client, so server markup holds none.
 -->
-<script lang="ts" generics="T extends SelectOption">
-  import {
-    ARKHE_CLASS,
-    EMPTY_VALUE,
-    SVELTE_EVENTS,
-    comboboxMachineProps,
-    fieldDescribedBy,
-    fieldIds,
-    flag,
-    fromEmptyValue,
-    filterOptions,
-    guardComboboxKeys,
-    isGrouped,
-    optionCollection,
-    queryAfterChange,
-    toEmptyValue,
-    withEmptyOption,
-    type SelectOption,
-    type OptionFilter,
-    type Placement,
-  } from '@arkhe/core';
-  import * as combobox from '@zag-js/combobox';
-  import {
-    mergeProps,
-    normalizeProps,
-    portal,
-    useMachine,
-  } from '@zag-js/svelte';
-  import { onMount, tick, type Snippet } from 'svelte';
-  import { useArkhe } from '../base/context.js';
-  import { useArkheEnvironment } from '../base/environment.js';
-  import ComboboxList from './ComboboxList.svelte';
-  import FieldNote from '../field/FieldNote.svelte';
-  import Icon from '../base/Icon.svelte';
-  import { useVirtualRows } from '../list/virtualRows.svelte.js';
+<script module lang="ts">
+  import type { OptionFilter, Placement, SelectOption } from '@arkhe/core';
+  import type { Snippet } from 'svelte';
 
   /**
    * Props of ComboboxField.
    *
-   * @interface Props
+   * @interface ComboboxFieldProps
+   * @template {SelectOption} T
    * @property {string} label - Visible label.
    * @property {readonly T[]} items - Options; a repeated value is dropped.
    * @property {string} [placeholder] - Input placeholder.
@@ -62,6 +31,7 @@ once mounted on the client, so server markup holds none.
    * @property {OptionFilter<T>} [filter] - Match rule; `false` when the host filters.
    * @property {boolean} [loading] - Shows the loading line instead of options.
    * @property {boolean} [failed] - Shows the error line instead of options.
+   * @property {boolean} [stale] - Dims the options while newer ones load.
    * @property {(text: string) => void} [onSubmit] - Takes free text on Enter when nothing is highlighted.
    * @property {Snippet<[T]>} [item] - Option body. Defaults to label and description.
    * @property {boolean} [disabled] - Blocks input.
@@ -77,7 +47,7 @@ once mounted on the client, so server markup holds none.
    * @property {boolean} [required] - The input must not be empty.
    * @property {number} [rowPitch] - Row height in rem; draws only the rows in view. Flat lists only.
    */
-  interface Props {
+  export interface ComboboxFieldProps<T extends SelectOption> {
     label: string;
     items: readonly T[];
     placeholder?: string;
@@ -91,6 +61,7 @@ once mounted on the client, so server markup holds none.
     filter?: OptionFilter<T>;
     loading?: boolean;
     failed?: boolean;
+    stale?: boolean;
     onSubmit?: (text: string) => void;
     item?: Snippet<[T]>;
     disabled?: boolean;
@@ -106,50 +77,110 @@ once mounted on the client, so server markup holds none.
     required?: boolean;
     rowPitch?: number;
   }
+</script>
 
-  let { value = $bindable(), ...props }: Props = $props();
+<script lang="ts" generics="T extends SelectOption">
+  import {
+    ARKHE_CLASS,
+    comboboxMachineProps,
+    EMPTY_VALUE,
+    fieldDescribedBy,
+    fieldIds,
+    filterOptions,
+    flag,
+    fromEmptyValue,
+    guardComboboxKeys,
+    isGrouped,
+    listNote,
+    optionCollection,
+    partAttrs,
+    queryAfterChange,
+    SVELTE_EVENTS,
+    toEmptyValue,
+    withEmptyOption,
+  } from '@arkhe/core';
+  import * as combobox from '@zag-js/combobox';
+  import {
+    mergeProps,
+    normalizeProps,
+    portal,
+    useMachine,
+  } from '@zag-js/svelte';
+  import { tick } from 'svelte';
+  import { useArkhe } from '../base/context.js';
+  import { useArkheEnvironment } from '../base/environment.js';
+  import Icon from '../base/Icon.svelte';
+  import { useMounted } from '../base/mounted.svelte.js';
+  import FieldNote from '../field/FieldNote.svelte';
+  import { useVirtualRows } from '../list/virtualRows.svelte.js';
+  import ComboboxList from './ComboboxList.svelte';
+
+  let {
+    label,
+    items,
+    placeholder,
+    value = $bindable(),
+    defaultValue,
+    onValueChange,
+    onSelect,
+    clearOnSelect,
+    onInputChange,
+    onQuery,
+    filter,
+    loading,
+    failed,
+    stale,
+    onSubmit,
+    item,
+    disabled,
+    placement,
+    emptyLabel,
+    size,
+    labelHidden,
+    inline,
+    name,
+    hint,
+    error,
+    enterKeyHint,
+    required,
+    rowPitch,
+  }: ComboboxFieldProps<T> = $props();
   const id = $props.id();
   const ids = fieldIds(id);
   const arkhe = useArkhe();
   const env = useArkheEnvironment();
   let query = $state('');
-  const items = $derived(
-    withEmptyOption(props.items, props.emptyLabel) as readonly T[],
-  );
-  const shown = $derived(filterOptions(items, query, props.filter));
+  const options = $derived(withEmptyOption(items, emptyLabel) as readonly T[]);
+  const shown = $derived(filterOptions(options, query, filter));
   const collection = $derived(combobox.collection(optionCollection(shown)));
   const rows = useVirtualRows(
     () => shown.length,
-    () => (isGrouped(shown) ? undefined : props.rowPitch),
+    () => (isGrouped(shown) ? undefined : rowPitch),
   );
-  const note = $derived(
-    props.loading
-      ? 'loading'
-      : props.failed
-        ? 'failed'
-        : shown.length === 0
-          ? 'empty'
-          : undefined,
-  );
+  const note = $derived(listNote(loading, failed, shown.length));
+  const commit = (next: string | null) => {
+    value = next;
+    onValueChange?.(next);
+  };
   const service = useMachine(combobox.machine, () => ({
     ...comboboxMachineProps({
       id,
-      label: props.label,
+      label,
       labels: arkhe().labels,
       locale: arkhe().locale,
-      value: toEmptyValue(value, props.emptyLabel),
-      defaultValue: toEmptyValue(props.defaultValue ?? null, props.emptyLabel),
-      clearOnSelect: props.clearOnSelect,
-      submits: props.onSubmit !== undefined,
-      loading: props.loading,
-      disabled: props.disabled,
-      required: props.required,
-      invalid: Boolean(props.error),
-      placeholder: props.placeholder,
-      placement: props.placement,
+      value: toEmptyValue(value, emptyLabel),
+      defaultValue: toEmptyValue(defaultValue ?? null, emptyLabel),
+      clearOnSelect,
+      submits: onSubmit !== undefined,
+      loading,
+      disabled,
+      required,
+      invalid: Boolean(error),
+      placeholder,
+      placement,
       getRootNode: env().getRootNode,
     }),
-    ...(props.inline && !props.clearOnSelect
+    ...(inline && !clearOnSelect
       ? { selectionBehavior: 'preserve' as const }
       : {}),
     ...(rows.on ? { scrollToIndexFn: rows.scrollTo } : {}),
@@ -158,26 +189,20 @@ once mounted on the client, so server markup holds none.
       const next = queryAfterChange(details);
       void tick().then(() => {
         query = next;
-        props.onInputChange?.(details.inputValue);
-        if (details.reason === 'input-change')
-          props.onQuery?.(details.inputValue);
+        onInputChange?.(details.inputValue);
+        if (details.reason === 'input-change') onQuery?.(details.inputValue);
       });
     },
     onValueChange: (details: combobox.ValueChangeDetails<T>) => {
-      const next = fromEmptyValue(details.value[0] ?? null);
-      value = next;
-      props.onValueChange?.(next);
+      commit(fromEmptyValue(details.value[0] ?? null));
     },
     onSelect: (details: combobox.SelectionDetails) => {
-      const chosen = items.find((option) => option.value === details.itemValue);
-      if (chosen) props.onSelect?.(chosen);
+      const chosen = options.find((entry) => entry.value === details.itemValue);
+      if (chosen) onSelect?.(chosen);
     },
   }));
   const api = $derived(combobox.connect(service, normalizeProps));
-  let mounted = $state(false);
-  onMount(() => {
-    mounted = true;
-  });
+  const mounted = useMounted();
   const inputProps = $derived(
     mergeProps(
       guardComboboxKeys(
@@ -185,13 +210,17 @@ once mounted on the client, so server markup holds none.
         {
           highlighted: () => api.highlightedValue,
           inputValue: () => api.inputValue,
-          select: (value) => api.selectValue(value),
-          close: () => api.setOpen(false),
-          submit: props.onSubmit,
+          select: (next) => {
+            api.selectValue(next);
+          },
+          close: () => {
+            api.setOpen(false);
+          },
+          submit: onSubmit,
         },
         SVELTE_EVENTS,
       ),
-      props.inline
+      inline
         ? {
             onfocus: () => {
               api.setInputValue('');
@@ -200,8 +229,8 @@ once mounted on the client, so server markup holds none.
           }
         : {},
       {
-        enterkeyhint: props.enterKeyHint,
-        'aria-describedby': fieldDescribedBy(ids, props.hint, props.error),
+        enterkeyhint: enterKeyHint,
+        'aria-describedby': fieldDescribedBy(ids, hint, error),
       },
     ),
   );
@@ -209,13 +238,13 @@ once mounted on the client, so server markup holds none.
 
 {#snippet option(entry: T, index: number)}
   <div {...api.getItemProps({ item: entry })} {...rows.position(index)}>
-    {#if props.item && !(entry.value === EMPTY_VALUE && props.emptyLabel !== undefined)}
-      {@render props.item(entry)}
+    {#if item && !(entry.value === EMPTY_VALUE && emptyLabel !== undefined)}
+      {@render item(entry)}
     {:else}
       {#if entry.icon}<Icon name={entry.icon} />{/if}
-      <span data-scope="combobox" data-part="item-label">{entry.label}</span>
+      <span {...partAttrs('combobox', 'item-label')}>{entry.label}</span>
       {#if entry.description}
-        <span data-scope="combobox" data-part="item-description"
+        <span {...partAttrs('combobox', 'item-description')}
           >{entry.description}</span>
       {/if}
     {/if}
@@ -230,34 +259,35 @@ once mounted on the client, so server markup holds none.
     {note}
     emptyText={arkhe().labels.selectEmpty}
     {option}
-    inline={props.inline}
-    {rows} />
+    {inline}
+    {rows}
+    {stale} />
 {/snippet}
 
 <div
   {...mergeProps(api.getRootProps(), {
     class: ARKHE_CLASS,
-    'data-size': props.size,
-    'data-label-hidden': flag(props.labelHidden),
+    'data-size': size,
+    'data-label-hidden': flag(labelHidden),
   })}>
-  <label {...api.getLabelProps()}>{props.label}</label>
+  <label {...api.getLabelProps()}>{label}</label>
   <div {...api.getControlProps()}>
     <input {...inputProps} />
     <button {...api.getClearTriggerProps()}><Icon name="x" /></button>
-    {#if !props.inline}
+    {#if !inline}
       <button {...api.getTriggerProps()}><Icon name="chevron-down" /></button>
     {/if}
   </div>
-  <FieldNote {ids} hint={props.hint} error={props.error} />
-  {#if props.name !== undefined}
+  <FieldNote {ids} {hint} {error} />
+  {#if name !== undefined}
     <input
       type="hidden"
-      name={props.name}
+      {name}
       value={fromEmptyValue(api.value[0] ?? null) ?? ''} />
   {/if}
-  {#if props.inline}
+  {#if inline}
     {@render list()}
-  {:else if mounted}
+  {:else if mounted.current}
     <div
       class={ARKHE_CLASS}
       use:portal={{

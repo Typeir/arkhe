@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { FocusReturn, focusCandidates, focusableIn } from '@arkhe/core';
+import { focusableIn, focusCandidates, FocusReturn } from '@arkhe/core';
 import { afterEach, describe, expect, it } from 'vitest';
 
 const build = (html: string) => {
@@ -7,7 +7,7 @@ const build = (html: string) => {
   return (id: string) => document.getElementById(id) as HTMLElement;
 };
 
-const ids = (nodes: Element[]) => nodes.map((node) => node.id);
+const ids = (nodes: readonly Element[]) => nodes.map((node) => node.id);
 
 afterEach(() => document.body.replaceChildren());
 

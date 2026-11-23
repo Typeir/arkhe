@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { FakePath, fakeContext, placeAt } from '@tests/fixtures/canvas';
+import { fakeContext, FakePath, placeAt } from '@tests/fixtures/canvas';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { View } from '../../../../../../../packages/core/src/feedback/canvas/view';
 import type { SkeletonAtlas } from '../../../../../../../packages/core/src/feedback/fx/skeleton/atlas';

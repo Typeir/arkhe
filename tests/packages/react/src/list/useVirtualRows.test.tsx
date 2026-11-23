@@ -1,5 +1,5 @@
-import { sizeBox } from '@tests/fixtures/scrollBox';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { sizeBox } from '@tests/fixtures/scrollBox';
 import { describe, expect, it } from 'vitest';
 import { useVirtualRows } from '../../../../../packages/react/src/list/useVirtualRows';
 

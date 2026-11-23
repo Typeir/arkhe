@@ -43,24 +43,6 @@ describe('file checks', () => {
     ).toEqual([]);
   });
 
-  it('flags exports without JSDoc', () => {
-    const bare = `${HEADING}\nexport const A = 1;\n`;
-    const documented = `${HEADING}\n/** A. */\nexport const A = 1;\n`;
-    expect(scan('jsdoc-exports', 'packages/core/src/a.ts', bare)).toHaveLength(
-      1,
-    );
-    expect(scan('jsdoc-exports', 'packages/core/src/a.ts', documented)).toEqual(
-      [],
-    );
-    expect(
-      scan(
-        'jsdoc-exports',
-        'packages/core/src/a.ts',
-        "export { a } from './a';",
-      ),
-    ).toEqual([]);
-  });
-
   it('flags inline comments but allows tool directives', () => {
     expect(
       scan('no-inline-comments', 'packages/core/src/a.ts', '// why'),
@@ -101,62 +83,6 @@ describe('file checks', () => {
   it('flags browser dialogs in sources', () => {
     expect(
       scan('no-browser-dialogs', 'apps/showcase/src/a.ts', 'confirm("x");'),
-    ).toHaveLength(1);
-  });
-
-  it('flags colour literals outside the token file', () => {
-    expect(
-      scan('color-literals', 'packages/core/styles/_x.scss', 'color: #fff;'),
-    ).toHaveLength(1);
-    expect(
-      scan(
-        'color-literals',
-        'packages/core/styles/_x.scss',
-        'color: rgb(1 2 3);',
-      ),
-    ).toHaveLength(1);
-    expect(
-      scan(
-        'color-literals',
-        'packages/core/styles/_x.scss',
-        'color: rgb(var(--a));',
-      ),
-    ).toEqual([]);
-    expect(
-      scan(
-        'color-literals',
-        'packages/core/styles/_x.scss',
-        '[data-#{$s}-x] {',
-      ),
-    ).toEqual([]);
-    expect(
-      scan(
-        'color-literals',
-        'packages/core/styles/_tokens.scss',
-        'color: #fff;',
-      ),
-    ).toEqual([]);
-  });
-
-  it('keeps game words out of packages only', () => {
-    expect(
-      scan('banned-words', 'packages/core/src/a.ts', "'Bloodline'"),
-    ).toHaveLength(1);
-    expect(
-      scan('banned-words', 'apps/showcase/src/a.ts', "'Bloodline'"),
-    ).toEqual([]);
-  });
-
-  it('finds game words in comments too', () => {
-    expect(
-      scan(
-        'banned-words',
-        'packages/core/src/a.ts',
-        '/**\n * As in Flamelost.\n */',
-      ),
-    ).toEqual([expect.objectContaining({ line: 2 })]);
-    expect(
-      scan('banned-words', 'packages/core/styles/_a.scss', '/* Ikuisuus */'),
     ).toHaveLength(1);
   });
 

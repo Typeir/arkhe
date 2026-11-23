@@ -10,8 +10,8 @@
  * @since 0.1.0
  */
 
-import { evaluate } from '@mdx-js/mdx';
 import type { MDXContent } from 'mdx/types';
+import { evaluate } from '@mdx-js/mdx';
 import * as runtime from 'react/jsx-runtime';
 import { remarkKeyword, remarkUnit } from './remark';
 

@@ -7,15 +7,15 @@ paragraph of a hundred triggers.
 <script lang="ts">
   import {
     ArkheProvider,
+    type LinkComponent,
     Menu,
     Popover,
     Select,
     Tooltip,
-    type LinkComponent,
   } from '@arkhe/svelte';
+  import RouterLink from '../../fixtures/svelte/RouterLink.svelte';
   import { DENSE_TRIGGERS } from '../fixtures';
   import Keyword from './Keyword.svelte';
-  import RouterLink from '../../fixtures/svelte/RouterLink.svelte';
   import Unit from './Unit.svelte';
 
   let { name }: { name: 'lineage' | 'sheet' | 'dense' } = $props();

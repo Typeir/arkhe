@@ -5,38 +5,25 @@ heading, optionally one open at a time, one always open, or an expand all
 button. Panels come from the `panel` snippet, as Tabs. No arrow keys between
 triggers: arrows scroll long panels. `value` binds.
 -->
-<script lang="ts">
-  import {
-    ARKHE_CLASS,
-    accordionAllOpen,
-    accordionHeld,
-    accordionReduce,
-    dispatch,
-    partAttrs,
-    uniqueByValue,
-    type AccordionAction,
-    type AccordionItem,
-    type HeadingLevel,
-  } from '@arkhe/core';
+<script module lang="ts">
+  import type { AccordionItem, HeadingLevel } from '@arkhe/core';
   import type { Snippet } from 'svelte';
-  import Collapsible from './Collapsible.svelte';
-  import { useArkhe } from '../base/context.js';
 
   /**
    * Props of Accordion.
    *
-   * @interface Props
+   * @interface AccordionProps
    * @property {readonly AccordionItem[]} items - Sections, in order; a repeated value is dropped.
    * @property {Snippet<[string]>} panel - Panel for a value.
    * @property {readonly string[]} [value] - Open values; bindable.
-   * @property {readonly string[]} [defaultValue] - First open values when unbound.
+   * @property {readonly string[]} [defaultValue] - First open values when uncontrolled.
    * @property {(value: readonly string[]) => void} [onValueChange] - Reports changes.
-   * @property {boolean} [multiple] - Several open at once; true by default.
-   * @property {boolean} [collapsible] - The last open section may close; true by default.
-   * @property {HeadingLevel} [heading] - Heading level of every trigger; 3 by default.
+   * @property {boolean} [multiple] - Several open at once. Defaults to `true`.
+   * @property {boolean} [collapsible] - The last open section may close. Defaults to `true`.
+   * @property {HeadingLevel} [heading] - Heading level of every trigger. Defaults to `3`.
    * @property {boolean} [expandAll] - Adds an expand / collapse all button while `multiple`.
    */
-  interface Props {
+  export interface AccordionProps {
     items: readonly AccordionItem[];
     panel: Snippet<[string]>;
     value?: readonly string[];
@@ -47,28 +34,47 @@ triggers: arrows scroll long panels. `value` binds.
     heading?: HeadingLevel;
     expandAll?: boolean;
   }
+</script>
+
+<script lang="ts">
+  import {
+    type AccordionAction,
+    accordionAllOpen,
+    accordionHeld,
+    accordionReduce,
+    ARKHE_CLASS,
+    dispatch,
+    partAttrs,
+    uniqueByValue,
+  } from '@arkhe/core';
+  import { untrack } from 'svelte';
+  import { useArkhe } from '../base/context.js';
+  import Collapsible from './Collapsible.svelte';
 
   let {
     items,
     panel,
+    value = $bindable(),
     defaultValue,
-    value = $bindable(defaultValue ?? []),
     onValueChange,
     multiple = true,
     collapsible = true,
     heading = 3,
     expandAll,
-  }: Props = $props();
+  }: AccordionProps = $props();
   const arkhe = useArkhe();
+  const initial = untrack(() => defaultValue ?? []);
+  const expanded = $derived(value ?? initial);
   const all = $derived(uniqueByValue(items));
   const rules = $derived({ items: all, multiple, collapsible });
-  const full = $derived(accordionAllOpen(all, value));
+  const full = $derived(accordionAllOpen(all, expanded));
   const commit = (next: readonly string[]) => {
     value = next;
     onValueChange?.(next);
   };
-  const act = (action: AccordionAction) =>
-    dispatch(accordionReduce, value, action, rules, commit);
+  const act = (action: AccordionAction) => {
+    dispatch(accordionReduce, expanded, action, rules, commit);
+  };
 </script>
 
 <div class={ARKHE_CLASS} {...partAttrs('accordion', 'root')}>
@@ -77,7 +83,9 @@ triggers: arrows scroll long panels. `value` binds.
       type="button"
       {...partAttrs('accordion', 'toggle-all')}
       aria-expanded={full}
-      onclick={() => act({ type: 'toggle-all' })}>
+      onclick={() => {
+        act({ type: 'toggle-all' });
+      }}>
       {full ? arkhe().labels.collapseAll : arkhe().labels.expandAll}
     </button>
   {/if}
@@ -85,9 +93,11 @@ triggers: arrows scroll long panels. `value` binds.
     <Collapsible
       title={item.title}
       {heading}
-      open={value.includes(item.value)}
-      disabled={item.disabled || accordionHeld(value, item.value, rules)}
-      onOpenChange={(next) => act({ type: 'set', item, open: next })}>
+      open={expanded.includes(item.value)}
+      disabled={item.disabled || accordionHeld(expanded, item.value, rules)}
+      onOpenChange={(next) => {
+        act({ type: 'set', item, open: next });
+      }}>
       {@render panel(item.value)}
     </Collapsible>
   {/each}

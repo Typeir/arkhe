@@ -9,14 +9,17 @@
  */
 
 import { builtinModules } from 'node:module';
+import { API_CHECKS } from './apiChecks.mjs';
+import { CODE_CHECKS } from './codeChecks.mjs';
+import { DOC_CHECKS } from './docChecks.mjs';
 import {
   AUTHORED,
-  SCRIPT,
-  SOURCE,
-  TEST,
   codeLines,
   comments,
+  hits,
+  SOURCE,
   stripBlockComments,
+  TEST,
 } from './files.mjs';
 
 /**
@@ -60,25 +63,12 @@ export const ALLOWED_COMMENTS = [
 ];
 
 /**
- * Game and app words that must not leak into the library packages.
+ * Code lines every file must stay under.
  *
- * @constant BANNED_WORDS
- * @type {readonly string[]}
+ * @constant MAX_CODE_LINES
+ * @type {number}
  */
-export const BANNED_WORDS = [
-  'ikuisuus',
-  'flamelost',
-  'bloodline',
-  'homunculus',
-  'spell',
-  'encounter',
-  'dither',
-];
-
 const MAX_CODE_LINES = 250;
-const TOKENS_FILE = 'packages/core/styles/_tokens.scss';
-const COLOR =
-  /(^|[^&\w{])#[0-9a-fA-F]{3,8}\b(?!\{)|\b(rgba?|hsla?|hwb|lab|lch|oklab|oklch)\((?!\s*var\()/;
 /**
  * Modules core must not load: frameworks, their Zag adapters, icon sets,
  * Node. Each also bans its subpaths.
@@ -98,34 +88,43 @@ export const CORE_BANNED_MODULES = [
   ...builtinModules.filter((name) => !name.startsWith('_')),
 ];
 
+/**
+ * A call to a blocking browser dialog.
+ *
+ * @constant DIALOG
+ * @type {RegExp}
+ */
 const DIALOG = /\b(alert|confirm|prompt)\s*\(/;
+/**
+ * A module specifier in any import form: static, side-effect, re-export, dynamic, `require`.
+ *
+ * @constant MODULE_SPECIFIER
+ * @type {RegExp}
+ */
 const MODULE_SPECIFIER =
   /(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+|\brequire\s*\(\s*)(['"])([^'"\n]+)\1/g;
-const EXPORT_DECL =
-  /^export\s+(default\s+)?(async\s+)?(const|let|function|interface|type|class|enum)\s+[A-Za-z_$]/;
+/**
+ * A top-level binding whose initialiser opens an arrow or a function expression.
+ *
+ * @constant ARROW_START
+ * @type {RegExp}
+ */
 const ARROW_START =
   /^(export\s+)?(const|let|var)\s+[a-z_$][\w$]*\s*(:[^=]+(=>[^=]+)*)?=\s*(async\s+)?(<[^>]*>\s*)?(\(|[\w$]+\s*=>|function\b)/;
-const FUNCTION_COMPONENT = /^(export\s+(default\s+)?)?function\s+[A-Z]/;
-const NESTED_FUNCTION = /^\s+(async\s+)?function\s*\*?\s*\w+\s*\(/;
-
 /**
- * Lines of `content` matching `test`, outside block comments unless `raw`.
+ * A function declaration named like a component.
  *
- * @function hits
- * @param {string} file - File path.
- * @param {string} content - Source text.
- * @param {(line: string) => boolean} test - Line predicate.
- * @param {string} message - Failure message.
- * @param {boolean} [raw] - Scan comments too.
- * @returns {Failure[]} One failure per matching line.
+ * @constant FUNCTION_COMPONENT
+ * @type {RegExp}
  */
-function hits(file, content, test, message, raw = false) {
-  return (raw ? content : stripBlockComments(content))
-    .split('\n')
-    .flatMap((line, index) =>
-      test(line) ? [{ file, line: index + 1, message }] : [],
-    );
-}
+const FUNCTION_COMPONENT = /^(export\s+(default\s+)?)?function\s+[A-Z]/;
+/**
+ * A function declaration nested inside another block.
+ *
+ * @constant NESTED_FUNCTION
+ * @type {RegExp}
+ */
+const NESTED_FUNCTION = /^\s+(async\s+)?function\s*\*?\s*\w+\s*\(/;
 
 /**
  * Says whether `specifier` names a module core must not load.
@@ -237,50 +236,6 @@ function headingFailures(file, content) {
 }
 
 /**
- * Says whether a JSDoc block, other than the file heading, ends right above
- * line `index`.
- *
- * @function docAbove
- * @param {string[]} lines - File lines.
- * @param {number} index - Declaration line.
- * @returns {boolean} True when documented.
- */
-function docAbove(lines, index) {
-  let end = index - 1;
-  while (end >= 0 && !lines[end].trim()) end -= 1;
-  if (end < 0 || !lines[end].trim().endsWith('*/')) return false;
-  let start = end;
-  while (start > 0 && !lines[start].trim().startsWith('/**')) start -= 1;
-  return !lines
-    .slice(start, end + 1)
-    .some((line) => line.includes('@fileoverview'));
-}
-
-/**
- * Finds exported declarations with no JSDoc block right above them.
- *
- * @function undocumentedExports
- * @param {string} file - File path.
- * @param {string} content - Source text.
- * @returns {Failure[]} One failure per bare export.
- */
-function undocumentedExports(file, content) {
-  const lines = content.split('\n');
-  return lines.flatMap((line, index) => {
-    if (!EXPORT_DECL.test(line)) return [];
-    return docAbove(lines, index)
-      ? []
-      : [
-          {
-            file,
-            line: index + 1,
-            message: `Export lacks JSDoc: ${line.trim()}`,
-          },
-        ];
-  });
-}
-
-/**
  * Finds function-style breaks: top-level arrows, function components,
  * nested function declarations.
  *
@@ -338,12 +293,7 @@ export const FILE_CHECKS = [
       AUTHORED.test(file) && !TEST.test(file) && !file.endsWith('.d.ts'),
     scan: headingFailures,
   },
-  {
-    name: 'jsdoc-exports',
-    applies: (file) =>
-      AUTHORED.test(file) && SCRIPT.test(file) && !TEST.test(file),
-    scan: undocumentedExports,
-  },
+  ...DOC_CHECKS,
   {
     name: 'no-inline-comments',
     applies: (file) => AUTHORED.test(file),
@@ -355,31 +305,8 @@ export const FILE_CHECKS = [
     scan: (file, content) =>
       hits(file, content, (line) => DIALOG.test(line), 'Browser dialog call.'),
   },
-  {
-    name: 'color-literals',
-    applies: (file) =>
-      AUTHORED.test(file) && !file.startsWith('tests/') && file !== TOKENS_FILE,
-    scan: (file, content) =>
-      hits(
-        file,
-        content,
-        (line) => COLOR.test(line),
-        `Colour literal: define a token in ${TOKENS_FILE}.`,
-      ),
-  },
-  {
-    name: 'banned-words',
-    applies: (file) => file.startsWith('packages/') && AUTHORED.test(file),
-    scan: (file, content) =>
-      hits(
-        file,
-        content,
-        (line) =>
-          BANNED_WORDS.some((word) => new RegExp(`\\b${word}`, 'i').test(line)),
-        'App or game word in a library package.',
-        true,
-      ),
-  },
+  ...CODE_CHECKS,
+  ...API_CHECKS,
   {
     name: 'core-purity',
     applies: (file) => file.startsWith('packages/core/src/'),

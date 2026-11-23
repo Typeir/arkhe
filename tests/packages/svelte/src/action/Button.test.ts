@@ -1,7 +1,7 @@
 import { Button } from '@arkhe/svelte';
-import { textSnippet } from '@tests/fixtures/svelte/snippets';
 import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import { textSnippet } from '@tests/fixtures/svelte/snippets';
 import { describe, expect, it, vi } from 'vitest';
 
 describe('Button', () => {

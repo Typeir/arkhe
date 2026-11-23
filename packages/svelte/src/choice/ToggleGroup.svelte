@@ -5,41 +5,27 @@ stop, an optional limit with a show more button, and a clear button. Tab
 enters it once; arrows, Home and End move between its buttons. A disabled
 toggle stays reachable and ignores presses. `value` binds.
 -->
-<script lang="ts">
-  import {
-    ARKHE_CLASS,
-    dispatch,
-    partAttrs,
-    rovingFocus,
-    toggleRootAttrs,
-    toggleReduce,
-    toggleShown,
-    uniqueByValue,
-    type ToggleAction,
-    type ToggleItem,
-    type ToggleOrientation,
-  } from '@arkhe/core';
+<script module lang="ts">
+  import type { ToggleItem, ToggleOrientation } from '@arkhe/core';
   import type { Snippet } from 'svelte';
-  import { useArkhe } from '../base/context.js';
-  import Icon from '../base/Icon.svelte';
 
   /**
    * Props of ToggleGroup.
    *
-   * @interface Props
+   * @interface ToggleGroupProps
    * @property {string} label - Accessible name of the group.
    * @property {readonly ToggleItem[]} items - Toggles, in order; a repeated value is dropped.
    * @property {readonly string[]} [value] - Pressed values; bindable.
-   * @property {readonly string[]} [defaultValue] - First pressed values when unbound.
+   * @property {readonly string[]} [defaultValue] - First pressed values when uncontrolled.
    * @property {(value: readonly string[]) => void} [onValueChange] - Reports presses.
    * @property {boolean} [multiple] - Several may be pressed at once.
    * @property {boolean} [deselectable] - A single pressed toggle may be released.
-   * @property {ToggleOrientation} [orientation] - Direction; horizontal by default.
+   * @property {ToggleOrientation} [orientation] - Direction. Defaults to `horizontal`.
    * @property {number} [limit] - Toggles shown until the reader asks for more; pressed ones always show.
    * @property {boolean} [clearable] - Adds a clear button while anything is pressed.
    * @property {Snippet<[ToggleItem, boolean]>} [item] - Content of a toggle; it must carry the toggle's name.
    */
-  interface Props {
+  export interface ToggleGroupProps {
     label: string;
     items: readonly ToggleItem[];
     value?: readonly string[];
@@ -52,12 +38,29 @@ toggle stays reachable and ignores presses. `value` binds.
     clearable?: boolean;
     item?: Snippet<[ToggleItem, boolean]>;
   }
+</script>
+
+<script lang="ts">
+  import {
+    ARKHE_CLASS,
+    dispatch,
+    partAttrs,
+    rovingFocus,
+    type ToggleAction,
+    toggleReduce,
+    toggleRootAttrs,
+    toggleShown,
+    uniqueByValue,
+  } from '@arkhe/core';
+  import { untrack } from 'svelte';
+  import { useArkhe } from '../base/context.js';
+  import Icon from '../base/Icon.svelte';
 
   let {
     label,
     items,
+    value = $bindable(),
     defaultValue,
-    value = $bindable(defaultValue ?? []),
     onValueChange,
     multiple,
     deselectable,
@@ -65,18 +68,21 @@ toggle stays reachable and ignores presses. `value` binds.
     limit,
     clearable,
     item: content,
-  }: Props = $props();
+  }: ToggleGroupProps = $props();
   const arkhe = useArkhe();
+  const initial = untrack(() => defaultValue ?? []);
+  const pressed = $derived(value ?? initial);
   let expanded = $state(false);
-  let root = $state<HTMLDivElement>();
+  let root = $state<HTMLDivElement | null>(null);
   const all = $derived(uniqueByValue(items));
-  const shown = $derived(toggleShown(all, value, limit, expanded));
+  const shown = $derived(toggleShown(all, pressed, limit, expanded));
   const commit = (next: readonly string[]) => {
     value = next;
     onValueChange?.(next);
   };
-  const act = (action: ToggleAction) =>
-    dispatch(toggleReduce, value, action, { multiple, deselectable }, commit);
+  const act = (action: ToggleAction) => {
+    dispatch(toggleReduce, pressed, action, { multiple, deselectable }, commit);
+  };
   const clear = () => {
     act({ type: 'clear' });
     root?.querySelector<HTMLElement>('[data-part="item"]')?.focus();
@@ -90,14 +96,16 @@ toggle stays reachable and ignores presses. `value` binds.
   {...partAttrs('toggle-group', 'root')}
   {...toggleRootAttrs(label, orientation)}>
   {#each shown as entry (entry.value)}
-    {@const on = value.includes(entry.value)}
+    {@const on = pressed.includes(entry.value)}
     <button
       type="button"
       {...partAttrs('toggle-group', 'item')}
       data-value={entry.value}
       aria-pressed={on}
       aria-disabled={entry.disabled ? true : undefined}
-      onclick={() => act({ type: 'press', item: entry })}>
+      onclick={() => {
+        act({ type: 'press', item: entry });
+      }}>
       {#if entry.icon}<Icon name={entry.icon} />{/if}
       {#if content}{@render content(entry, on)}{:else}<span
           {...partAttrs('toggle-group', 'label')}>{entry.label}</span
@@ -113,7 +121,7 @@ toggle stays reachable and ignores presses. `value` binds.
       {expanded ? arkhe().labels.showLess : arkhe().labels.showMore}
     </button>
   {/if}
-  {#if clearable && value.length > 0}
+  {#if clearable && pressed.length > 0}
     <button
       type="button"
       {...partAttrs('toggle-group', 'clear')}

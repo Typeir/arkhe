@@ -1,9 +1,9 @@
 import { Popover } from '@arkhe/svelte';
+import { render, screen, waitFor } from '@testing-library/svelte';
+import userEvent from '@testing-library/user-event';
 import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
 import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
 import { textSnippet } from '@tests/fixtures/svelte/snippets';
-import { render, screen, waitFor } from '@testing-library/svelte';
-import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 const held = () => screen.getByText(/^held /).textContent;

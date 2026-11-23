@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 import {
-  REACT_EVENTS,
+  type HintEvent,
   hintTriggerProps,
   ownsEvent,
-  watchOutsideTap,
-  type HintEvent,
   type PointerMemory,
+  REACT_EVENTS,
+  watchOutsideTap,
 } from '@arkhe/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -41,7 +41,7 @@ function event(
 type Handler = (event: HintEvent) => void;
 
 function setup(open: boolean, zag: Record<string, Handler> = {}) {
-  const memory: PointerMemory = { current: undefined };
+  const memory: PointerMemory = { current: null };
   const setOpen = vi.fn();
   const props = hintTriggerProps(zag, {
     open,
@@ -171,7 +171,7 @@ describe('hintTriggerProps activation', () => {
       {
         open: false,
         setOpen,
-        memory: { current: undefined },
+        memory: { current: null },
         names: REACT_EVENTS,
         activate,
         keys,

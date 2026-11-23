@@ -3,7 +3,7 @@
  * mounted on first open on the client and kept after, a place in the hint
  * tree, and tap handling on the trigger.
  *
- * @module packages/svelte/src/hint.svelte
+ * @module packages/svelte/src/hint/hint.svelte
  * @version 1.0.0
  * @author Typeir
  * @since 0.1.0
@@ -11,36 +11,45 @@
 
 import {
   HintNode,
-  SVELTE_EVENTS,
   hintTriggerProps,
-  watchOutsideTap,
   type PointerMemory,
   type RootNode,
+  SVELTE_EVENTS,
+  watchOutsideTap,
 } from '@arkhe/core';
 import { getContext, setContext, untrack } from 'svelte';
+import { useLatch, useMounted } from '../base/mounted.svelte.js';
 
-const HINT_KEY = Symbol('arkhe-hint');
+/**
+ * Context key of the enclosing card's hint node, shared by every copy of
+ * Arkhé.
+ *
+ * @constant KEY
+ * @type {symbol}
+ */
+const KEY = Symbol.for('arkhe.hint');
+
+/**
+ * Makes the node `read` returns the parent of hints rendered below. Call
+ * during component initialisation.
+ *
+ * @function provideHintNode
+ * @param {() => HintNode} read - Returns the card's node.
+ * @returns {void}
+ */
+export function provideHintNode(read: () => HintNode): void {
+  setContext(KEY, read);
+}
 
 /**
  * Returns this hint's tree node, a child of the card it renders in. Call
- * during component init.
+ * during component initialisation.
  *
  * @function useHintNode
  * @returns {HintNode} Node.
  */
 export function useHintNode(): HintNode {
-  return new HintNode(getContext<HintNode | undefined>(HINT_KEY));
-}
-
-/**
- * Makes `node` the parent of hints rendered below. Call during component
- * init.
- *
- * @function provideHintNode
- * @param {HintNode} node - Card's node.
- */
-export function provideHintNode(node: HintNode): void {
-  setContext(HINT_KEY, node);
+  return new HintNode(getContext<(() => HintNode) | undefined>(KEY)?.());
 }
 
 /**
@@ -95,22 +104,19 @@ export interface Hint<P extends object> {
  * @returns {Hint<P>} Trigger props and mount flag.
  */
 export function useHint<P extends object>(read: () => HintInput<P>): Hint<P> {
-  const memory: PointerMemory = { current: undefined };
+  const memory: PointerMemory = { current: null };
   const node = untrack(() => read().node);
   const triggerId = $derived(read().trigger.id ?? '');
   const positionerId = $derived(read().positionerId);
-  let client = $state(false);
-  let opened = false;
-  const mounted = $derived.by(() => {
-    if (client && read().open) opened = true;
-    return opened;
-  });
+  const client = useMounted();
+  const opened = useLatch(() => client.current && read().open);
   $effect(() => {
-    client = true;
     const ids = [triggerId, positionerId];
     return untrack(() =>
       node.attach({
-        close: () => read().setOpen(false),
+        close: () => {
+          read().setOpen(false);
+        },
         leaving: () => read().leaving(),
         ids: () => ids,
       }),
@@ -118,7 +124,9 @@ export function useHint<P extends object>(read: () => HintInput<P>): Hint<P> {
   });
   $effect(() => {
     const { open } = read();
-    untrack(() => node.report(open));
+    untrack(() => {
+      node.report(open);
+    });
   });
   $effect(() => {
     const { open, getRootNode } = read();
@@ -128,7 +136,9 @@ export function useHint<P extends object>(read: () => HintInput<P>): Hint<P> {
       watchOutsideTap(
         root,
         () => node.ids(),
-        () => read().setOpen(false),
+        () => {
+          read().setOpen(false);
+        },
       ),
     );
   });
@@ -146,7 +156,7 @@ export function useHint<P extends object>(read: () => HintInput<P>): Hint<P> {
       });
     },
     get mounted() {
-      return mounted;
+      return opened.current;
     },
   };
 }

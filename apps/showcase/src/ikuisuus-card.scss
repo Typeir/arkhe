@@ -1,0 +1,107 @@
+/**
+ * @fileoverview Ikuisuus's keyword card body for the clone section: title
+ * and rule link level with each other, then the shard prose. Sizes follow
+ * Ikuisuus's 14px `rem`, as `--ik-rem`.
+ */
+
+@use 'sass:math';
+
+$rhombus-side: math.sqrt(0.925);
+
+.ikuisuus-layer {
+  .ik-card {
+    display: flex;
+    flex-direction: column;
+    gap: calc(0.35 * var(--ik-rem));
+  }
+
+  .ik-card-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: calc(0.5 * var(--ik-rem));
+  }
+
+  .ik-card-title {
+    margin: 0;
+    color: var(--color-accent);
+    font-family: var(--ik-headings);
+    font-size: calc(1.5 * var(--ik-rem));
+    font-weight: 600;
+    line-height: 1.15;
+
+    &::first-letter {
+      text-transform: uppercase;
+    }
+  }
+
+  .ik-card-link {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    inline-size: calc(1.6 * var(--ik-rem) * #{$rhombus-side});
+    block-size: calc(1.6 * var(--ik-rem) * #{$rhombus-side});
+    box-sizing: border-box;
+    border: var(--border-width-xs) solid var(--color-border);
+    color: var(--color-accent);
+    text-decoration: none;
+    rotate: 45deg;
+    transition:
+      color 0.15s ease,
+      transform 0.15s ease,
+      filter 0.15s ease;
+
+    > * {
+      rotate: -45deg;
+    }
+
+    [data-scope='icon'] {
+      width: 14px;
+      height: 14px;
+    }
+
+    &:hover,
+    &:focus {
+      color: var(--color-primary);
+    }
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--color-accent);
+      filter: drop-shadow(0 0 3px var(--color-accent));
+      outline: none;
+    }
+
+    &:hover {
+      transform: scale(1.08);
+    }
+  }
+
+  .ik-blurb {
+    white-space: normal;
+
+    p,
+    ul {
+      margin: 0;
+    }
+
+    :last-child {
+      margin-bottom: 0;
+    }
+
+    > :first-child {
+      margin-top: 0;
+    }
+
+    ul {
+      list-style: revert;
+      padding-left: calc(1.1 * var(--ik-rem));
+    }
+
+    li::marker {
+      color: var(--color-accent);
+      content: '▹ ';
+    }
+  }
+}

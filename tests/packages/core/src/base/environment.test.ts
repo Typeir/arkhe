@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import {
-  DEFAULT_ENVIRONMENT,
   createEnvironment,
+  DEFAULT_ENVIRONMENT,
   documentOf,
 } from '@arkhe/core';
 import { describe, expect, it } from 'vitest';

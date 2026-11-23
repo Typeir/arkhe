@@ -40,7 +40,7 @@ describe('ManagedCanvas', () => {
     el.dispatchEvent(new Event('contextrestored'));
     expect(lost).toHaveBeenCalledTimes(1);
     expect(restored).toHaveBeenCalledTimes(1);
-    canvas.free();
+    canvas.release();
     expect(canvas.live).toBe(false);
     expect(el.width).toBe(0);
     expect(el.isConnected).toBe(false);

@@ -1,6 +1,6 @@
 import type { ArkheEnvironmentValue } from '@arkhe/core';
-import WithEnvironment from '@tests/fixtures/svelte/WithEnvironment.svelte';
 import { render } from '@testing-library/svelte';
+import WithEnvironment from '@tests/fixtures/svelte/WithEnvironment.svelte';
 import { describe, expect, it } from 'vitest';
 
 describe('ArkheEnvironment', () => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  CanvasBudget,
   type BudgetClient,
+  CanvasBudget,
 } from '../../../../../../packages/core/src/feedback/canvas/budget';
 
 const client = (

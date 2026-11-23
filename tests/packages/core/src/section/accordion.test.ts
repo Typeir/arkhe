@@ -1,8 +1,8 @@
 import {
   accordionAllOpen,
   accordionHeld,
-  accordionReduce,
   type AccordionItem,
+  accordionReduce,
   type AccordionRules,
 } from '@arkhe/core';
 import { describe, expect, it } from 'vitest';

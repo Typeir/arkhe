@@ -5,28 +5,14 @@ popover machine, portalled into the environment's container once mounted on
 the client, so server markup holds the trigger alone. Escape and outside
 clicks close it; focus returns to the button.
 -->
-<script lang="ts">
-  import {
-    ARKHE_CLASS,
-    floatingMachineProps,
-    type Placement,
-  } from '@arkhe/core';
-  import * as popover from '@zag-js/popover';
-  import {
-    mergeProps,
-    normalizeProps,
-    portal,
-    useMachine,
-  } from '@zag-js/svelte';
-  import { onMount, type Snippet } from 'svelte';
-  import { useArkhe } from '../base/context.js';
-  import { useArkheEnvironment } from '../base/environment.js';
-  import Icon from '../base/Icon.svelte';
+<script module lang="ts">
+  import type { Placement } from '@arkhe/core';
+  import type { Snippet } from 'svelte';
 
   /**
    * Props of Popover.
    *
-   * @interface Props
+   * @interface PopoverProps
    * @property {string} trigger - Text of the open button.
    * @property {string} [title] - Heading; names the panel. Without it the trigger text does.
    * @property {boolean} [open] - Open state; bindable. A function binding vetoes.
@@ -35,7 +21,7 @@ clicks close it; focus returns to the button.
    * @property {Placement} [placement] - Side. Defaults to `bottom-start`.
    * @property {Snippet} [children] - Panel body.
    */
-  interface Props {
+  export interface PopoverProps {
     trigger: string;
     title?: string;
     open?: boolean;
@@ -44,6 +30,21 @@ clicks close it; focus returns to the button.
     placement?: Placement;
     children?: Snippet;
   }
+</script>
+
+<script lang="ts">
+  import { ARKHE_CLASS, floatingMachineProps, partAttrs } from '@arkhe/core';
+  import * as popover from '@zag-js/popover';
+  import {
+    mergeProps,
+    normalizeProps,
+    portal,
+    useMachine,
+  } from '@zag-js/svelte';
+  import { useArkhe } from '../base/context.js';
+  import { useArkheEnvironment } from '../base/environment.js';
+  import Icon from '../base/Icon.svelte';
+  import { useMounted } from '../base/mounted.svelte.js';
 
   let {
     trigger,
@@ -53,33 +54,31 @@ clicks close it; focus returns to the button.
     onOpenChange,
     placement = 'bottom-start',
     children,
-  }: Props = $props();
+  }: PopoverProps = $props();
   const id = $props.id();
   const arkhe = useArkhe();
   const env = useArkheEnvironment();
+  const commit = (next: boolean) => {
+    open = next;
+    onOpenChange?.(next);
+  };
   const service = useMachine(popover.machine, () =>
     floatingMachineProps({
       id,
       open,
       defaultOpen,
-      onOpenChange: (next: boolean) => {
-        open = next;
-        onOpenChange?.(next);
-      },
+      onOpenChange: commit,
       placement,
       getRootNode: env().getRootNode,
     }),
   );
   const api = $derived(popover.connect(service, normalizeProps));
-  let mounted = $state(false);
-  onMount(() => {
-    mounted = true;
-  });
+  const mounted = useMounted();
 </script>
 
 <button {...mergeProps(api.getTriggerProps(), { class: ARKHE_CLASS })}
   >{trigger}<Icon name="chevron-down" /></button>
-{#if mounted}
+{#if mounted.current}
   <div
     class={ARKHE_CLASS}
     use:portal={{
@@ -90,7 +89,7 @@ clicks close it; focus returns to the button.
       <div
         {...api.getContentProps()}
         aria-label={title === undefined ? trigger : undefined}>
-        <div data-scope="popover" data-part="header">
+        <div {...partAttrs('popover', 'header')}>
           {#if title !== undefined}<h2 {...api.getTitleProps()}>
               {title}
             </h2>{/if}
@@ -98,7 +97,7 @@ clicks close it; focus returns to the button.
             {...api.getCloseTriggerProps()}
             aria-label={arkhe().labels.close}><Icon name="x" /></button>
         </div>
-        <div data-scope="popover" data-part="body">{@render children?.()}</div>
+        <div {...partAttrs('popover', 'body')}>{@render children?.()}</div>
       </div>
     </div>
   </div>

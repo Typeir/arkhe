@@ -10,6 +10,12 @@
 
 import { defineConfig, devices } from '@playwright/test';
 
+/**
+ * Port the showcase preview serves on during the e2e run.
+ *
+ * @constant PORT
+ * @type {number}
+ */
 const PORT = 5194;
 
 export default defineConfig({

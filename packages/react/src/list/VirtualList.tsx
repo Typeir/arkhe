@@ -12,7 +12,7 @@
 'use client';
 
 import { ARKHE_CLASS, partAttrs, type VirtualRange } from '@arkhe/core';
-import { useEffect, type CSSProperties, type JSX, type ReactNode } from 'react';
+import { type CSSProperties, type JSX, type ReactNode, useEffect } from 'react';
 import { useVirtualRows } from './useVirtualRows.js';
 
 /**
@@ -47,40 +47,40 @@ export interface VirtualListProps<T> {
  * @param {VirtualListProps<T>} props - Rows, pitch, row body.
  * @returns {JSX.Element} List.
  */
-export const VirtualList = <T,>(props: VirtualListProps<T>): JSX.Element => {
-  const { items, renderItem, getKey, onRange } = props;
-  const { attach, ...rows } = useVirtualRows(
-    items.length,
-    props.rowPitch,
-    props.overscan,
-  );
+export const VirtualList = <T,>({
+  items,
+  rowPitch,
+  renderItem,
+  label,
+  maxHeight,
+  overscan,
+  getKey,
+  onRange,
+}: VirtualListProps<T>): JSX.Element => {
+  const { attach, ...rows } = useVirtualRows(items.length, rowPitch, overscan);
   const { start, end } = rows.visible;
   useEffect(() => {
     onRange?.({ start, end });
   }, [start, end, onRange]);
   return (
-    <div
+    <ul
       className={ARKHE_CLASS}
       {...partAttrs('virtual-list', 'root')}
-      role='list'
-      aria-label={props.label}
+      aria-label={label}
       ref={attach}
-      style={
-        { ...rows.vars, '--virtual-max': props.maxHeight } as CSSProperties
-      }
+      style={{ ...rows.vars, '--virtual-max': maxHeight } as CSSProperties}
       data-virtual=''>
       {items.slice(rows.range.start, rows.range.end).map((item, at) => {
         const index = rows.range.start + at;
         return (
-          <div
+          <li
             key={getKey?.(item, index) ?? index}
             {...partAttrs('virtual-list', 'item')}
-            role='listitem'
             {...rows.position(index)}>
             {renderItem(item, index)}
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ul>
   );
 };

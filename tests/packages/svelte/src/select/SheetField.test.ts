@@ -1,6 +1,6 @@
-import SheetProbe from '@tests/fixtures/svelte/SheetProbe.svelte';
 import { render, screen, waitFor, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import SheetProbe from '@tests/fixtures/svelte/SheetProbe.svelte';
 import { describe, expect, it } from 'vitest';
 
 describe('SheetField', () => {

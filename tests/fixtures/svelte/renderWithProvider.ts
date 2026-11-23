@@ -8,8 +8,8 @@
  */
 
 import type { ArkheProvider } from '@arkhe/svelte';
-import { render } from '@testing-library/svelte';
 import type { Component, ComponentProps } from 'svelte';
+import { render } from '@testing-library/svelte';
 import WithProvider from './WithProvider.svelte';
 
 /**

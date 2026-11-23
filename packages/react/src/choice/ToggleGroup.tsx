@@ -14,19 +14,21 @@
 import {
   ARKHE_CLASS,
   dispatch,
+  hasText,
   partAttrs,
   rovingFocus,
-  toggleRootAttrs,
-  toggleReduce,
-  toggleShown,
-  uniqueByValue,
   type ToggleAction,
   type ToggleItem,
   type ToggleOrientation,
+  toggleReduce,
+  toggleRootAttrs,
+  toggleShown,
+  uniqueByValue,
 } from '@arkhe/core';
-import { useEffect, useRef, useState, type JSX, type ReactNode } from 'react';
+import { type JSX, type ReactNode, useEffect, useRef, useState } from 'react';
 import { useArkhe } from '../base/ArkheProvider.js';
 import { Icon } from '../base/Icon.js';
+import { useControllable } from '../base/useControllable.js';
 
 /**
  * Props of ToggleGroup.
@@ -39,7 +41,7 @@ import { Icon } from '../base/Icon.js';
  * @property {(value: readonly string[]) => void} [onValueChange] - Reports presses.
  * @property {boolean} [multiple] - Several may be pressed at once.
  * @property {boolean} [deselectable] - A single pressed toggle may be released.
- * @property {ToggleOrientation} [orientation] - Direction; horizontal by default.
+ * @property {ToggleOrientation} [orientation] - Direction. Defaults to horizontal.
  * @property {number} [limit] - Toggles shown until the reader asks for more; pressed ones always show.
  * @property {boolean} [clearable] - Adds a clear button while anything is pressed.
  * @property {(item: ToggleItem, pressed: boolean) => ReactNode} [renderItem] - Content of a toggle; it must carry the toggle's name.
@@ -81,18 +83,21 @@ export const ToggleGroup = ({
   renderItem,
 }: ToggleGroupProps): JSX.Element => {
   const { labels } = useArkhe();
-  const [own, setOwn] = useState<readonly string[]>(defaultValue ?? []);
+  const { current: pressed, commit } = useControllable<readonly string[]>({
+    value,
+    defaultValue: defaultValue ?? [],
+    onChange: onValueChange,
+  });
   const [expanded, setExpanded] = useState(false);
   const root = useRef<HTMLDivElement>(null);
-  const pressed = value ?? own;
   const all = uniqueByValue(items);
-  useEffect(() => (root.current ? rovingFocus(root.current) : undefined), []);
-  const commit = (next: readonly string[]) => {
-    if (value === undefined) setOwn(next);
-    onValueChange?.(next);
-  };
-  const act = (action: ToggleAction) =>
+  useEffect(() => {
+    if (!root.current) return undefined;
+    return rovingFocus(root.current);
+  }, []);
+  const act = (action: ToggleAction) => {
     dispatch(toggleReduce, pressed, action, { multiple, deselectable }, commit);
+  };
   const clear = () => {
     act({ type: 'clear' });
     root.current?.querySelector<HTMLElement>('[data-part="item"]')?.focus();
@@ -113,8 +118,10 @@ export const ToggleGroup = ({
             data-value={item.value}
             aria-pressed={on}
             aria-disabled={item.disabled ? true : undefined}
-            onClick={() => act({ type: 'press', item })}>
-            {item.icon ? <Icon name={item.icon} /> : null}
+            onClick={() => {
+              act({ type: 'press', item });
+            }}>
+            {hasText(item.icon) ? <Icon name={item.icon} /> : null}
             {renderItem ? (
               renderItem(item, on)
             ) : (
@@ -128,7 +135,9 @@ export const ToggleGroup = ({
           type='button'
           {...partAttrs('toggle-group', 'more')}
           aria-expanded={expanded}
-          onClick={() => setExpanded(!expanded)}>
+          onClick={() => {
+            setExpanded(!expanded);
+          }}>
           {expanded ? labels.showLess : labels.showMore}
         </button>
       ) : null}

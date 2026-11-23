@@ -12,17 +12,18 @@
 
 import {
   ARKHE_CLASS,
+  type CheckboxLook,
   checkboxRootAttrs,
+  type CheckboxSize,
   fieldDescribedBy,
   fieldIds,
+  hasText,
   markIndeterminate,
   partAttrs,
-  type CheckboxLook,
-  type CheckboxSize,
 } from '@arkhe/core';
-import { useEffect, useId, useRef, type JSX } from 'react';
-import { FieldNote } from '../field/FieldNote.js';
+import { type JSX, useEffect, useId, useRef } from 'react';
 import { Icon } from '../base/Icon.js';
+import { FieldNote } from '../field/FieldNote.js';
 
 /**
  * Props of Checkbox.
@@ -33,8 +34,8 @@ import { Icon } from '../base/Icon.js';
  * @property {boolean} [defaultChecked] - First state when uncontrolled.
  * @property {(checked: boolean) => void} [onCheckedChange] - Reports changes.
  * @property {boolean} [indeterminate] - Mixed state.
- * @property {CheckboxLook} [look] - Pip or box; pip by default.
- * @property {CheckboxSize} [size] - s, m or l; m by default.
+ * @property {CheckboxLook} [look] - Pip or box. Defaults to pip.
+ * @property {CheckboxSize} [size] - s, m or l. Defaults to m.
  * @property {boolean} [labelHidden] - Hides the label visually.
  * @property {string} [name] - Form field name.
  * @property {string} [value] - Value submitted while checked.
@@ -114,7 +115,7 @@ export const Checkbox = ({
             required={required}
             disabled={disabled}
             aria-describedby={fieldDescribedBy(ids, hint, error)}
-            aria-invalid={error ? true : undefined}
+            aria-invalid={hasText(error) ? true : undefined}
           />
           {look === 'box' ? (
             <span {...partAttrs('checkbox', 'mark')} aria-hidden>

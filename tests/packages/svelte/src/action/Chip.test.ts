@@ -1,8 +1,8 @@
 import { Chip } from '@arkhe/svelte';
-import ChipList from '@tests/fixtures/svelte/ChipList.svelte';
-import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
 import { render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import ChipList from '@tests/fixtures/svelte/ChipList.svelte';
+import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
 import { describe, expect, it, vi } from 'vitest';
 
 describe('Chip', () => {

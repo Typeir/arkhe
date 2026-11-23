@@ -7,35 +7,96 @@
  * @since 0.1.0
  */
 
-export { default as Accordion } from './section/Accordion.svelte';
-export { default as ArkheEnvironment } from './base/ArkheEnvironment.svelte';
-export { default as ArkheProvider } from './base/ArkheProvider.svelte';
-export { default as Button } from './action/Button.svelte';
-export { default as Checkbox } from './choice/Checkbox.svelte';
-export { default as Chip } from './action/Chip.svelte';
-export { default as Collapsible } from './section/Collapsible.svelte';
-export { default as Disclosure } from './section/Disclosure.svelte';
-export { default as Field } from './field/Field.svelte';
-export { default as HoverCard } from './hint/HoverCard.svelte';
-export { default as Icon } from './base/Icon.svelte';
-export { default as Menu } from './action/Menu.svelte';
-export { default as Modal } from './overlay/Modal.svelte';
-export { default as NumericInput } from './field/NumericInput.svelte';
-export { default as Picker } from './select/Picker.svelte';
-export { default as Popover } from './overlay/Popover.svelte';
-export { default as Progress } from './feedback/Progress.svelte';
-export { default as RadioGroup } from './choice/RadioGroup.svelte';
-export { default as Search } from './select/Search.svelte';
-export { default as Select } from './select/Select.svelte';
-export { default as Skeleton } from './feedback/Skeleton.svelte';
-export { default as SkeletonGroup } from './feedback/SkeletonGroup.svelte';
-export { default as Status } from './feedback/Status.svelte';
-export { default as Tabs } from './section/Tabs.svelte';
-export { default as TextArea } from './field/TextArea.svelte';
-export { default as TextInput } from './field/TextInput.svelte';
-export { default as ToggleGroup } from './choice/ToggleGroup.svelte';
-export { default as Tooltip } from './hint/Tooltip.svelte';
-export { default as VirtualList } from './list/VirtualList.svelte';
+export {
+  default as Accordion,
+  type AccordionProps,
+} from './section/Accordion.svelte';
+export {
+  default as ArkheEnvironment,
+  type ArkheEnvironmentProps,
+} from './base/ArkheEnvironment.svelte';
+export {
+  default as ArkheProvider,
+  type ArkheProviderProps,
+} from './base/ArkheProvider.svelte';
+export {
+  default as Button,
+  type ButtonProps,
+  type ButtonSize,
+  type ButtonTone,
+  type ButtonVariant,
+} from './action/Button.svelte';
+export {
+  default as Checkbox,
+  type CheckboxProps,
+} from './choice/Checkbox.svelte';
+export {
+  default as Chip,
+  type ChipProps,
+  type ChipTone,
+} from './action/Chip.svelte';
+export {
+  default as Collapsible,
+  type CollapsibleProps,
+} from './section/Collapsible.svelte';
+export {
+  default as Disclosure,
+  type DisclosureProps,
+} from './section/Disclosure.svelte';
+export { default as Field, type FieldProps } from './field/Field.svelte';
+export {
+  default as HoverCard,
+  type HoverCardProps,
+} from './hint/HoverCard.svelte';
+export { default as Icon, type IconProps } from './base/Icon.svelte';
+export { default as Menu, type MenuProps } from './action/Menu.svelte';
+export { default as Modal, type ModalProps } from './overlay/Modal.svelte';
+export {
+  default as NumericInput,
+  type NumericInputProps,
+} from './field/NumericInput.svelte';
+export { default as Picker, type PickerProps } from './select/Picker.svelte';
+export {
+  default as Popover,
+  type PopoverProps,
+} from './overlay/Popover.svelte';
+export {
+  default as Progress,
+  type ProgressProps,
+} from './feedback/Progress.svelte';
+export {
+  default as RadioGroup,
+  type RadioGroupProps,
+} from './choice/RadioGroup.svelte';
+export { default as Search, type SearchProps } from './select/Search.svelte';
+export { default as Select, type SelectProps } from './select/Select.svelte';
+export {
+  default as Skeleton,
+  type SkeletonProps,
+} from './feedback/Skeleton.svelte';
+export {
+  default as SkeletonGroup,
+  type SkeletonGroupProps,
+} from './feedback/SkeletonGroup.svelte';
+export { default as Status, type StatusProps } from './feedback/Status.svelte';
+export { default as Tabs, type TabsProps } from './section/Tabs.svelte';
+export {
+  default as TextArea,
+  type TextAreaProps,
+} from './field/TextArea.svelte';
+export {
+  default as TextInput,
+  type TextInputProps,
+} from './field/TextInput.svelte';
+export {
+  default as ToggleGroup,
+  type ToggleGroupProps,
+} from './choice/ToggleGroup.svelte';
+export { default as Tooltip, type TooltipProps } from './hint/Tooltip.svelte';
+export {
+  default as VirtualList,
+  type VirtualListProps,
+} from './list/VirtualList.svelte';
 export {
   useArkhe,
   type ArkheContextValue,
@@ -49,7 +110,6 @@ export type {
   ArkheLabels,
   CheckboxLook,
   CheckboxSize,
-  SelectOption,
   DialogRole,
   FieldControlAttrs,
   HeadingLevel,
@@ -62,6 +122,7 @@ export type {
   RadioLook,
   RadioOrientation,
   RootNode,
+  SelectOption,
   StatusKind,
   TabItem,
   ToggleItem,

@@ -1,9 +1,9 @@
+import type { ArkheEnvironmentValue } from '@arkhe/core';
 import {
   ArkheEnvironment,
-  useArkheEnvironment,
   type ArkheEnvironmentProps,
+  useArkheEnvironment,
 } from '@arkhe/react';
-import type { ArkheEnvironmentValue } from '@arkhe/core';
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 

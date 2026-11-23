@@ -9,7 +9,7 @@
  */
 
 import { Button, Skeleton, SkeletonGroup, useArkhe } from '@arkhe/react';
-import { useEffect, useState, type JSX } from 'react';
+import { type JSX, useEffect, useState } from 'react';
 import {
   SPECIMEN_REVEAL,
   SPECIMEN_REVEAL_ROWS,
@@ -27,13 +27,20 @@ export const SkeletonSection = (): JSX.Element => {
   const { effects } = useArkhe();
   const [loading, setLoading] = useState(true);
   const [revealed, setRevealed] = useState(0);
-  useEffect(() => exposeEffects(effects), [effects]);
-  const count = () => setRevealed((n) => n + 1);
+  useEffect(() => {
+    exposeEffects(effects);
+  }, [effects]);
+  const count = () => {
+    setRevealed((shown) => shown + 1);
+  };
   return (
     <section className='specimen' id='skeleton'>
       <h2>{SPECIMEN_SECTIONS.skeleton}</h2>
       <div className='row'>
-        <Button onClick={() => setLoading(!loading)}>
+        <Button
+          onClick={() => {
+            setLoading(!loading);
+          }}>
           {loading ? 'Load' : 'Reload'}
         </Button>
         <output>Revealed: {revealed}</output>

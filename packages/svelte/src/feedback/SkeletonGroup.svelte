@@ -6,34 +6,38 @@ whenever loading starts, is told the content is ready in an effect, which
 runs after the DOM update and before paint, so the cover paints first, and
 detaches on unmount. Without a loaded engine the content just shows.
 -->
-<script lang="ts">
-  import {
-    ARKHE_CLASS,
-    announceText,
-    flag,
-    partAttrs,
-    type Fx,
-  } from '@arkhe/core';
-  import { untrack, type Snippet } from 'svelte';
-  import { useArkhe } from '../base/context.js';
+<script module lang="ts">
+  import type { Snippet } from 'svelte';
 
   /**
    * Props of SkeletonGroup.
    *
-   * @interface Props
+   * @interface SkeletonGroupProps
    * @property {boolean} loading - True: show `skeleton` and animate. False: show `children` and reveal them.
    * @property {Snippet} skeleton - Shapes in the final layout's shape.
    * @property {Snippet} [children] - The real content, mounted only once loading ends.
-   * @property {boolean} [effect] - False keeps the CSS skeleton for this group. Defaults to true.
+   * @property {boolean} [effect] - False keeps the CSS skeleton for this group. Defaults to `true`.
    * @property {() => void} [onRevealed] - Called when the reveal has finished, or at once without an effect.
    */
-  interface Props {
+  export interface SkeletonGroupProps {
     loading: boolean;
     skeleton: Snippet;
     children?: Snippet;
     effect?: boolean;
     onRevealed?: () => void;
   }
+</script>
+
+<script lang="ts">
+  import {
+    announceText,
+    ARKHE_CLASS,
+    flag,
+    type Fx,
+    partAttrs,
+  } from '@arkhe/core';
+  import { untrack } from 'svelte';
+  import { useArkhe } from '../base/context.js';
 
   let {
     loading,
@@ -41,10 +45,10 @@ detaches on unmount. Without a loaded engine the content just shows.
     children,
     effect: animated = true,
     onRevealed,
-  }: Props = $props();
+  }: SkeletonGroupProps = $props();
   const arkhe = useArkhe();
-  let host = $state<HTMLDivElement>();
-  let label = $state<HTMLSpanElement>();
+  let host = $state<HTMLDivElement | null>(null);
+  let label = $state<HTMLSpanElement | null>(null);
   let shown = untrack(() => loading);
   $effect(() =>
     loading && label
@@ -54,13 +58,16 @@ detaches on unmount. Without a loaded engine the content just shows.
   let attached: Fx | null = null;
   $effect(() => {
     const el = host;
-    if (!loading || !animated || !el) return;
+    if (!loading || !animated || !el) return undefined;
     const attach = (fx: Fx | null) => {
       attached = fx;
       fx?.attach(el);
     };
     const effects = untrack(() => arkhe().effects);
-    if (effects.engine) return attach(effects.engine);
+    if (effects.engine) {
+      attach(effects.engine);
+      return undefined;
+    }
     let live = true;
     void effects.request().then((fx) => {
       if (live) attach(fx);

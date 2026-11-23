@@ -1,8 +1,8 @@
 import { Tabs } from '@arkhe/svelte';
-import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
-import { panelSnippet, textSnippet } from '@tests/fixtures/svelte/snippets';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
+import { panelSnippet, textSnippet } from '@tests/fixtures/svelte/snippets';
 import { describe, expect, it, vi } from 'vitest';
 
 const ITEMS = [

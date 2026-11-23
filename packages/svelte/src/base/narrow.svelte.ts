@@ -2,7 +2,7 @@
  * @fileoverview useNarrow: whether the environment's window is phone-width,
  * kept current as it crosses. False on the server and until mounted.
  *
- * @module packages/svelte/src/narrow.svelte
+ * @module packages/svelte/src/base/narrow.svelte
  * @version 1.0.0
  * @author Typeir
  * @since 0.2.0
@@ -22,7 +22,7 @@ export interface Narrow {
 }
 
 /**
- * Tracks phone width. Call during component init.
+ * Tracks phone width. Call during component initialisation.
  *
  * @function useNarrow
  * @returns {Narrow} Reactive flag.

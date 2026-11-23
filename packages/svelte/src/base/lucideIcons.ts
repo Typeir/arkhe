@@ -12,6 +12,7 @@ import type { ArkheIconName } from '@arkhe/core';
 import Check from '@lucide/svelte/icons/check';
 import ChevronDown from '@lucide/svelte/icons/chevron-down';
 import ExternalLink from '@lucide/svelte/icons/external-link';
+import GripVertical from '@lucide/svelte/icons/grip-vertical';
 import Inbox from '@lucide/svelte/icons/inbox';
 import Info from '@lucide/svelte/icons/info';
 import Loader from '@lucide/svelte/icons/loader';
@@ -20,7 +21,7 @@ import Pin from '@lucide/svelte/icons/pin';
 import PinOff from '@lucide/svelte/icons/pin-off';
 import Plus from '@lucide/svelte/icons/plus';
 import TriangleAlert from '@lucide/svelte/icons/triangle-alert';
-import X from '@lucide/svelte/icons/x';
+import XIcon from '@lucide/svelte/icons/x';
 import type { IconComponent } from './context.js';
 
 /**
@@ -30,7 +31,7 @@ import type { IconComponent } from './context.js';
  * @type {Readonly<Record<ArkheIconName, IconComponent>>}
  */
 export const LUCIDE_ICONS: Readonly<Record<ArkheIconName, IconComponent>> = {
-  x: X,
+  x: XIcon,
   check: Check,
   plus: Plus,
   minus: Minus,
@@ -42,4 +43,5 @@ export const LUCIDE_ICONS: Readonly<Record<ArkheIconName, IconComponent>> = {
   pin: Pin,
   'pin-off': PinOff,
   'external-link': ExternalLink,
+  'grip-vertical': GripVertical,
 };

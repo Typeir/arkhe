@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { FxEngine, InertFx, createFx } from '@arkhe/core/fx';
+import { createFx, FxEngine, InertFx } from '@arkhe/core/fx';
 import { stubBrowser, stubCanvas } from '@tests/fixtures/canvas';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 

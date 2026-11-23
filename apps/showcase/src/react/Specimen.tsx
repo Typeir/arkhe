@@ -12,42 +12,48 @@ import {
   ArkheProvider,
   Button,
   Chip,
+  type ChipTone,
   Field,
   HoverCard,
   Icon,
   Menu,
   Modal,
   NumericInput,
+  type NumericValue,
   Popover,
   Progress,
   Status,
-  Tabs,
   TextArea,
   TextInput,
   Tooltip,
-  type ChipTone,
-  type NumericValue,
 } from '@arkhe/react';
-import { useState, type JSX, type ReactNode } from 'react';
+import { type JSX, type ReactNode, useState } from 'react';
 import {
+  clampTen,
+  loadSpecimenCard,
+  nameReadout,
   SPECIMEN_BUTTON_SIZES,
   SPECIMEN_CHIPS,
   SPECIMEN_ICONS,
   SPECIMEN_MENU,
   SPECIMEN_PROGRESS,
   SPECIMEN_SECTIONS,
-  SPECIMEN_TABS,
-  SPECIMEN_TAB_TEXT,
   SPECIMEN_TONES,
-  clampTen,
-  loadSpecimenCard,
-  nameReadout,
 } from '../specimen';
 import { ChoiceSection } from './ChoiceSection';
 import { CollapseSection } from './CollapseSection';
+import { IkuisuusSection } from './IkuisuusSection';
 import { SelectSection } from './SelectSection';
 import { SkeletonSection } from './SkeletonSection';
+import { TabsSection } from './TabsSection';
 
+/**
+ * One specimen section: a heading and a row of examples.
+ *
+ * @component
+ * @param {{ id: string, children: ReactNode }} props - Section id and examples.
+ * @returns {JSX.Element} Section.
+ */
 const Section = ({
   id,
   children,
@@ -98,7 +104,11 @@ export const Specimen = (): JSX.Element => {
         <Button icon='chevron-down' iconSide='end' variant='ghost'>
           Options
         </Button>
-        <Button pressed={pressed} onClick={() => setPressed(!pressed)}>
+        <Button
+          pressed={pressed}
+          onClick={() => {
+            setPressed(!pressed);
+          }}>
           Toggle
         </Button>
         <Button disabled>Disabled</Button>
@@ -114,7 +124,9 @@ export const Specimen = (): JSX.Element => {
               {...control}
               value={name}
               maxLength={24}
-              onChange={(event) => setName(event.target.value)}
+              onChange={(event) => {
+                setName(event.target.value);
+              }}
             />
           )}
         </Field>
@@ -134,7 +146,9 @@ export const Specimen = (): JSX.Element => {
           value={clamped}
           min={0}
           max={10}
-          onValueChange={(next) => setClamped(clampTen(next))}
+          onValueChange={(next) => {
+            setClamped(clampTen(next));
+          }}
         />
         <NumericInput label='Unbounded' defaultValue={null} />
         <ArkheProvider locale='fi' effects={false}>
@@ -150,7 +164,9 @@ export const Specimen = (): JSX.Element => {
           <Chip
             key={chip}
             label={chip}
-            onRemove={() => setChips(chips.filter((other) => other !== chip))}
+            onRemove={() => {
+              setChips(chips.filter((other) => other !== chip));
+            }}
           />
         ))}
       </Section>
@@ -175,12 +191,16 @@ export const Specimen = (): JSX.Element => {
             <Button
               icon='minus'
               label='Less'
-              onClick={() => setValue(value - 1)}
+              onClick={() => {
+                setValue(value - 1);
+              }}
             />
             <Button
               icon='plus'
               label='More'
-              onClick={() => setValue(value + 1)}
+              onClick={() => {
+                setValue(value + 1);
+              }}
             />
           </div>
         </div>
@@ -194,9 +214,7 @@ export const Specimen = (): JSX.Element => {
           <Status kind='info'>Placeholder information.</Status>
         </div>
       </Section>
-      <Section id='tabs'>
-        <Tabs items={SPECIMEN_TABS} label='Sheet' panels={SPECIMEN_TAB_TEXT} />
-      </Section>
+      <TabsSection />
       <Section id='modal'>
         <Modal
           title='Short rest'
@@ -233,6 +251,7 @@ export const Specimen = (): JSX.Element => {
           card, or open{' '}
           <HoverCard
             title='Fireball'
+            actions={<Button size='xs'>Copy</Button>}
             load={loadSpecimenCard}
             loaded={(text) => <span>{text}</span>}>
             fireball
@@ -248,6 +267,7 @@ export const Specimen = (): JSX.Element => {
       <SelectSection />
       <ChoiceSection />
       <CollapseSection />
+      <IkuisuusSection />
     </main>
   );
 };

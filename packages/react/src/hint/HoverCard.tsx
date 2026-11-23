@@ -16,35 +16,40 @@
 import {
   ARKHE_CLASS,
   CardAccess,
+  cardContentProps,
   cardTriggerAria,
   elementById,
+  flag,
   floatingMachineProps,
-  formatLabel,
+  HINT_GUTTER,
+  partAttrs,
   type Placement,
+  REACT_EVENTS,
 } from '@arkhe/core';
 import * as hoverCard from '@zag-js/hover-card';
-import { Portal, mergeProps, normalizeProps, useMachine } from '@zag-js/react';
+import { mergeProps, normalizeProps, Portal, useMachine } from '@zag-js/react';
 import {
+  type JSX,
+  type ReactNode,
   useEffect,
   useEffectEvent,
   useId,
   useState,
-  type JSX,
-  type ReactNode,
 } from 'react';
-import { useArkhe } from '../base/ArkheProvider.js';
 import { useArkheEnvironment } from '../base/ArkheEnvironment.js';
-import { Button } from '../action/Button.js';
+import { useArkhe } from '../base/ArkheProvider.js';
+import { useControllable } from '../base/useControllable.js';
+import { usePortalContainer } from '../base/usePortalContainer.js';
+import { Status } from '../feedback/Status.js';
+import { useContentLoader } from '../feedback/useContentLoader.js';
+import { CardHeader } from './CardHeader.js';
 import {
   HintContext,
   HintTrigger,
   useHint,
   useHintNode,
-  useOpenState,
 } from './HintTrigger.js';
-import { Status } from '../feedback/Status.js';
-import { useContentLoader } from '../feedback/useContentLoader.js';
-import { usePortalContainer } from '../base/usePortalContainer.js';
+import { useCardDrag } from './useCardDrag.js';
 
 /**
  * Props of HoverCard. Give `content`, or `load` with `loaded`.
@@ -54,6 +59,8 @@ import { usePortalContainer } from '../base/usePortalContainer.js';
  * @property {string} title - Card heading; also names the pin button.
  * @property {ReactNode} children - Trigger content.
  * @property {string} [href] - Makes the trigger the provider's link to this address, and adds the link to the card's header.
+ * @property {boolean} [headerLink] - `false` leaves the link out of the header; the trigger stays a link. Defaults to true.
+ * @property {ReactNode} [actions] - Host controls in the header, before the built-in buttons.
  * @property {boolean} [inline] - Makes the trigger inline text with a tab stop; it may hold other triggers.
  * @property {ReactNode} [content] - Card body.
  * @property {() => Promise<T>} [load] - Fetches the body on first open. A new function loads afresh; keep it stable.
@@ -65,13 +72,15 @@ import { usePortalContainer } from '../base/usePortalContainer.js';
  * @property {Placement} [placement] - Side. Defaults to `bottom-start`.
  * @property {number} [openDelay] - Milliseconds before opening. Defaults to 400.
  * @property {number} [closeDelay] - Milliseconds before closing. Defaults to 200.
- * @property {'narrow' | 'wide'} [width] - Card width; between the two by default.
+ * @property {'narrow' | 'wide'} [width] - Card width. Defaults to between the two.
  * @property {boolean} [card] - `false` opens this card on click only; overrides the provider's `hoverCards`.
  */
 export interface HoverCardProps<T> {
   readonly title: string;
   readonly children: ReactNode;
   readonly href?: string;
+  readonly headerLink?: boolean;
+  readonly actions?: ReactNode;
   readonly inline?: boolean;
   readonly content?: ReactNode;
   readonly load?: () => Promise<T>;
@@ -105,6 +114,8 @@ export const HoverCard = <T,>({
   title,
   children,
   href,
+  headerLink = true,
+  actions,
   inline,
   content,
   load,
@@ -119,13 +130,19 @@ export const HoverCard = <T,>({
   width,
   card,
 }: HoverCardProps<T>): JSX.Element => {
-  const { labels, hoverCards } = useArkhe();
+  const { hoverCards, labels, announcer } = useArkhe();
   const id = useId();
   const env = useArkheEnvironment();
   const container = usePortalContainer();
   const node = useHintNode();
   const [pinned, setPinned] = useState(false);
-  const { shown, change } = useOpenState(open, defaultOpen, onOpenChange);
+  const [detached, setDetached] = useState(false);
+  const { current: shown, commit } = useControllable({
+    value: open,
+    defaultValue: defaultOpen ?? false,
+    onChange: onOpenChange,
+  });
+  if (detached && !shown) setDetached(false);
   const body = useContentLoader(load);
   const service = useMachine(hoverCard.machine, {
     ...floatingMachineProps({
@@ -133,8 +150,9 @@ export const HoverCard = <T,>({
       open: shown,
       hold: pinned,
       placement,
+      gutter: HINT_GUTTER,
       onOpenChange: (next: boolean) => {
-        if (node.request(next)) change(next);
+        if (node.request(next)) commit(next);
       },
       getRootNode: env.getRootNode,
     }),
@@ -144,23 +162,31 @@ export const HoverCard = <T,>({
   });
   const api = hoverCard.connect(service, normalizeProps);
   const positioner = api.getPositionerProps();
-  const contentProps = api.getContentProps();
+  const contentProps = cardContentProps(
+    api.getContentProps(),
+    pinned,
+    REACT_EVENTS,
+  );
   const triggerProps = api.getTriggerProps();
   const [triggerId, contentId] = [triggerProps.id ?? '', contentProps.id ?? ''];
   const togglePin = () => {
-    if (pinned) change(service.state.matches('open'));
+    if (pinned) commit(service.state.matches('open'));
     setPinned(!pinned);
+    setDetached(false);
   };
   const unpinAndClose = () => {
     setPinned(false);
-    change(false);
+    setDetached(false);
+    commit(false);
   };
   const release = useEffectEvent(unpinAndClose);
-  const shut = useEffectEvent(() => change(false));
+  const shut = useEffectEvent(() => {
+    commit(false);
+  });
   const hint = useHint({
     open: api.open,
     setOpen: (next: boolean) => {
-      if (next || !pinned) change(next);
+      if (next || !pinned) commit(next);
     },
     trigger: triggerProps,
     positionerId: positioner.id ?? '',
@@ -168,6 +194,25 @@ export const HoverCard = <T,>({
     leaving: () => service.state.matches('closing'),
     activate: href === undefined ? togglePin : undefined,
     keys: href === undefined && inline,
+  });
+  const move = useCardDrag({
+    open: api.open && hint.mounted,
+    contentId,
+    triggerId,
+    getRootNode: env.getRootNode,
+    detached,
+    setDetached: (on: boolean) => {
+      if (on) setPinned(true);
+      setDetached(on);
+    },
+    pin: () => {
+      setPinned(true);
+    },
+    title,
+    labels,
+    announce: (text: string) => {
+      announcer.announce(text);
+    },
   });
   const { state, load: start } = body;
   useEffect(() => {
@@ -181,14 +226,18 @@ export const HoverCard = <T,>({
       trigger: () => byId(triggerId),
       content: () => byId(contentId),
       node,
-      close: () => shut(),
-      release: () => release(),
+      close: () => {
+        shut();
+      },
+      release: () => {
+        release();
+      },
     });
     access.pin(pinned);
     return access.attach();
   }, [api.open, pinned, env, node, triggerId, contentId]);
   return (
-    <span className={ARKHE_CLASS} data-scope='hover-card' data-part='root'>
+    <span className={ARKHE_CLASS} {...partAttrs('hover-card', 'root')}>
       <HintTrigger
         attrs={{
           ...hint.trigger,
@@ -206,54 +255,34 @@ export const HoverCard = <T,>({
       </HintTrigger>
       {hint.mounted ? (
         <Portal container={container} getRootNode={env.getRootNode}>
-          <div className={ARKHE_CLASS}>
+          <div
+            className={ARKHE_CLASS}
+            {...partAttrs('hover-card', 'frame')}
+            data-detached={flag(detached)}>
             <div {...mergeProps(positioner, { hidden: !api.open })}>
               <div
                 {...mergeProps(contentProps, {
                   role: 'dialog',
                   'aria-labelledby': `${id}title`,
                 })}
-                data-pinned={pinned ? '' : undefined}
+                data-pinned={flag(pinned)}
                 data-width={width}>
-                <div data-scope='hover-card' data-part='header'>
-                  <span
-                    data-scope='hover-card'
-                    data-part='title'
-                    id={`${id}title`}>
-                    {title}
-                  </span>
-                  {href !== undefined ? (
-                    <Button
-                      variant='ghost'
-                      icon='external-link'
-                      label={formatLabel(labels.openLink, { label: title })}
-                      href={href}
-                    />
-                  ) : null}
-                  {pinnable ? (
-                    <Button
-                      variant='ghost'
-                      icon={pinned ? 'pin-off' : 'pin'}
-                      label={formatLabel(pinned ? labels.unpin : labels.pin, {
-                        label: title,
-                      })}
-                      pressed={pinned}
-                      onClick={togglePin}
-                    />
-                  ) : null}
-                  {pinned ? (
-                    <Button
-                      variant='ghost'
-                      icon='x'
-                      label={labels.close}
-                      onClick={() => {
-                        elementById(env.getRootNode(), triggerId)?.focus();
-                        unpinAndClose();
-                      }}
-                    />
-                  ) : null}
-                </div>
-                <div data-scope='hover-card' data-part='body' id={`${id}body`}>
+                <CardHeader
+                  title={title}
+                  titleId={`${id}title`}
+                  href={headerLink ? href : undefined}
+                  actions={actions}
+                  pinnable={pinnable}
+                  pinned={pinned}
+                  detached={detached}
+                  onMove={move}
+                  onTogglePin={togglePin}
+                  onClose={() => {
+                    elementById(env.getRootNode(), triggerId)?.focus();
+                    unpinAndClose();
+                  }}
+                />
+                <div {...partAttrs('hover-card', 'body')} id={`${id}body`}>
                   <HintContext value={node}>
                     {content}
                     {state.status === 'loading' ? (

@@ -29,6 +29,12 @@ export const FX_LOG: string[] = [];
  */
 export const FX_MODE = { instant: true };
 
+/**
+ * Reveals held back until a test ends them.
+ *
+ * @constant held
+ * @type {(() => void)[]}
+ */
 const held: (() => void)[] = [];
 
 /**

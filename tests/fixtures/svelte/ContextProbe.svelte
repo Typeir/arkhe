@@ -3,7 +3,7 @@
 Test fixture: hands the adapters it sees to `onread`.
 -->
 <script lang="ts">
-  import { useArkhe, type ArkheContextValue } from '@arkhe/svelte';
+  import { type ArkheContextValue, useArkhe } from '@arkhe/svelte';
 
   /**
    * Props of ContextProbe.

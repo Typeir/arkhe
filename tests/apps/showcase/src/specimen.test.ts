@@ -1,11 +1,13 @@
 import { ARKHE_ICON_NAMES } from '@arkhe/core';
 import { describe, expect, it } from 'vitest';
 import {
+  nameReadout,
+  nestsFolder,
+  searchSpecimen,
+  SPECIMEN_FOLDERS,
   SPECIMEN_ICONS,
   SPECIMEN_PROGRESS,
   SPECIMEN_RUNES,
-  nameReadout,
-  searchSpecimen,
 } from '../../../../apps/showcase/src/specimen';
 
 describe('specimen data', () => {
@@ -35,5 +37,14 @@ describe('nameReadout', () => {
     expect((await searchSpecimen('gob')).map((item) => item.value)).toEqual([
       'goblin',
     ]);
+  });
+});
+
+describe('nestsFolder', () => {
+  it('opens the next level in each first tab, down to the last', () => {
+    expect(nestsFolder(0, 'overview')).toBe(true);
+    expect(nestsFolder(0, 'notes')).toBe(false);
+    expect(nestsFolder(1, 'boons')).toBe(true);
+    expect(nestsFolder(SPECIMEN_FOLDERS.length - 1, 'past')).toBe(false);
   });
 });

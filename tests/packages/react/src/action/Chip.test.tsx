@@ -1,7 +1,7 @@
 import { ArkheProvider, Chip } from '@arkhe/react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useState, type JSX } from 'react';
+import { type JSX, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 const ChipList = (): JSX.Element => {

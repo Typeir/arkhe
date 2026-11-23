@@ -1,12 +1,12 @@
 import { expect, test } from '@playwright/test';
 import {
-  GROUP,
-  TARGETS,
   framesOver,
-  openDemo as open,
+  GROUP,
   opaqueShare,
-  readStats as stats,
+  openDemo as open,
   revealAll,
+  readStats as stats,
+  TARGETS,
 } from '@tests/fixtures/skeletonPage';
 
 for (const target of TARGETS) {

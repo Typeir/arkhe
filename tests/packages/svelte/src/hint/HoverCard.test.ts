@@ -1,14 +1,14 @@
+import type { Component } from 'svelte';
 import { HoverCard } from '@arkhe/svelte';
+import { render, screen, waitFor, within } from '@testing-library/svelte';
+import userEvent from '@testing-library/user-event';
 import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
 import NestedCards from '@tests/fixtures/svelte/NestedCards.svelte';
 import NestedCardsQuick from '@tests/fixtures/svelte/NestedCardsQuick.svelte';
 import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
 import RouterLink from '@tests/fixtures/svelte/RouterLink.svelte';
 import { textSnippet, valueSnippet } from '@tests/fixtures/svelte/snippets';
-import { render, screen, waitFor, within } from '@testing-library/svelte';
 import { tap } from '@tests/fixtures/tap';
-import userEvent from '@testing-library/user-event';
-import type { Component } from 'svelte';
 import { describe, expect, it, vi } from 'vitest';
 
 function card(title: string) {

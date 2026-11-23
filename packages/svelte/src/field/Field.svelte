@@ -4,40 +4,44 @@ Renders a labelled control. The control receives its id, description ids and
 invalid state through the `children` snippet. A new error is announced
 politely.
 -->
-<script lang="ts">
-  import {
-    ARKHE_CLASS,
-    fieldControlAttrs,
-    fieldIds,
-    flag,
-    partAttrs,
-    type FieldControlAttrs,
-  } from '@arkhe/core';
+<script module lang="ts">
+  import type { FieldControlAttrs } from '@arkhe/core';
   import type { Snippet } from 'svelte';
-  import FieldNote from './FieldNote.svelte';
 
   /**
    * Props of Field.
    *
-   * @interface Props
+   * @interface FieldProps
    * @property {string} label - Visible label.
    * @property {string | number} [readout] - Current value shown beside the label; not announced as it changes.
    * @property {string} [hint] - Help text under the control.
    * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
    * @property {Snippet<[FieldControlAttrs]>} children - Renders the control with the given attributes.
    */
-  interface Props {
+  export interface FieldProps {
     label: string;
     readout?: string | number;
     hint?: string;
     error?: string;
     children: Snippet<[FieldControlAttrs]>;
   }
+</script>
 
-  let { label, readout, hint, error, children }: Props = $props();
+<script lang="ts">
+  import {
+    ARKHE_CLASS,
+    fieldControlAttrs,
+    fieldIds,
+    flag,
+    hasText,
+    partAttrs,
+  } from '@arkhe/core';
+  import FieldNote from './FieldNote.svelte';
+
+  let { label, readout, hint, error, children }: FieldProps = $props();
   const id = $props.id();
   const ids = fieldIds(id);
-  const showHint = $derived(Boolean(hint) && !error);
+  const showHint = $derived(hasText(hint) && !hasText(error));
   const control = $derived(fieldControlAttrs(ids, showHint, Boolean(error)));
 </script>
 

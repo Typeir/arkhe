@@ -17,8 +17,23 @@ import { vi } from 'vitest';
  * @class FakeCloseWatcher
  */
 export class FakeCloseWatcher {
+  /**
+   * Every watcher made, oldest first.
+   *
+   * @type {FakeCloseWatcher[]}
+   */
   static made: FakeCloseWatcher[] = [];
+  /**
+   * Close listeners added so far.
+   *
+   * @type {(() => void)[]}
+   */
   readonly listeners: (() => void)[] = [];
+  /**
+   * True once `destroy` ran.
+   *
+   * @type {boolean}
+   */
   destroyed = false;
 
   /**

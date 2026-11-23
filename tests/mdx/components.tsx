@@ -11,22 +11,22 @@
  * @since 0.1.0
  */
 
+import type { MDXComponents } from 'mdx/types';
 import {
   HoverCard,
   Menu,
+  type MenuEntry,
   Popover,
   Select,
-  Tooltip,
   type SelectOption,
-  type MenuEntry,
+  Tooltip,
 } from '@arkhe/react';
-import type { MDXComponents } from 'mdx/types';
 import {
-  Children,
-  useCallback,
   type AnchorHTMLAttributes,
+  Children,
   type JSX,
   type ReactNode,
+  useCallback,
 } from 'react';
 import { loadShard, measure } from './data';
 

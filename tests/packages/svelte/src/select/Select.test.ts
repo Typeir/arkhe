@@ -1,8 +1,8 @@
 import { Picker, Search, Select } from '@arkhe/svelte';
-import { resetNarrow, setNarrow } from '@tests/fixtures/narrow';
-import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
 import { render, screen, waitFor, within } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import { resetNarrow, setNarrow } from '@tests/fixtures/narrow';
+import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const SPELLS = [

@@ -5,6 +5,26 @@ Renders a native progress element on a rail with threshold markers. Past
 much; without a value it is indeterminate. The value text shown above it is
 for sight only; the element itself carries it. Throws a RangeError when `max` is not positive.
 -->
+<script module lang="ts">
+  /**
+   * Props of Progress.
+   *
+   * @interface ProgressProps
+   * @property {number} [value] - Current amount; may exceed `max`. None while the amount is unknown.
+   * @property {number} max - Amount that fills the rail.
+   * @property {string} label - Accessible name.
+   * @property {readonly number[]} [markers] - Thresholds, in the value's units; repeats are dropped.
+   * @property {boolean} [showValue] - Prints the value text above the rail.
+   */
+  export interface ProgressProps {
+    value?: number;
+    max: number;
+    label: string;
+    markers?: readonly number[];
+    showValue?: boolean;
+  }
+</script>
+
 <script lang="ts">
   import {
     ARKHE_CLASS,
@@ -15,25 +35,7 @@ for sight only; the element itself carries it. Throws a RangeError when `max` is
   } from '@arkhe/core';
   import { useArkhe } from '../base/context.js';
 
-  /**
-   * Props of Progress.
-   *
-   * @interface Props
-   * @property {number} [value] - Current amount; may exceed `max`. None while the amount is unknown.
-   * @property {number} max - Amount that fills the rail.
-   * @property {string} label - Accessible name.
-   * @property {readonly number[]} [markers] - Thresholds, in the value's units; repeats are dropped.
-   * @property {boolean} [showValue] - Prints the value text above the rail.
-   */
-  interface Props {
-    value?: number;
-    max: number;
-    label: string;
-    markers?: readonly number[];
-    showValue?: boolean;
-  }
-
-  let { value, max, label, markers, showValue }: Props = $props();
+  let { value, max, label, markers, showValue }: ProgressProps = $props();
   const arkhe = useArkhe();
   const state = $derived(progressState(value, max, markers));
   const text = $derived(

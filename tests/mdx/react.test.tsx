@@ -1,6 +1,6 @@
-import { tap } from '@tests/fixtures/tap';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { tap } from '@tests/fixtures/tap';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   byteSize,
@@ -13,9 +13,9 @@ import { SHARD_LOADS } from './data';
 import { DENSE_MDX, DENSE_TRIGGERS, LINEAGE_MDX, SHEET_MDX } from './fixtures';
 import {
   clientPage,
+  type HydratedPage,
   hydratePage,
   serverHtml,
-  type HydratedPage,
 } from './reactPage';
 
 const BYTES_PER_TRIGGER = 300;

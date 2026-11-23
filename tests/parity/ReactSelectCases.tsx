@@ -11,8 +11,8 @@
  * @since 0.2.0
  */
 
-import { Menu, Picker, Select, VirtualList } from '@arkhe/react';
 import type { ReactNode } from 'react';
+import { Menu, Picker, Select, VirtualList } from '@arkhe/react';
 import { COMBO_ITEMS, LONG_ITEMS, MENU_ITEMS } from './scenes';
 
 /**

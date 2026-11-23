@@ -11,11 +11,11 @@
 
 'use client';
 
-import type { SelectOption, OptionFilter, Placement } from '@arkhe/core';
+import type { OptionFilter, Placement, SelectOption } from '@arkhe/core';
 import type { JSX, ReactNode } from 'react';
+import { useNarrow } from '../base/useNarrow.js';
 import { ComboboxField } from './ComboboxField.js';
 import { SheetField } from './SheetField.js';
-import { useNarrow } from '../base/useNarrow.js';
 
 /**
  * Props of Picker.
@@ -64,24 +64,48 @@ export interface PickerProps<T extends SelectOption> {
  * @param {PickerProps<T>} props - Label, options, choice callback.
  * @returns {JSX.Element} Picker.
  */
-export const Picker = <T extends SelectOption>(
-  props: PickerProps<T>,
-): JSX.Element => {
-  if (!useNarrow()) return <ComboboxField {...props} clearOnSelect />;
+export const Picker = <T extends SelectOption>({
+  label,
+  placeholder,
+  size,
+  labelHidden,
+  disabled,
+  hint,
+  error,
+  ...rest
+}: PickerProps<T>): JSX.Element => {
+  const narrow = useNarrow();
+  if (!narrow) {
+    return (
+      <ComboboxField
+        {...rest}
+        label={label}
+        placeholder={placeholder}
+        size={size}
+        labelHidden={labelHidden}
+        disabled={disabled}
+        hint={hint}
+        error={error}
+        clearOnSelect
+      />
+    );
+  }
   return (
     <SheetField
-      label={props.label}
-      placeholder={props.placeholder}
-      size={props.size}
-      labelHidden={props.labelHidden}
-      disabled={props.disabled}
-      hint={props.hint}
-      error={props.error}>
+      label={label}
+      placeholder={placeholder}
+      size={size}
+      labelHidden={labelHidden}
+      disabled={disabled}
+      hint={hint}
+      error={error}>
       {() => (
         <ComboboxField
-          {...props}
-          hint={undefined}
-          error={undefined}
+          {...rest}
+          label={label}
+          placeholder={placeholder}
+          size={size}
+          disabled={disabled}
           clearOnSelect
           labelHidden
           inline

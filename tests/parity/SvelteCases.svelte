@@ -4,6 +4,7 @@ Svelte side of the parity scenes. Each scene must match its twin in
 `ReactCases.tsx` element for element.
 -->
 <script lang="ts">
+  import type { NumericValue } from '@arkhe/core';
   import {
     ArkheProvider,
     Button,
@@ -27,9 +28,6 @@ Svelte side of the parity scenes. Each scene must match its twin in
     Tooltip,
     VirtualList,
   } from '@arkhe/svelte';
-  import type { NumericValue } from '@arkhe/core';
-  import SvelteFormCases from './SvelteFormCases.svelte';
-  import SvelteSectionCases from './SvelteSectionCases.svelte';
   import {
     COMBO_ITEMS,
     LONG_ITEMS,
@@ -40,6 +38,8 @@ Svelte side of the parity scenes. Each scene must match its twin in
     TWIN_OPTIONS,
     TWIN_TABS,
   } from './scenes';
+  import SvelteFormCases from './SvelteFormCases.svelte';
+  import SvelteSectionCases from './SvelteSectionCases.svelte';
 
   /**
    * Props of SvelteCases.
@@ -189,6 +189,7 @@ Svelte side of the parity scenes. Each scene must match its twin in
   <HoverCard title="Charge" openDelay={0}>
     charge
     {#snippet content()}Spend to act twice.{/snippet}
+    {#snippet actions()}<Button>Copy</Button>{/snippet}
   </HoverCard>
 {:else if name === 'popover'}
   <Popover trigger="Filters" title="Filter by">Body</Popover>
@@ -230,7 +231,7 @@ Svelte side of the parity scenes. Each scene must match its twin in
   </VirtualList>
 {:else if ['checkbox', 'radio-group', 'toggle-group'].includes(name)}
   <SvelteFormCases {name} />
-{:else if ['collapsible', 'disclosure', 'accordion'].includes(name)}
+{:else if ['collapsible', 'disclosure', 'accordion', 'tabs-folder'].includes(name)}
   <SvelteSectionCases {name} />
 {:else}
   missing scene {name}

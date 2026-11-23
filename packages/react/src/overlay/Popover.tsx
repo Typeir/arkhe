@@ -11,12 +11,17 @@
 
 'use client';
 
-import { ARKHE_CLASS, floatingMachineProps, type Placement } from '@arkhe/core';
+import {
+  ARKHE_CLASS,
+  floatingMachineProps,
+  partAttrs,
+  type Placement,
+} from '@arkhe/core';
 import * as popover from '@zag-js/popover';
-import { Portal, mergeProps, normalizeProps, useMachine } from '@zag-js/react';
-import { useId, type JSX, type ReactNode } from 'react';
-import { useArkhe } from '../base/ArkheProvider.js';
+import { mergeProps, normalizeProps, Portal, useMachine } from '@zag-js/react';
+import { type JSX, type ReactNode, useId } from 'react';
 import { useArkheEnvironment } from '../base/ArkheEnvironment.js';
+import { useArkhe } from '../base/ArkheProvider.js';
 import { Icon } from '../base/Icon.js';
 import { useHydrated } from '../base/useHydrated.js';
 import { usePortalContainer } from '../base/usePortalContainer.js';
@@ -90,7 +95,7 @@ export const Popover = ({
               <div
                 {...api.getContentProps()}
                 aria-label={title === undefined ? trigger : undefined}>
-                <div data-scope='popover' data-part='header'>
+                <div {...partAttrs('popover', 'header')}>
                   {title === undefined ? null : (
                     <h2 {...api.getTitleProps()}>{title}</h2>
                   )}
@@ -100,9 +105,7 @@ export const Popover = ({
                     <Icon name='x' />
                   </button>
                 </div>
-                <div data-scope='popover' data-part='body'>
-                  {children}
-                </div>
+                <div {...partAttrs('popover', 'body')}>{children}</div>
               </div>
             </div>
           </div>

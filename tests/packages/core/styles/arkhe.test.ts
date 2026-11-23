@@ -114,11 +114,12 @@ describe('arkhe.css', () => {
   });
 
   it('lays out floating headers with logical properties', () => {
-    for (const scope of ['popover', 'hover-card']) {
-      expect(declarations(scope, 'header'), scope).toMatch(
-        /padding-block: var\(--space-1\);\s+padding-inline: var\(--space-3\) var\(--space-1\)/,
-      );
-    }
+    expect(declarations('popover', 'header')).toMatch(
+      /padding-block: var\(--space-1\);\s+padding-inline: var\(--space-3\) var\(--space-1\)/,
+    );
+    expect(declarations('hover-card', 'header')).toMatch(
+      /padding-block: 4px;\s+padding-inline: 8px/,
+    );
     const close = declarations('popover', 'close-trigger');
     expect(close).toContain('margin-inline-start: auto');
     expect(close).not.toContain('margin-left');
@@ -205,5 +206,14 @@ describe('arkhe.css', () => {
     );
     expect(CSS).toMatch(/--color-error: light-dark\(/);
     expect(CSS).not.toMatch(/rgb\(var\(--color-/);
+  });
+
+  it('draws folder panels only while shown, so find-in-page panels stay empty', () => {
+    const panel =
+      /\[data-look=folder\] > \[data-part=content\]:not\(\[hidden\]\) \{[^}]*background: var\(--tabs-layer\)/;
+    expect(CSS).toMatch(panel);
+    expect(CSS).not.toMatch(
+      /\[data-look=folder\] > \[data-part=content\]\[hidden\]/,
+    );
   });
 });

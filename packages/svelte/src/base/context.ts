@@ -13,14 +13,14 @@
 
 import {
   Announcer,
-  FxLoader,
-  DEFAULT_LOCALE,
-  resolveLabels,
   type ArkheLabels,
+  DEFAULT_LOCALE,
+  FxLoader,
   type FxModule,
   type IconSet,
+  resolveLabels,
 } from '@arkhe/core';
-import { getContext, setContext, type Component } from 'svelte';
+import { type Component, getContext, setContext } from 'svelte';
 
 /**
  * A drawable icon: Lucide's Svelte components fit, and so does an app's own SVG.
@@ -61,6 +61,12 @@ export interface ArkheContextValue {
   readonly hoverCards: boolean;
 }
 
+/**
+ * Context key of the adapters, shared by every copy of Arkhé.
+ *
+ * @constant KEY
+ * @type {symbol}
+ */
 const KEY = Symbol.for('arkhe.context');
 
 /**
@@ -73,6 +79,13 @@ export function loadFx(): Promise<FxModule> {
   return import('@arkhe/core/fx');
 }
 
+/**
+ * Adapters outside any provider: default labels and locale, no app icon
+ * sets, plain links, an announcer and an engine shared by every component.
+ *
+ * @constant DEFAULT_CONTEXT
+ * @type {ArkheContextValue}
+ */
 const DEFAULT_CONTEXT: ArkheContextValue = {
   labels: resolveLabels(),
   locale: DEFAULT_LOCALE,

@@ -8,8 +8,8 @@
  * @since 0.4.0
  */
 
-import { Checkbox, RadioGroup, ToggleGroup } from '@arkhe/react';
 import type { ReactNode } from 'react';
+import { Checkbox, RadioGroup, ToggleGroup } from '@arkhe/react';
 import { ASPECT_ITEMS, UNIT_ITEMS } from './scenes';
 
 /**

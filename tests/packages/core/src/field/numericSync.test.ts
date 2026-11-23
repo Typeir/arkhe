@@ -1,8 +1,8 @@
 import {
-  NumericSync,
-  REACT_EVENTS,
   guardInputProps,
   type NumericMachineApi,
+  NumericSync,
+  REACT_EVENTS,
 } from '@arkhe/core';
 import { describe, expect, it, vi } from 'vitest';
 

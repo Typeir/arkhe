@@ -1,4 +1,4 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
+import { expect, type Locator, type Page, test } from '@playwright/test';
 
 const TARGETS = ['react', 'svelte'] as const;
 
@@ -9,6 +9,10 @@ function trigger(page: Page, name: string): Locator {
 async function region(page: Page, name: string): Promise<Locator> {
   const id = await trigger(page, name).getAttribute('aria-controls');
   return page.locator(`[id="${id}"]`);
+}
+
+async function slow(page: Page) {
+  await page.addStyleTag({ content: ':root { --dur-3: 2s; }' });
 }
 
 async function look(box: Locator) {
@@ -39,13 +43,14 @@ for (const target of TARGETS) {
     });
 
     test('opening eases from zero to the natural height', async ({ page }) => {
+      await slow(page);
       const box = await region(page, 'Sealed lore');
       await trigger(page, 'Sealed lore').click();
-      const early = await look(box);
-      expect(early.height).toBeLessThan(early.natural);
       await expect
         .poll(async () => (await look(box)).visibility)
         .toBe('visible');
+      const early = await look(box);
+      expect(early.height).toBeLessThan(early.natural);
       await expect
         .poll(async () => {
           const state = await look(box);
@@ -57,6 +62,7 @@ for (const target of TARGETS) {
     test('closing keeps the content painted until the height reaches zero', async ({
       page,
     }) => {
+      await slow(page);
       const box = await region(page, 'Growing');
       const open = await look(box);
       await trigger(page, 'Growing').click();

@@ -1,9 +1,9 @@
 import {
+  type ArkheLabels,
   DEFAULT_LABELS,
   formatLabel,
   formatPlural,
   resolveLabels,
-  type ArkheLabels,
 } from '@arkhe/core';
 import { describe, expect, it } from 'vitest';
 

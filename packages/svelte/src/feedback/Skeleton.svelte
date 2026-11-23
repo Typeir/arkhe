@@ -2,24 +2,26 @@
 @component
 Renders one placeholder bar, hidden from assistive technology.
 -->
-<script lang="ts">
-  import { ARKHE_CLASS, partAttrs } from '@arkhe/core';
-
+<script module lang="ts">
   /**
    * Props of Skeleton.
    *
-   * @interface Props
+   * @interface SkeletonProps
    * @property {'line' | 'block'} [shape] - A text line or a block. Defaults to `line`.
    * @property {string} [width] - CSS width. Defaults to the full row.
    * @property {string} [height] - CSS height. Defaults by shape.
    */
-  interface Props {
+  export interface SkeletonProps {
     shape?: 'line' | 'block';
     width?: string;
     height?: string;
   }
+</script>
 
-  let { shape = 'line', width, height }: Props = $props();
+<script lang="ts">
+  import { ARKHE_CLASS, partAttrs } from '@arkhe/core';
+
+  let { shape = 'line', width, height }: SkeletonProps = $props();
 </script>
 
 <span

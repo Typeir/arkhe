@@ -1,8 +1,8 @@
-import { ArkheProvider, NumericInput } from '@arkhe/react';
 import type { NumericValue } from '@arkhe/core';
-import { typeNumber } from '@tests/fixtures/typeNumber';
+import { ArkheProvider, NumericInput } from '@arkhe/react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { typeNumber } from '@tests/fixtures/typeNumber';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 

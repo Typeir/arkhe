@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
-  PROJECT_CHECKS,
   expectedTests,
   overrideRanges,
+  PROJECT_CHECKS,
   starExports,
   valueExports,
 } from '../../../.github/scripts/health/projectChecks.mjs';

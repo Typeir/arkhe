@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
-  VISIBLE_MARGIN,
   snapRect,
   type View,
+  VISIBLE_MARGIN,
 } from '../../../../../../packages/core/src/feedback/canvas/view';
 
 const view = (dpr: number, ox = 0, oy = 0) =>

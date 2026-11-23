@@ -1,7 +1,7 @@
 /**
  * @fileoverview Select: one choice from a list of options. A button that
- * opens the list (Zag select) by default; with `searchable`, a text input
- * that filters it (Zag combobox).
+ * opens the list (Zag select); with `searchable`, a text input that filters
+ * it (Zag combobox).
  *
  * @module packages/react/src/select/Select
  * @version 1.0.0
@@ -11,12 +11,13 @@
 
 'use client';
 
-import type { SelectOption, OptionFilter, Placement } from '@arkhe/core';
-import { useState, type JSX, type ReactNode } from 'react';
+import type { OptionFilter, Placement, SelectOption } from '@arkhe/core';
+import type { JSX, ReactNode } from 'react';
+import { useControllable } from '../base/useControllable.js';
+import { useNarrow } from '../base/useNarrow.js';
 import { ComboboxField } from './ComboboxField.js';
 import { SelectMenu } from './SelectMenu.js';
 import { SheetField } from './SheetField.js';
-import { useNarrow } from '../base/useNarrow.js';
 
 /**
  * Props of Select.
@@ -76,42 +77,57 @@ export interface SelectProps<T extends SelectOption> {
  * @returns {JSX.Element} Select.
  */
 const SelectSheet = <T extends SelectOption>({
-  name,
+  label,
+  items,
+  placeholder,
+  value,
   defaultValue,
+  onValueChange,
+  disabled,
+  emptyLabel,
+  size,
+  labelHidden,
+  name,
   required,
   hint,
   error,
-  ...shared
+  ...rest
 }: SelectProps<T>): JSX.Element => {
-  const [inner, setInner] = useState(defaultValue ?? null);
-  const value = shared.value === undefined ? inner : shared.value;
+  const { current, commit } = useControllable({
+    value,
+    defaultValue: defaultValue ?? null,
+    onChange: onValueChange,
+  });
   const text =
-    value === null
-      ? shared.emptyLabel
-      : shared.items.find((item) => item.value === value)?.label;
+    current === null
+      ? emptyLabel
+      : items.find((item) => item.value === current)?.label;
   return (
     <SheetField
-      label={shared.label}
+      label={label}
       text={text}
-      placeholder={shared.placeholder}
-      size={shared.size}
-      labelHidden={shared.labelHidden}
-      disabled={shared.disabled}
+      placeholder={placeholder}
+      size={size}
+      labelHidden={labelHidden}
+      disabled={disabled}
       name={name}
-      value={value}
+      value={current}
       required={required}
       hint={hint}
       error={error}>
       {(close) => (
         <ComboboxField
-          {...shared}
-          value={value}
+          {...rest}
+          label={label}
+          items={items}
+          placeholder={placeholder}
+          disabled={disabled}
+          emptyLabel={emptyLabel}
+          size={size}
+          value={current}
           labelHidden
           inline
-          onValueChange={(next) => {
-            setInner(next);
-            shared.onValueChange?.(next);
-          }}
+          onValueChange={commit}
           onSelect={close}
         />
       )}
@@ -127,11 +143,27 @@ const SelectSheet = <T extends SelectOption>({
  * @param {SelectProps<T>} props - Label, options, selection.
  * @returns {JSX.Element} Select.
  */
-export const Select = <T extends SelectOption>(
-  props: SelectProps<T>,
-): JSX.Element => {
-  const { searchable, filter, name, required, autoComplete, ...shared } = props;
-  if (useNarrow()) return <SelectSheet {...props} />;
+export const Select = <T extends SelectOption>({
+  searchable,
+  filter,
+  name,
+  required,
+  autoComplete,
+  ...shared
+}: SelectProps<T>): JSX.Element => {
+  const narrow = useNarrow();
+  if (narrow) {
+    return (
+      <SelectSheet
+        {...shared}
+        searchable={searchable}
+        filter={filter}
+        name={name}
+        required={required}
+        autoComplete={autoComplete}
+      />
+    );
+  }
   return searchable ? (
     <ComboboxField
       {...shared}

@@ -1,5 +1,5 @@
-import { resetNarrow, setNarrow } from '@tests/fixtures/narrow';
 import { act, render, screen } from '@testing-library/react';
+import { resetNarrow, setNarrow } from '@tests/fixtures/narrow';
 import { afterEach, describe, expect, it } from 'vitest';
 import { useNarrow } from '../../../../../packages/react/src/base/useNarrow';
 

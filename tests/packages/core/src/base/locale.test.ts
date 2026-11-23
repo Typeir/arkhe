@@ -1,7 +1,7 @@
 import {
   DEFAULT_LOCALE,
-  NUMERIC_FORMAT,
   formatNumber,
+  NUMERIC_FORMAT,
   pluralCategory,
 } from '@arkhe/core';
 import { describe, expect, it } from 'vitest';

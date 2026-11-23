@@ -5,17 +5,15 @@ choice and empties itself, for adding to a list kept elsewhere. At phone width
 it opens a sheet that stays open while choices are added. On Zag's combobox
 machine.
 -->
-<script lang="ts" generics="T extends SelectOption">
-  import type { SelectOption, OptionFilter, Placement } from '@arkhe/core';
+<script module lang="ts">
+  import type { OptionFilter, Placement, SelectOption } from '@arkhe/core';
   import type { Snippet } from 'svelte';
-  import ComboboxField from './ComboboxField.svelte';
-  import { useNarrow } from '../base/narrow.svelte.js';
-  import SheetField from './SheetField.svelte';
 
   /**
    * Props of Picker.
    *
-   * @interface Props
+   * @interface PickerProps
+   * @template {SelectOption} T
    * @property {string} label - Visible label.
    * @property {readonly T[]} items - Options; a repeated value is dropped.
    * @property {(item: T) => void} onSelect - Every choice, even a repeat.
@@ -32,7 +30,7 @@ machine.
    * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
    * @property {number} [rowPitch] - Row height in rem; draws only the rows in view, for long lists. Flat lists only.
    */
-  interface Props {
+  export interface PickerProps<T extends SelectOption> {
     label: string;
     items: readonly T[];
     onSelect: (item: T) => void;
@@ -49,28 +47,54 @@ machine.
     error?: string;
     rowPitch?: number;
   }
+</script>
 
-  let props: Props = $props();
+<script lang="ts" generics="T extends SelectOption">
+  import { useNarrow } from '../base/narrow.svelte.js';
+  import ComboboxField from './ComboboxField.svelte';
+  import SheetField from './SheetField.svelte';
+
+  let {
+    label,
+    placeholder,
+    size,
+    labelHidden,
+    disabled,
+    hint,
+    error,
+    ...rest
+  }: PickerProps<T> = $props();
   const narrow = useNarrow();
 </script>
 
 {#if narrow.current}
   <SheetField
-    label={props.label}
-    placeholder={props.placeholder}
-    size={props.size}
-    labelHidden={props.labelHidden}
-    disabled={props.disabled}
-    hint={props.hint}
-    error={props.error}>
+    {label}
+    {placeholder}
+    {size}
+    {labelHidden}
+    {disabled}
+    {hint}
+    {error}>
     <ComboboxField
-      {...props}
-      hint={undefined}
-      error={undefined}
+      {...rest}
+      {label}
+      {placeholder}
+      {size}
+      {disabled}
       clearOnSelect
       labelHidden
       inline />
   </SheetField>
 {:else}
-  <ComboboxField {...props} clearOnSelect />
+  <ComboboxField
+    {...rest}
+    {label}
+    {placeholder}
+    {size}
+    {labelHidden}
+    {disabled}
+    {hint}
+    {error}
+    clearOnSelect />
 {/if}

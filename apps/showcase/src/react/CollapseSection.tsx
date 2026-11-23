@@ -18,7 +18,7 @@ import {
   Collapsible,
   Disclosure,
 } from '@arkhe/react';
-import { useState, type JSX } from 'react';
+import { type JSX, useState } from 'react';
 import {
   SPECIMEN_ACCORDION,
   SPECIMEN_ACCORDION_TEXT,
@@ -43,7 +43,11 @@ export const CollapseSection = (): JSX.Element => {
           heading={3}
           defaultOpen
           actions={
-            <Button pressed={locked} onClick={() => setLocked(!locked)}>
+            <Button
+              pressed={locked}
+              onClick={() => {
+                setLocked(!locked);
+              }}>
               Lock
             </Button>
           }>
@@ -56,7 +60,12 @@ export const CollapseSection = (): JSX.Element => {
           </Collapsible>
         </Collapsible>
         <Collapsible title='Growing' defaultOpen>
-          <Button onClick={() => setLines(lines + 1)}>Grow</Button>
+          <Button
+            onClick={() => {
+              setLines(lines + 1);
+            }}>
+            Grow
+          </Button>
           {Array.from({ length: lines }, (_, line) => (
             <p key={line}>Line {line + 1}</p>
           ))}

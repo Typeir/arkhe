@@ -1,13 +1,14 @@
 import {
-  DEFAULT_LABELS,
-  REACT_EVENTS,
   comboboxMachineProps,
+  DEFAULT_LABELS,
   filterOptions,
   guardComboboxKeys,
   isGrouped,
+  listNote,
   matchOption,
   optionCollection,
   queryAfterChange,
+  REACT_EVENTS,
 } from '@arkhe/core';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -202,5 +203,14 @@ describe('guardComboboxKeys', () => {
     press('Enter');
     expect(submit).not.toHaveBeenCalled();
     expect(zag).toHaveBeenCalled();
+  });
+});
+
+describe('listNote', () => {
+  it('picks loading, then failure, then no match', () => {
+    expect(listNote(true, true, 0)).toBe('loading');
+    expect(listNote(false, true, 0)).toBe('failed');
+    expect(listNote(undefined, undefined, 0)).toBe('empty');
+    expect(listNote(undefined, undefined, 3)).toBeUndefined();
   });
 });

@@ -1,8 +1,9 @@
-import { Accordion } from '@arkhe/svelte';
 import type { AccordionItem } from '@arkhe/core';
-import { panelSnippet } from '@tests/fixtures/svelte/snippets';
+import { Accordion } from '@arkhe/svelte';
 import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import BoundUnset from '@tests/fixtures/svelte/BoundUnset.svelte';
+import { panelSnippet } from '@tests/fixtures/svelte/snippets';
 import { describe, expect, it, vi } from 'vitest';
 
 const ITEMS: readonly AccordionItem[] = [
@@ -69,5 +70,16 @@ describe('Accordion', () => {
     });
     expect(screen.queryByRole('button', { name: 'Again' })).toBeNull();
     expect(trigger('Actions')).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('starts from defaultValue under a binding that starts unset', async () => {
+    render(BoundUnset, { kind: 'accordion' });
+    expect(screen.getByRole('button', { name: 'Dexterity' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+    expect(screen.getByText('held undefined')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Strength' }));
+    expect(screen.getByText(/^held \[.*"str".*\]$/)).toBeInTheDocument();
   });
 });

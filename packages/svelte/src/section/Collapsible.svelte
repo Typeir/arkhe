@@ -4,28 +4,17 @@ Renders a collapsible section: a trigger button, optionally inside a heading,
 actions beside it, and a region find-in-page can open; when the browser
 reveals it, the section opens. Height animates in CSS. `open` binds.
 -->
-<script lang="ts">
-  import {
-    ARKHE_CLASS,
-    collapsibleIds,
-    collapsibleReduce,
-    dispatch,
-    findableRegion,
-    headingTag,
-    partAttrs,
-    type CollapsibleAction,
-    type HeadingLevel,
-  } from '@arkhe/core';
+<script module lang="ts">
+  import type { HeadingLevel } from '@arkhe/core';
   import type { Snippet } from 'svelte';
-  import Icon from '../base/Icon.svelte';
 
   /**
    * Props of Collapsible.
    *
-   * @interface Props
+   * @interface CollapsibleProps
    * @property {string} title - Trigger text; names the button and never changes.
    * @property {boolean} [open] - Open state; bindable.
-   * @property {boolean} [defaultOpen] - First state when unbound.
+   * @property {boolean} [defaultOpen] - First state when uncontrolled.
    * @property {(open: boolean) => void} [onOpenChange] - Reports changes, find-in-page included.
    * @property {HeadingLevel} [heading] - Wraps the trigger in a heading of this level.
    * @property {Snippet} [actions] - Controls beside the trigger, outside it.
@@ -33,7 +22,7 @@ reveals it, the section opens. Height animates in CSS. `open` binds.
    * @property {boolean} [disabled] - The trigger stays focusable and ignores presses.
    * @property {Snippet} children - Content.
    */
-  interface Props {
+  export interface CollapsibleProps {
     title: string;
     open?: boolean;
     defaultOpen?: boolean;
@@ -44,32 +33,50 @@ reveals it, the section opens. Height animates in CSS. `open` binds.
     disabled?: boolean;
     children: Snippet;
   }
+</script>
+
+<script lang="ts">
+  import {
+    ARKHE_CLASS,
+    type CollapsibleAction,
+    collapsibleIds,
+    collapsibleReduce,
+    dispatch,
+    findableRegion,
+    headingTag,
+    partAttrs,
+    sectionTags,
+  } from '@arkhe/core';
+  import { untrack } from 'svelte';
+  import Icon from '../base/Icon.svelte';
+  import { useLatch } from '../base/mounted.svelte.js';
 
   let {
     title,
-    defaultOpen = false,
-    open = $bindable(defaultOpen),
+    open = $bindable(),
+    defaultOpen,
     onOpenChange,
     heading,
     actions,
     lazy,
     disabled,
     children,
-  }: Props = $props();
+  }: CollapsibleProps = $props();
   const id = $props.id();
   const ids = collapsibleIds(id);
+  const initial = untrack(() => defaultOpen ?? false);
+  const shown = $derived(open ?? initial);
   const tag = $derived(headingTag(heading));
-  let seen = $state(false);
-  $effect(() => {
-    if (open) seen = true;
-  });
-  const mounted = $derived(!lazy || seen || open);
+  const tags = $derived(sectionTags(heading));
+  const seen = useLatch(() => shown);
+  const mounted = $derived(!lazy || seen.current || shown);
   const commit = (next: boolean) => {
     open = next;
     onOpenChange?.(next);
   };
-  const act = (action: CollapsibleAction) =>
-    dispatch(collapsibleReduce, Boolean(open), action, { disabled }, commit);
+  const act = (action: CollapsibleAction) => {
+    dispatch(collapsibleReduce, shown, action, { disabled }, commit);
+  };
 </script>
 
 {#snippet trigger()}
@@ -77,22 +84,28 @@ reveals it, the section opens. Height animates in CSS. `open` binds.
     type="button"
     {...partAttrs('collapsible', 'trigger')}
     id={ids.trigger}
-    aria-expanded={open}
+    aria-expanded={shown}
     aria-controls={ids.content}
     aria-disabled={disabled ? true : undefined}
-    onclick={() => act({ type: 'toggle' })}>
+    onclick={() => {
+      act({ type: 'toggle' });
+    }}>
     <span {...partAttrs('collapsible', 'marker')}
       ><Icon name="chevron-down" /></span>
     <span {...partAttrs('collapsible', 'title')}>{title}</span>
   </button>
 {/snippet}
 
-<div
-  {@attach (node) => findableRegion(node, () => act({ type: 'reveal' }))}
+<svelte:element
+  this={tags.root}
+  {@attach (node: HTMLElement) =>
+    findableRegion(node, () => {
+      act({ type: 'reveal' });
+    })}
   class={ARKHE_CLASS}
   {...partAttrs('collapsible', 'root')}
-  data-state={open ? 'open' : 'closed'}>
-  <div {...partAttrs('collapsible', 'header')}>
+  data-state={shown ? 'open' : 'closed'}>
+  <svelte:element this={tags.header} {...partAttrs('collapsible', 'header')}>
     {#if tag}
       <svelte:element this={tag} {...partAttrs('collapsible', 'heading')}
         >{@render trigger()}</svelte:element>
@@ -102,14 +115,14 @@ reveals it, the section opens. Height animates in CSS. `open` binds.
     {#if actions}
       <div {...partAttrs('collapsible', 'actions')}>{@render actions()}</div>
     {/if}
-  </div>
+  </svelte:element>
   <div
     {...partAttrs('collapsible', 'content')}
     id={ids.content}
     data-findable=""
-    hidden={!open}>
+    hidden={!shown}>
     <div {...partAttrs('collapsible', 'body')}>
       {#if mounted}{@render children()}{/if}
     </div>
   </div>
-</div>
+</svelte:element>

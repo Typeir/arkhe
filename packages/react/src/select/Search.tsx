@@ -17,17 +17,18 @@
 
 import {
   ARKHE_CLASS,
-  SearchRequest,
   partAttrs,
   type Placement,
+  searchBusy,
+  SearchRequest,
   type SearchRun,
   type SearchState,
   type SelectOption,
 } from '@arkhe/core';
-import { useEffect, useState, type JSX, type ReactNode } from 'react';
+import { type JSX, type ReactNode, useEffect, useState } from 'react';
+import { useNarrow } from '../base/useNarrow.js';
 import { ComboboxField } from './ComboboxField.js';
 import { SheetField } from './SheetField.js';
-import { useNarrow } from '../base/useNarrow.js';
 
 /**
  * Props of Search. Give `search`, or `items` with `onInputChange`.
@@ -42,7 +43,7 @@ import { useNarrow } from '../base/useNarrow.js';
  * @property {(text: string) => void} [onSubmit] - Takes the text on Enter when nothing is highlighted.
  * @property {(item: T) => void} [onSelect] - A result was chosen.
  * @property {string} [placeholder] - Input placeholder.
- * @property {boolean} [loading] - Shows the loading line instead of `items`.
+ * @property {boolean} [loading] - A query is pending: shows the loading line, or dims `items` from the last one.
  * @property {(item: T) => ReactNode} [renderItem] - Result body. Defaults to label and description.
  * @property {boolean} [disabled] - Blocks input.
  * @property {Placement} [placement] - Side of the list. Defaults to `bottom-start`.
@@ -93,14 +94,23 @@ export const Search = <T extends SelectOption>({
     failed: false,
   });
   const [request] = useState(() => new SearchRequest<T>(setState, debounce));
-  useEffect(() => () => request.dispose(), [request]);
+  useEffect(
+    () => () => {
+      request.destroy();
+    },
+    [request],
+  );
   const narrow = useNarrow();
   const answered = search === undefined;
+  const busy = answered
+    ? searchBusy(Boolean(loading), items.length)
+    : searchBusy(state.loading, state.items.length);
   const field = (close?: () => void) => (
     <ComboboxField
       {...rest}
       items={answered ? items : state.items}
-      loading={answered ? loading : state.loading && state.items.length === 0}
+      loading={busy.loading}
+      stale={busy.stale}
       failed={!answered && state.failed}
       filter={false}
       enterKeyHint='search'
@@ -127,7 +137,7 @@ export const Search = <T extends SelectOption>({
     />
   );
   return (
-    <div className={ARKHE_CLASS} {...partAttrs('search', 'root')} role='search'>
+    <search className={ARKHE_CLASS} {...partAttrs('search', 'root')}>
       {narrow ? (
         <SheetField
           label={rest.label}
@@ -142,6 +152,6 @@ export const Search = <T extends SelectOption>({
       ) : (
         field()
       )}
-    </div>
+    </search>
   );
 };

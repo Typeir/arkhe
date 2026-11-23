@@ -1,17 +1,17 @@
 import { SkeletonGroup } from '@arkhe/svelte';
+import { waitFor } from '@testing-library/svelte';
 import { announced } from '@tests/fixtures/announced';
 import {
+  finishReveals,
   FX_LOG,
   FX_MODE,
-  finishReveals,
   resetFx,
 } from '@tests/fixtures/fakeFx';
 import {
-  renderWithProvider,
   type ProviderProps,
+  renderWithProvider,
 } from '@tests/fixtures/svelte/renderWithProvider';
 import { textSnippet } from '@tests/fixtures/svelte/snippets';
-import { waitFor } from '@testing-library/svelte';
 import { createRawSnippet, tick } from 'svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

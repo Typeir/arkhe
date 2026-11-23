@@ -12,8 +12,20 @@
 
 import { vi } from 'vitest';
 
+/**
+ * Elements that take part in keyboard order.
+ *
+ * @constant INTERACTIVE
+ * @type {string}
+ */
 const INTERACTIVE =
   'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
+/**
+ * Parts that float over the page: positioners, contents, tooltips, dialogs, menus, listboxes.
+ *
+ * @constant FLOATING
+ * @type {string}
+ */
 const FLOATING = [
   '[data-part="positioner"]',
   '[data-part="content"]',
@@ -22,6 +34,12 @@ const FLOATING = [
   '[role="menu"]',
   '[role="listbox"]',
 ].join(', ');
+/**
+ * A part that opens another.
+ *
+ * @constant TRIGGER
+ * @type {string}
+ */
 const TRIGGER = '[data-part="trigger"]';
 
 /**

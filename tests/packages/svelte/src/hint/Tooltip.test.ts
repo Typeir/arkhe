@@ -1,10 +1,10 @@
 import { Tooltip } from '@arkhe/svelte';
+import { render, screen, waitFor } from '@testing-library/svelte';
+import userEvent from '@testing-library/user-event';
 import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
 import NestedTips from '@tests/fixtures/svelte/NestedTips.svelte';
 import { textSnippet } from '@tests/fixtures/svelte/snippets';
 import { tap } from '@tests/fixtures/tap';
-import { render, screen, waitFor } from '@testing-library/svelte';
-import userEvent from '@testing-library/user-event';
 import { createRawSnippet } from 'svelte';
 import { describe, expect, it } from 'vitest';
 
@@ -20,10 +20,12 @@ describe('Tooltip', () => {
     const trigger = screen.getByRole('button', { name: 'resistance' });
     expect(trigger).toHaveAttribute('type', 'button');
     await userEvent.hover(trigger);
-    expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      'Resistance halves damage.',
-    );
+    const hint = await screen.findByRole('tooltip');
+    expect(hint).toHaveTextContent('Resistance halves damage.');
     expect(trigger).toHaveAccessibleDescription('Resistance halves damage.');
+    expect(
+      hint.querySelector('[data-part="arrow"] > [data-part="arrow-tip"]'),
+    ).not.toBeNull();
   });
 
   it('hides on Escape', async () => {

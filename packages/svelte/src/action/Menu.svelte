@@ -4,6 +4,28 @@ Renders a menu button and its action list, on Zag's menu machine, portalled
 into the environment's container once mounted on the client. Arrow keys,
 Home, End and typeahead move; focus returns to the button on close.
 -->
+<script module lang="ts">
+  import type { MenuEntry, Placement } from '@arkhe/core';
+
+  /**
+   * Props of Menu.
+   *
+   * @interface MenuProps
+   * @property {string} trigger - Text of the open button; its accessible name when `icon` is set.
+   * @property {string} [icon] - Lucide name; makes the open button icon-only.
+   * @property {readonly MenuEntry[]} items - Actions and separators.
+   * @property {(value: string) => void} onSelect - Called with the chosen action.
+   * @property {Placement} [placement] - Side. Defaults to `bottom-start`.
+   */
+  export interface MenuProps {
+    trigger: string;
+    icon?: string;
+    items: readonly MenuEntry[];
+    onSelect: (value: string) => void;
+    placement?: Placement;
+  }
+</script>
+
 <script lang="ts">
   import {
     ARKHE_CLASS,
@@ -11,8 +33,6 @@ Home, End and typeahead move; focus returns to the button on close.
     flag,
     floatingMachineProps,
     isSeparator,
-    type MenuEntry,
-    type Placement,
   } from '@arkhe/core';
   import * as menu from '@zag-js/menu';
   import {
@@ -21,27 +41,9 @@ Home, End and typeahead move; focus returns to the button on close.
     portal,
     useMachine,
   } from '@zag-js/svelte';
-  import { onMount } from 'svelte';
   import { useArkheEnvironment } from '../base/environment.js';
   import Icon from '../base/Icon.svelte';
-
-  /**
-   * Props of Menu.
-   *
-   * @interface Props
-   * @property {string} trigger - Text of the open button; its accessible name when `icon` is set.
-   * @property {string} [icon] - Lucide name; makes the open button icon-only.
-   * @property {readonly MenuEntry[]} items - Actions and separators.
-   * @property {(value: string) => void} onSelect - Called with the chosen action.
-   * @property {Placement} [placement] - Side. Defaults to `bottom-start`.
-   */
-  interface Props {
-    trigger: string;
-    icon?: string;
-    items: readonly MenuEntry[];
-    onSelect: (value: string) => void;
-    placement?: Placement;
-  }
+  import { useLatch, useMounted } from '../base/mounted.svelte.js';
 
   let {
     trigger,
@@ -49,7 +51,7 @@ Home, End and typeahead move; focus returns to the button on close.
     items,
     onSelect,
     placement = 'bottom-start',
-  }: Props = $props();
+  }: MenuProps = $props();
   const id = $props.id();
   const env = useArkheEnvironment();
   const service = useMachine(menu.machine, () => ({
@@ -58,24 +60,31 @@ Home, End and typeahead move; focus returns to the button on close.
       placement,
       getRootNode: env().getRootNode,
     }),
-    onSelect: (details: menu.SelectionDetails) => onSelect(details.value),
+    onSelect: (details: menu.SelectionDetails) => {
+      onSelect(details.value);
+    },
   }));
   const api = $derived(menu.connect(service, normalizeProps));
-  let mounted = $state(false);
-  onMount(() => {
-    mounted = true;
-  });
+  const mounted = useMounted();
+  const opened = useLatch(() => api.open);
+  const controls = $derived(
+    opened.current ? api.getTriggerProps()['aria-controls'] : undefined,
+  );
 </script>
 
 <button
   {...mergeProps(api.getTriggerProps(), {
     class: ARKHE_CLASS,
-    'aria-label': icon ? trigger : undefined,
+    'aria-label': icon !== undefined ? trigger : undefined,
     'data-icon-only': flag(icon !== undefined),
+    onpointerenter: opened.raise,
+    onfocus: opened.raise,
   })}
-  >{#if icon}<Icon name={icon} />{:else}{trigger}<Icon
+  aria-controls={controls}
+  data-controls={controls}
+  >{#if icon !== undefined}<Icon name={icon} />{:else}{trigger}<Icon
       name="chevron-down" />{/if}</button>
-{#if mounted}
+{#if mounted.current && opened.current}
   <div
     class={ARKHE_CLASS}
     use:portal={{
@@ -93,8 +102,9 @@ Home, End and typeahead move; focus returns to the button on close.
                 value: entry.value,
                 disabled: entry.disabled,
               })}
-              data-danger={entry.danger ? '' : undefined}>
-              {#if entry.icon}<Icon name={entry.icon} />{/if}{entry.label}
+              data-danger={flag(entry.danger)}>
+              {#if entry.icon !== undefined}<Icon
+                  name={entry.icon} />{/if}{entry.label}
             </li>
           {/if}
         {/each}

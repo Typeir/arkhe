@@ -9,8 +9,10 @@
  * @since 0.4.0
  */
 
-import { ARKHE_CLASS, partAttrs } from '@arkhe/core';
+'use client';
+
 import type { JSX, ReactNode } from 'react';
+import { ARKHE_CLASS, partAttrs } from '@arkhe/core';
 import { Icon } from '../base/Icon.js';
 
 /**

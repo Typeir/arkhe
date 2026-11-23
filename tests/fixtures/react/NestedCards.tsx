@@ -8,8 +8,8 @@
  * @since 0.1.0
  */
 
-import { HoverCard } from '@arkhe/react';
 import type { JSX } from 'react';
+import { HoverCard } from '@arkhe/react';
 
 /**
  * Renders the Charge card, whose body holds the Action card, and an

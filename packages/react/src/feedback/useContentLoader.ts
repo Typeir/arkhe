@@ -13,8 +13,20 @@
 import { ContentLoader, type LoadState } from '@arkhe/core';
 import { useCallback, useState, useSyncExternalStore } from 'react';
 
+/**
+ * State of a component with no source, or before the client renders.
+ *
+ * @constant IDLE
+ * @type {LoadState<never>}
+ */
 const IDLE: LoadState<never> = { status: 'idle' };
 
+/**
+ * Unsubscribe of a component with no loader: nothing to undo.
+ *
+ * @function unsubscribeNothing
+ * @returns {void}
+ */
 function unsubscribeNothing(): void {
   return undefined;
 }
@@ -25,11 +37,12 @@ function unsubscribeNothing(): void {
  * @interface Held
  * @template T
  * @property {(() => Promise<T>) | undefined} source - Source the loader runs.
- * @property {ContentLoader<T> | undefined} loader - Loader, if there is a source.
+ * @property {ContentLoader<T> | null} loader - Loader; 
+ull without a source.
  */
 interface Held<T> {
   readonly source: (() => Promise<T>) | undefined;
-  readonly loader: ContentLoader<T> | undefined;
+  readonly loader: ContentLoader<T> | null;
 }
 
 /**
@@ -41,7 +54,7 @@ interface Held<T> {
  * @returns {Held<T>} Source and loader.
  */
 function hold<T>(source: (() => Promise<T>) | undefined): Held<T> {
-  return { source, loader: source ? new ContentLoader(source) : undefined };
+  return { source, loader: source ? new ContentLoader(source) : null };
 }
 
 /**

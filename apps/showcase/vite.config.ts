@@ -13,7 +13,21 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
+/**
+ * Resolves `path` from the showcase folder.
+ *
+ * @function here
+ * @param {string} path - Relative path.
+ * @returns {string} Absolute path.
+ */
 const here = (path: string) => resolve(import.meta.dirname, path);
+/**
+ * Resolves `path` inside the packages folder.
+ *
+ * @function pkg
+ * @param {string} path - Path inside packages/.
+ * @returns {string} Absolute path.
+ */
 const pkg = (path: string) => here(`../../packages/${path}`);
 
 export default defineConfig({

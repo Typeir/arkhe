@@ -9,6 +9,12 @@
  * @since 0.1.0
  */
 
+/**
+ * Metres in one of each unit the MDX pages use.
+ *
+ * @constant METRES
+ * @type {Readonly<Record<string, number>>}
+ */
 const METRES: Readonly<Record<string, number>> = {
   stride: 1.5,
   league: 4800,

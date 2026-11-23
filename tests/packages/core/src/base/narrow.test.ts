@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { NARROW_QUERY, isNarrow, watchNarrow } from '@arkhe/core';
+import { isNarrow, NARROW_QUERY, watchNarrow } from '@arkhe/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 function fakeQuery(matches: boolean) {

@@ -3,18 +3,25 @@
 Renders a single-line text input. Native attributes pass through; `value`
 binds. Type defaults to `text`.
 -->
-<script lang="ts">
-  import { ARKHE_CLASS, partAttrs } from '@arkhe/core';
+<script module lang="ts">
   import type { HTMLInputAttributes } from 'svelte/elements';
 
   /**
    * Props of TextInput: native input attributes, minus `class`.
    *
-   * @typedef {Omit<HTMLInputAttributes, 'class'>} Props
+   * @typedef {Omit<HTMLInputAttributes, 'class'>} TextInputProps
    */
-  type Props = Omit<HTMLInputAttributes, 'class'>;
+  export type TextInputProps = Omit<HTMLInputAttributes, 'class'>;
+</script>
 
-  let { value = $bindable(), type = 'text', ...rest }: Props = $props();
+<script lang="ts">
+  import { ARKHE_CLASS, partAttrs } from '@arkhe/core';
+
+  let {
+    value = $bindable(),
+    type = 'text',
+    ...rest
+  }: TextInputProps = $props();
 </script>
 
 <input

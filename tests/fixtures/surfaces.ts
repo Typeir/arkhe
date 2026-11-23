@@ -9,16 +9,16 @@
  * @since 0.1.0
  */
 
-import { vi, type Mock } from 'vitest';
-import { CanvasBudget } from '../../packages/core/src/feedback/canvas/budget';
+import { type Mock, vi } from 'vitest';
 import type { DisplayWatcher } from '../../packages/core/src/feedback/canvas/display';
-import { FrameLoop } from '../../packages/core/src/feedback/canvas/loop';
-import { ObserverHub } from '../../packages/core/src/feedback/canvas/observers';
 import type {
   Region,
   Slice,
   SurfaceContext,
 } from '../../packages/core/src/feedback/canvas/view';
+import { CanvasBudget } from '../../packages/core/src/feedback/canvas/budget';
+import { FrameLoop } from '../../packages/core/src/feedback/canvas/loop';
+import { ObserverHub } from '../../packages/core/src/feedback/canvas/observers';
 
 /**
  * A slice whose answers tests set.

@@ -15,7 +15,9 @@ that keeps the CSS skeleton.
   const arkhe = useArkhe();
   let loading = $state(true);
   let revealed = $state(0);
-  $effect(() => exposeEffects(arkhe().effects));
+  $effect(() => {
+    exposeEffects(arkhe().effects);
+  });
   const count = () => (revealed += 1);
 </script>
 

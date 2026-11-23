@@ -13,6 +13,12 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
 
+/**
+ * Package names resolved to their sources, so tests run without a build.
+ *
+ * @constant alias
+ * @type {Record<string, string>}
+ */
 const alias = {
   '@arkhe/core/styles': resolve('packages/core/styles'),
   '@arkhe/core/fx': resolve('packages/core/src/feedback/fx/index.ts'),

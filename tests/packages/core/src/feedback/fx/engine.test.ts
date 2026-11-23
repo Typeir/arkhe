@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import {
   DEFAULT_FX_OPTIONS,
-  PAINTED_ATTR,
   type FxOptions,
+  PAINTED_ATTR,
 } from '@arkhe/core/fx';
 import {
   FakeResizeObserver,

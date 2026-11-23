@@ -11,13 +11,13 @@
  */
 
 import { Picker, Search, Select, VirtualList } from '@arkhe/react';
-import { useState, type JSX } from 'react';
+import { type JSX, useState } from 'react';
 import {
+  searchSpecimen,
   SPECIMEN_RUNES,
   SPECIMEN_SCHOOLS,
   SPECIMEN_SECTIONS,
   SPECIMEN_SPELLS,
-  searchSpecimen,
 } from '../specimen';
 
 /**
@@ -51,11 +51,11 @@ export const SelectSection = (): JSX.Element => {
           label='Learn spell'
           items={SPECIMEN_SPELLS}
           placeholder='Add to the list'
-          onSelect={(spell) =>
+          onSelect={(spell) => {
             setKnown((list) =>
               list.includes(spell.label) ? list : [...list, spell.label],
-            )
-          }
+            );
+          }}
         />
         <Search
           label='Search'

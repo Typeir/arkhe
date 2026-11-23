@@ -1,5 +1,5 @@
-import { sizeBox } from '@tests/fixtures/scrollBox';
 import { fireEvent, render, screen, within } from '@testing-library/react';
+import { sizeBox } from '@tests/fixtures/scrollBox';
 import { describe, expect, it, vi } from 'vitest';
 import { VirtualList } from '../../../../../packages/react/src/list/VirtualList';
 
@@ -17,6 +17,8 @@ describe('VirtualList', () => {
       />,
     );
     const list = screen.getByRole('list', { name: 'Entries' });
+    expect(list.localName).toBe('ul');
+    expect(list.firstElementChild?.localName).toBe('li');
     const rows = within(list).getAllByRole('listitem');
     expect(rows).toHaveLength(8);
     expect(rows[0]).toHaveAttribute('aria-posinset', '1');

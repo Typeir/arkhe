@@ -8,8 +8,8 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   ObserverHub,
-  SizeWatcher,
   sizeOf,
+  SizeWatcher,
 } from '../../../../../../packages/core/src/feedback/canvas/observers';
 
 beforeEach(() => stubBrowser());

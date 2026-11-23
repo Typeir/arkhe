@@ -10,8 +10,8 @@
 
 'use client';
 
-import { ARKHE_CLASS, partAttrs } from '@arkhe/core';
 import type { InputHTMLAttributes, JSX, TextareaHTMLAttributes } from 'react';
+import { ARKHE_CLASS, partAttrs } from '@arkhe/core';
 
 /**
  * Props of TextInput: native input attributes, minus `className`.
@@ -59,9 +59,9 @@ export const TextInput = ({
  * @param {TextAreaProps} props - Native textarea attributes.
  * @returns {JSX.Element} Text area.
  */
-export const TextArea = (props: TextAreaProps): JSX.Element => (
+export const TextArea = ({ ...rest }: TextAreaProps): JSX.Element => (
   <textarea
-    {...props}
+    {...rest}
     className={ARKHE_CLASS}
     {...partAttrs('text-area', 'root')}
   />

@@ -4,29 +4,33 @@ Renders the line under a control: the hint or, once there is one, the error.
 A new error is announced politely. Not exported: Field, the select family and
 NumericInput share it.
 -->
-<script lang="ts">
-  import { partAttrs, type FieldIds } from '@arkhe/core';
-  import { untrack } from 'svelte';
-  import { useArkhe } from '../base/context.js';
+<script module lang="ts">
+  import type { FieldIds } from '@arkhe/core';
 
   /**
    * Props of FieldNote.
    *
-   * @interface Props
+   * @interface FieldNoteProps
    * @property {FieldIds} ids - Field ids; the line takes the hint or error id.
    * @property {string} [hint] - Help text.
    * @property {string} [error] - Error text; replaces the hint.
    */
-  interface Props {
+  export interface FieldNoteProps {
     ids: FieldIds;
     hint?: string;
     error?: string;
   }
+</script>
 
-  let { ids, hint, error }: Props = $props();
+<script lang="ts">
+  import { hasText, partAttrs } from '@arkhe/core';
+  import { untrack } from 'svelte';
+  import { useArkhe } from '../base/context.js';
+
+  let { ids, hint, error }: FieldNoteProps = $props();
   const arkhe = useArkhe();
   $effect(() => {
-    if (error) untrack(() => arkhe().announcer).announce(error);
+    if (hasText(error)) untrack(() => arkhe().announcer).announce(error);
   });
 </script>
 

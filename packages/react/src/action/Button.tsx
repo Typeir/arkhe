@@ -10,8 +10,8 @@
 
 'use client';
 
-import { ARKHE_CLASS, flag, partAttrs } from '@arkhe/core';
 import type { JSX, MouseEventHandler, ReactNode } from 'react';
+import { ARKHE_CLASS, flag, hasText, partAttrs } from '@arkhe/core';
 import { useArkhe } from '../base/ArkheProvider.js';
 import { Icon } from '../base/Icon.js';
 
@@ -127,7 +127,7 @@ export const Button = ({
   };
   const content = (
     <>
-      {icon ? <Icon name={icon} /> : null}
+      {hasText(icon) ? <Icon name={icon} /> : null}
       {children}
     </>
   );

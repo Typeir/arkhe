@@ -11,7 +11,7 @@
 
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { resolve } from 'node:path';
-import { flushSync, hydrate, unmount, type Component } from 'svelte';
+import { type Component, flushSync, hydrate, unmount } from 'svelte';
 import { createServer, type ViteDevServer } from 'vite';
 import { vi } from 'vitest';
 import Page from './svelte/Page.svelte';
@@ -37,12 +37,23 @@ export interface SveltePage {
   readonly unmount: () => void;
 }
 
+/**
+ * Package names resolved to their sources for the Svelte page server.
+ *
+ * @constant ALIAS
+ * @type {Record<string, string>}
+ */
 const ALIAS = {
   '@arkhe/core/fx': resolve('packages/core/src/feedback/fx/index.ts'),
   '@arkhe/core': resolve('packages/core/src/index.ts'),
   '@arkhe/svelte': resolve('packages/svelte/src/index.ts'),
 };
 
+/**
+ * The running page server, once started.
+ *
+ * @type {ViteDevServer | undefined}
+ */
 let server: ViteDevServer | undefined;
 
 /**

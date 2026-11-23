@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
-import Target from '../../../../../apps/showcase/src/svelte/Target.svelte';
 import { SPECIMEN_SECTIONS } from '../../../../../apps/showcase/src/specimen';
+import Target from '../../../../../apps/showcase/src/svelte/Target.svelte';
 
 describe('Svelte Target', () => {
   it('renders the specimen under a provider', () => {

@@ -9,30 +9,13 @@ keystrokes. The port keeps its own draft text: Zag hands the
 input its formatted value, which Svelte would bind live and so erase a lone
 "-".
 -->
-<script lang="ts">
-  import {
-    ARKHE_CLASS,
-    SVELTE_EVENTS,
-    fieldDescribedBy,
-    fieldIds,
-    formatDraft,
-    guardInputProps,
-    numericMachineProps,
-    type NumericValue,
-  } from '@arkhe/core';
-  import * as numberInput from '@zag-js/number-input';
-  import { mergeProps, normalizeProps, useMachine } from '@zag-js/svelte';
-  import { untrack } from 'svelte';
-  import { useArkhe } from '../base/context.js';
-  import { useArkheEnvironment } from '../base/environment.js';
-  import FieldNote from './FieldNote.svelte';
-  import Icon from '../base/Icon.svelte';
-  import { useNumericSync } from './numericSync.svelte.js';
+<script module lang="ts">
+  import type { NumericValue } from '@arkhe/core';
 
   /**
    * Props of NumericInput.
    *
-   * @interface Props
+   * @interface NumericInputProps
    * @property {string} label - Visible label; also names the step buttons.
    * @property {NumericValue} [value] - Value; bindable. A function binding vetoes or clamps.
    * @property {NumericValue} [defaultValue] - First value when uncontrolled.
@@ -40,7 +23,7 @@ input its formatted value, which Svelte would bind live and so erase a lone
    * @property {(value: NumericValue) => void} [onValueCommit] - Blur or Enter, clamped.
    * @property {number} [min] - Lowest value.
    * @property {number} [max] - Highest value.
-   * @property {number} [step] - Step size. Defaults to 1.
+   * @property {number} [step] - Step size. Defaults to `1`.
    * @property {string} [name] - Form field name.
    * @property {boolean} [required] - A value must be given.
    * @property {boolean} [disabled] - Blocks input.
@@ -48,7 +31,7 @@ input its formatted value, which Svelte would bind live and so erase a lone
    * @property {string} [hint] - Help text under the control.
    * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
    */
-  interface Props {
+  export interface NumericInputProps {
     label: string;
     value?: NumericValue;
     defaultValue?: NumericValue;
@@ -64,6 +47,26 @@ input its formatted value, which Svelte would bind live and so erase a lone
     hint?: string;
     error?: string;
   }
+</script>
+
+<script lang="ts">
+  import {
+    ARKHE_CLASS,
+    fieldDescribedBy,
+    fieldIds,
+    formatDraft,
+    guardInputProps,
+    numericMachineProps,
+    SVELTE_EVENTS,
+  } from '@arkhe/core';
+  import * as numberInput from '@zag-js/number-input';
+  import { mergeProps, normalizeProps, useMachine } from '@zag-js/svelte';
+  import { untrack } from 'svelte';
+  import { useArkhe } from '../base/context.js';
+  import { useArkheEnvironment } from '../base/environment.js';
+  import Icon from '../base/Icon.svelte';
+  import FieldNote from './FieldNote.svelte';
+  import { useNumericSync } from './numericSync.svelte.js';
 
   let {
     label,
@@ -80,7 +83,7 @@ input its formatted value, which Svelte would bind live and so erase a lone
     readOnly,
     hint,
     error,
-  }: Props = $props();
+  }: NumericInputProps = $props();
   const id = $props.id();
   const ids = fieldIds(id);
   const arkhe = useArkhe();
@@ -94,12 +97,10 @@ input its formatted value, which Svelte would bind live and so erase a lone
       formatDraft(value !== undefined ? value : defaultValue, arkhe().locale),
     ),
   );
-
-  const emit = (next: NumericValue) => {
+  const commit = (next: NumericValue) => {
     value = next;
     onValueChange?.(next);
   };
-
   const service = useMachine(numberInput.machine, () => ({
     ...numericMachineProps({
       id,
@@ -120,10 +121,11 @@ input its formatted value, which Svelte would bind live and so erase a lone
     }),
     onValueChange: (details: numberInput.ValueChangeDetails) => {
       draft = details.value;
-      sync.emit(details.valueAsNumber, emit);
+      sync.emit(details.valueAsNumber, commit);
     },
-    onValueCommit: (details: numberInput.ValueChangeDetails) =>
-      sync.commit(details.valueAsNumber, onValueCommit, { min, max }),
+    onValueCommit: (details: numberInput.ValueChangeDetails) => {
+      sync.commit(details.valueAsNumber, onValueCommit, { min, max });
+    },
   }));
   const api = $derived(numberInput.connect(service, normalizeProps));
   const inputProps = $derived(

@@ -1,4 +1,3 @@
-import { sizeBox } from '@tests/fixtures/scrollBox';
 import {
   fireEvent,
   render,
@@ -7,6 +6,7 @@ import {
   within,
 } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import { sizeBox } from '@tests/fixtures/scrollBox';
 import { describe, expect, it, vi } from 'vitest';
 import SelectMenu from '../../../../../packages/svelte/src/select/SelectMenu.svelte';
 
@@ -51,7 +51,13 @@ describe('SelectMenu', () => {
     await userEvent.keyboard('{Enter}');
     const list = await screen.findByRole('listbox');
     await waitFor(() => expect(list).toHaveFocus());
-    await userEvent.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}{Enter}');
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}');
+    await waitFor(() =>
+      expect(screen.getByRole('option', { name: /Medium/ })).toHaveAttribute(
+        'data-highlighted',
+      ),
+    );
+    await userEvent.keyboard('{Enter}');
     await waitFor(() =>
       expect(screen.getByRole('combobox')).toHaveTextContent('Medium'),
     );

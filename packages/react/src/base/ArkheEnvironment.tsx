@@ -11,19 +11,25 @@
 'use client';
 
 import {
-  DEFAULT_ENVIRONMENT,
-  createEnvironment,
   type ArkheEnvironmentValue,
+  createEnvironment,
+  DEFAULT_ENVIRONMENT,
   type RootNode,
 } from '@arkhe/core';
 import {
   createContext,
-  useContext,
-  useMemo,
   type JSX,
   type ReactNode,
+  useContext,
+  useMemo,
 } from 'react';
 
+/**
+ * Environment of the subtree; the main document's when no provider is above.
+ *
+ * @constant EnvironmentContext
+ * @type {import('react').Context<ArkheEnvironmentValue>}
+ */
 const EnvironmentContext =
   createContext<ArkheEnvironmentValue>(DEFAULT_ENVIRONMENT);
 
@@ -57,11 +63,7 @@ export const ArkheEnvironment = ({
     () => createEnvironment({ rootNode, container }),
     [rootNode, container],
   );
-  return (
-    <EnvironmentContext.Provider value={value}>
-      {children}
-    </EnvironmentContext.Provider>
-  );
+  return <EnvironmentContext value={value}>{children}</EnvironmentContext>;
 };
 
 /**

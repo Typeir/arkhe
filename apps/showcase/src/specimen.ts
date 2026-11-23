@@ -9,9 +9,9 @@
  */
 
 import {
+  type AccordionItem,
   ARKHE_ICON_NAMES,
   filterOptions,
-  type AccordionItem,
   type MenuEntry,
   type RadioItem,
   type SelectOption,
@@ -98,6 +98,7 @@ export const SPECIMEN_SECTIONS = {
   select: 'Select',
   choices: 'Choices',
   sections: 'Sections',
+  ikuisuus: 'Ikuisuus keywords',
 } as const;
 
 /**
@@ -208,10 +209,9 @@ export const SPECIMEN_MENU: readonly MenuEntry[] = [
  */
 export function loadSpecimenCard(): Promise<string> {
   return new Promise((resolve) =>
-    setTimeout(
-      () => resolve('Fire fills a sphere; everything in it burns.'),
-      700,
-    ),
+    setTimeout(() => {
+      resolve('Fire fills a sphere; everything in it burns.');
+    }, 700),
   );
 }
 
@@ -226,6 +226,51 @@ export const SPECIMEN_TABS: readonly TabItem[] = [
   { value: 'gear', label: 'Gear', disabled: true },
   { value: 'notes', label: 'Notes' },
 ];
+
+/**
+ * Folder tabs, one level per entry: many tabs at the top, a few below.
+ *
+ * @constant SPECIMEN_FOLDERS
+ * @type {readonly (readonly TabItem[])[]}
+ */
+export const SPECIMEN_FOLDERS: readonly (readonly TabItem[])[] = [
+  [
+    'Overview',
+    'Bloodline',
+    'Vocation',
+    'Abilities',
+    'Equipment',
+    'Spells',
+    'Feats',
+    'Conditions',
+    'Notes',
+    'Bibliography',
+  ].map((label) => ({ value: label.toLowerCase(), label })),
+  [
+    { value: 'boons', label: 'Boons' },
+    { value: 'traits', label: 'Traits' },
+    { value: 'lore', label: 'Lore' },
+  ],
+  [
+    { value: 'past', label: 'Past' },
+    { value: 'oaths', label: 'Oaths' },
+  ],
+];
+
+/**
+ * Whether the folder at `depth` holds the next level in its tab `value`.
+ *
+ * @function nestsFolder
+ * @param {number} depth - Folder level, from 0.
+ * @param {string} value - Tab value.
+ * @returns {boolean} The next level opens in this tab.
+ */
+export function nestsFolder(depth: number, value: string): boolean {
+  return (
+    depth + 1 < SPECIMEN_FOLDERS.length &&
+    SPECIMEN_FOLDERS[depth]?.[0]?.value === value
+  );
+}
 
 /**
  * Panel text per tab value.

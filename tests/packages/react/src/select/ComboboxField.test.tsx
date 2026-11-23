@@ -1,8 +1,8 @@
-import { ComboboxField as Combobox } from '../../../../../packages/react/src/select/ComboboxField';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderToString } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
+import { ComboboxField as Combobox } from '../../../../../packages/react/src/select/ComboboxField';
 
 const SPELLS = [
   { value: 'fireball', label: 'Fireball', description: 'Level 3' },

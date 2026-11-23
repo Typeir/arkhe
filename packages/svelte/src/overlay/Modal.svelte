@@ -3,36 +3,17 @@
 Renders a modal dialog on Zag's dialog machine, portalled into the
 environment's container. The portal mounts on the client only, and Zag stays
 closed until then, matching the React port. With `sheet` it rises from the
-bottom edge. Once mounted it stays; the
-`hidden` attribute plus CSS transitions animate entry and exit, so no presence
-machine is needed.
+bottom edge. Once mounted it stays; the `hidden` attribute plus CSS
+transitions animate entry and exit, so no presence machine is needed.
 -->
-<script lang="ts">
-  import {
-    ARKHE_CLASS,
-    FocusReturn,
-    dialogMachineProps,
-    flag,
-    hideShadowSiblings,
-    watchCloseRequest,
-    type DialogRole,
-  } from '@arkhe/core';
-  import * as dialog from '@zag-js/dialog';
-  import {
-    mergeProps,
-    normalizeProps,
-    portal,
-    useMachine,
-  } from '@zag-js/svelte';
-  import { onMount, untrack, type Snippet } from 'svelte';
-  import { useArkhe } from '../base/context.js';
-  import { useArkheEnvironment } from '../base/environment.js';
-  import Icon from '../base/Icon.svelte';
+<script module lang="ts">
+  import type { DialogRole } from '@arkhe/core';
+  import type { Snippet } from 'svelte';
 
   /**
    * Props of Modal.
    *
-   * @interface Props
+   * @interface ModalProps
    * @property {string} title - Heading; names the dialog.
    * @property {string} [description] - Text under the heading; describes the dialog.
    * @property {string} [trigger] - Text of a built-in open button. Omit to open from state only.
@@ -45,7 +26,7 @@ machine is needed.
    * @property {boolean} [sheet] - Rises from the bottom edge at full width instead of centring.
    * @property {Snippet} [children] - Body.
    */
-  interface Props {
+  export interface ModalProps {
     title: string;
     description?: string;
     trigger?: string;
@@ -58,6 +39,30 @@ machine is needed.
     sheet?: boolean;
     children?: Snippet;
   }
+</script>
+
+<script lang="ts">
+  import {
+    ARKHE_CLASS,
+    dialogMachineProps,
+    flag,
+    FocusReturn,
+    hideShadowSiblings,
+    partAttrs,
+    watchCloseRequest,
+  } from '@arkhe/core';
+  import * as dialog from '@zag-js/dialog';
+  import {
+    mergeProps,
+    normalizeProps,
+    portal,
+    useMachine,
+  } from '@zag-js/svelte';
+  import { untrack } from 'svelte';
+  import { useArkhe } from '../base/context.js';
+  import { useArkheEnvironment } from '../base/environment.js';
+  import Icon from '../base/Icon.svelte';
+  import { useMounted } from '../base/mounted.svelte.js';
 
   let {
     title,
@@ -71,31 +76,25 @@ machine is needed.
     finalFocus,
     sheet,
     children,
-  }: Props = $props();
+  }: ModalProps = $props();
   const id = $props.id();
   const arkhe = useArkhe();
   const env = useArkheEnvironment();
   const initial = untrack(() => defaultOpen ?? false);
-  let mounted = $state(false);
   const focusReturn = new FocusReturn();
   $effect(() => focusReturn.watch(env().getRootNode()));
-
-  onMount(() => {
-    mounted = true;
-  });
-
-  const change = (next: boolean) => {
+  const mounted = useMounted();
+  const commit = (next: boolean) => {
     open = next;
     onOpenChange?.(next);
   };
-
   const service = useMachine(dialog.machine, () =>
     dialogMachineProps({
       id,
       open: open ?? initial,
-      ready: mounted,
+      ready: mounted.current,
       role,
-      onOpenChange: change,
+      onOpenChange: commit,
       initialFocus,
       finalFocus,
       focusReturn,
@@ -103,17 +102,19 @@ machine is needed.
     }),
   );
   const api = $derived(dialog.connect(service, normalizeProps));
-  let content = $state<HTMLDivElement>();
+  let content = $state<HTMLDivElement | null>(null);
   $effect(() => {
-    if (!api.open || !content) return;
+    if (!api.open || !content) return undefined;
     return hideShadowSiblings(content);
   });
   const shown = $derived(api.open);
   $effect(() => {
-    if (!shown) return;
-    return watchCloseRequest(env().getRootNode(), () =>
-      untrack(() => api.setOpen(false)),
-    );
+    if (!shown) return undefined;
+    return watchCloseRequest(env().getRootNode(), () => {
+      untrack(() => {
+        api.setOpen(false);
+      });
+    });
   });
 </script>
 
@@ -121,7 +122,7 @@ machine is needed.
   <button {...mergeProps(api.getTriggerProps(), { class: ARKHE_CLASS })}
     >{trigger}</button>
 {/if}
-{#if mounted}
+{#if mounted.current}
   <div
     class={ARKHE_CLASS}
     use:portal={{
@@ -137,13 +138,13 @@ machine is needed.
         aria-describedby={description === undefined
           ? undefined
           : api.getDescriptionProps().id}>
-        <header data-scope="dialog" data-part="header">
+        <div {...partAttrs('dialog', 'header')}>
           <h2 {...api.getTitleProps()}>{title}</h2>
           <button
             {...api.getCloseTriggerProps()}
             aria-label={arkhe().labels.close}><Icon name="x" /></button>
-        </header>
-        <div data-scope="dialog" data-part="body">
+        </div>
+        <div {...partAttrs('dialog', 'body')}>
           {#if description !== undefined}<p {...api.getDescriptionProps()}>
               {description}
             </p>{/if}

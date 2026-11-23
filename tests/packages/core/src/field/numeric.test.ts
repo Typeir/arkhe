@@ -1,6 +1,6 @@
 import {
-  DEFAULT_LABELS,
   clampToBounds,
+  DEFAULT_LABELS,
   formatDraft,
   numericMachineProps,
   toNumericValue,

@@ -8,11 +8,11 @@ as virtual rows: a select and a plain list.
 <script lang="ts">
   import { Picker, Search, Select, VirtualList } from '@arkhe/svelte';
   import {
+    searchSpecimen,
     SPECIMEN_RUNES,
     SPECIMEN_SCHOOLS,
     SPECIMEN_SECTIONS,
     SPECIMEN_SPELLS,
-    searchSpecimen,
   } from '../specimen';
 
   let school = $state<string | null>(null);

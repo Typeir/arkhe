@@ -48,7 +48,7 @@ describe('HoverCard access', () => {
     expect(
       await screen.findByRole('button', { name: 'Unpin Charge' }),
     ).toHaveAttribute('aria-pressed', 'true');
-    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+    await userEvent.click(screen.getByRole('button', { name: /^Close / }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     expect(trigger).toHaveFocus();
   });
@@ -60,7 +60,7 @@ describe('HoverCard access', () => {
       </HoverCard>,
     );
     await userEvent.click(screen.getByRole('button', { name: 'charge' }));
-    await screen.findByRole('button', { name: 'Close' });
+    await screen.findByRole('button', { name: /^Close / });
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
   });
@@ -75,7 +75,7 @@ describe('HoverCard access', () => {
     trigger.focus();
     await userEvent.keyboard('{Enter}');
     expect(
-      await screen.findByRole('button', { name: 'Close' }),
+      await screen.findByRole('button', { name: /^Close / }),
     ).toBeInTheDocument();
   });
 

@@ -8,6 +8,8 @@
  * @since 0.4.0
  */
 
+'use client';
+
 import { sameRecord } from '@arkhe/core';
 import { useState } from 'react';
 

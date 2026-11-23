@@ -11,7 +11,7 @@
  */
 
 import { Checkbox, RadioGroup, ToggleGroup } from '@arkhe/react';
-import { useState, type JSX } from 'react';
+import { type JSX, useState } from 'react';
 import {
   SPECIMEN_ASPECTS,
   SPECIMEN_BOONS,
@@ -20,6 +20,12 @@ import {
   SPECIMEN_UNITS,
 } from '../specimen';
 
+/**
+ * Control sizes the choice specimens show.
+ *
+ * @constant SIZES
+ * @type {readonly ['s', 'm', 'l']}
+ */
 const SIZES = ['s', 'm', 'l'] as const;
 
 /**
@@ -57,7 +63,9 @@ export const ChoiceSection = (): JSX.Element => {
           look='box'
           checked={all}
           indeterminate={some && !all}
-          onCheckedChange={(next) => setPicked(picked.map(() => next))}
+          onCheckedChange={(next) => {
+            setPicked(picked.map(() => next));
+          }}
         />
         {['Frost', 'Ember'].map((label, index) => (
           <Checkbox
@@ -65,9 +73,9 @@ export const ChoiceSection = (): JSX.Element => {
             label={label}
             look='box'
             checked={picked[index] ?? false}
-            onCheckedChange={(next) =>
-              setPicked(picked.map((on, at) => (at === index ? next : on)))
-            }
+            onCheckedChange={(next) => {
+              setPicked(picked.map((on, at) => (at === index ? next : on)));
+            }}
           />
         ))}
         <Checkbox label='Oath sworn' required hint='Needed before the rite.' />

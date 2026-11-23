@@ -1,9 +1,9 @@
+import type { AnchorHTMLAttributes } from 'react';
 import { ArkheProvider, HoverCard } from '@arkhe/react';
-import { NestedCards } from '@tests/fixtures/react/NestedCards';
-import { tap } from '@tests/fixtures/tap';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { AnchorHTMLAttributes } from 'react';
+import { NestedCards } from '@tests/fixtures/react/NestedCards';
+import { tap } from '@tests/fixtures/tap';
 import { renderToString } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 

@@ -1,5 +1,5 @@
-import { ToggleGroup } from '@arkhe/react';
 import type { ToggleItem } from '@arkhe/core';
+import { ToggleGroup } from '@arkhe/react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';

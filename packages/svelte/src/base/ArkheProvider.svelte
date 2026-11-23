@@ -4,37 +4,24 @@ Supplies labels, icons, the link renderer, the announcer and the effect
 engine to every Arkhé component below. Mounts the announcer's live regions
 with itself, and destroys its engine with itself.
 -->
-<script lang="ts">
-  import {
-    Announcer,
-    DEFAULT_LOCALE,
-    FxLoader,
-    resolveLabels,
-    type ArkheLabels,
-    type EffectsSetting,
-    type IconSet,
-  } from '@arkhe/core';
-  import { untrack, type Snippet } from 'svelte';
-  import {
-    loadFx,
-    provideArkhe,
-    type IconComponent,
-    type LinkComponent,
-  } from './context.js';
+<script module lang="ts">
+  import type { ArkheLabels, EffectsSetting, IconSet } from '@arkhe/core';
+  import type { Snippet } from 'svelte';
+  import type { IconComponent, LinkComponent } from './context.js';
 
   /**
    * Props of ArkheProvider.
    *
-   * @interface Props
+   * @interface ArkheProviderProps
    * @property {Partial<ArkheLabels>} [labels] - Translated label templates.
    * @property {string} [locale] - BCP 47 locale for plurals and numbers. Defaults to `en`.
    * @property {IconSet<IconComponent>} [icons] - Icons by Lucide name; win over Lucide.
    * @property {LinkComponent} [link] - Link renderer. Defaults to `a`.
    * @property {EffectsSetting} [effects] - Canvas effect options, or `false` for CSS skeletons everywhere. Read once.
-   * @property {boolean} [hoverCards] - `false` opens hover cards on click only. Defaults to true.
+   * @property {boolean} [hoverCards] - `false` opens hover cards on click only. Defaults to `true`.
    * @property {Snippet} children - App subtree.
    */
-  interface Props {
+  export interface ArkheProviderProps {
     labels?: Partial<ArkheLabels>;
     locale?: string;
     icons?: IconSet<IconComponent>;
@@ -43,9 +30,27 @@ with itself, and destroys its engine with itself.
     hoverCards?: boolean;
     children: Snippet;
   }
+</script>
 
-  let { labels, locale, icons, link, effects, hoverCards, children }: Props =
-    $props();
+<script lang="ts">
+  import {
+    Announcer,
+    DEFAULT_LOCALE,
+    FxLoader,
+    resolveLabels,
+  } from '@arkhe/core';
+  import { untrack } from 'svelte';
+  import { loadFx, provideArkhe } from './context.js';
+
+  let {
+    labels,
+    locale,
+    icons,
+    link,
+    effects,
+    hoverCards,
+    children,
+  }: ArkheProviderProps = $props();
   const announcer = new Announcer();
   const engine = new FxLoader(untrack(() => effects) ?? {}, loadFx);
   $effect.pre(() => announcer.mount());

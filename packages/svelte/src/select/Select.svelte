@@ -5,18 +5,15 @@ Renders one choice from a list of options: a button that opens the list
 (Zag combobox). At phone width it opens a sheet with a search box and the
 list instead; choosing closes it.
 -->
-<script lang="ts" generics="T extends SelectOption">
-  import type { SelectOption, OptionFilter, Placement } from '@arkhe/core';
-  import { untrack, type Snippet } from 'svelte';
-  import ComboboxField from './ComboboxField.svelte';
-  import { useNarrow } from '../base/narrow.svelte.js';
-  import SelectMenu from './SelectMenu.svelte';
-  import SheetField from './SheetField.svelte';
+<script module lang="ts">
+  import type { OptionFilter, Placement, SelectOption } from '@arkhe/core';
+  import type { Snippet } from 'svelte';
 
   /**
    * Props of Select.
    *
-   * @interface Props
+   * @interface SelectProps
+   * @template {SelectOption} T
    * @property {string} label - Visible label.
    * @property {readonly T[]} items - Options; a repeated value is dropped.
    * @property {string} [placeholder] - Shown while nothing is chosen.
@@ -38,7 +35,7 @@ list instead; choosing closes it.
    * @property {string} [error] - Error text; replaces the hint and marks the control invalid.
    * @property {number} [rowPitch] - Row height in rem; draws only the rows in view, for long lists. Flat lists only.
    */
-  interface Props {
+  export interface SelectProps<T extends SelectOption> {
     label: string;
     items: readonly T[];
     placeholder?: string;
@@ -60,58 +57,113 @@ list instead; choosing closes it.
     error?: string;
     rowPitch?: number;
   }
+</script>
+
+<script lang="ts" generics="T extends SelectOption">
+  import { untrack } from 'svelte';
+  import { useNarrow } from '../base/narrow.svelte.js';
+  import ComboboxField from './ComboboxField.svelte';
+  import SelectMenu from './SelectMenu.svelte';
+  import SheetField from './SheetField.svelte';
 
   let {
+    label,
+    items,
+    placeholder,
     value = $bindable(),
+    defaultValue,
+    onValueChange,
     searchable,
     filter,
     name,
     required,
     autoComplete,
-    ...shared
-  }: Props = $props();
+    disabled,
+    emptyLabel,
+    size,
+    labelHidden,
+    hint,
+    error,
+    ...rest
+  }: SelectProps<T> = $props();
   const narrow = useNarrow();
-  let inner = $state(untrack(() => shared.defaultValue ?? null));
-  const current = $derived(value === undefined ? inner : value);
+  const initial = untrack(() => defaultValue ?? null);
+  const current = $derived(value === undefined ? initial : value);
   const text = $derived(
     current === null
-      ? shared.emptyLabel
-      : shared.items.find((item) => item.value === current)?.label,
+      ? emptyLabel
+      : items.find((entry) => entry.value === current)?.label,
   );
-  const choose = (next: string | null) => {
-    inner = next;
+  const commit = (next: string | null) => {
     value = next;
-    shared.onValueChange?.(next);
+    onValueChange?.(next);
   };
 </script>
 
 {#if narrow.current}
   <SheetField
-    label={shared.label}
+    {label}
     {text}
-    placeholder={shared.placeholder}
-    size={shared.size}
-    labelHidden={shared.labelHidden}
-    disabled={shared.disabled}
+    {placeholder}
+    {size}
+    {labelHidden}
+    {disabled}
     {name}
     value={current}
     {required}
-    hint={shared.hint}
-    error={shared.error}>
+    {hint}
+    {error}>
     {#snippet children(close)}
       <ComboboxField
-        {...shared}
-        hint={undefined}
-        error={undefined}
+        {...rest}
+        {label}
+        {items}
+        {placeholder}
+        {defaultValue}
+        {disabled}
+        {emptyLabel}
+        {size}
         value={current}
         labelHidden
         inline
-        onValueChange={choose}
+        onValueChange={commit}
         onSelect={close} />
     {/snippet}
   </SheetField>
 {:else if searchable}
-  <ComboboxField bind:value {...shared} {filter} {name} {required} />
+  <ComboboxField
+    bind:value
+    {...rest}
+    {label}
+    {items}
+    {placeholder}
+    {defaultValue}
+    {onValueChange}
+    {disabled}
+    {emptyLabel}
+    {size}
+    {labelHidden}
+    {hint}
+    {error}
+    {filter}
+    {name}
+    {required} />
 {:else}
-  <SelectMenu bind:value {...shared} {name} {required} {autoComplete} />
+  <SelectMenu
+    bind:value
+    {...rest}
+    {label}
+    {items}
+    {placeholder}
+    {defaultValue}
+    {onValueChange}
+    {disabled}
+    {emptyLabel}
+    {size}
+    {labelHidden}
+    {hint}
+    {error}
+    {name}
+    {required}
+    {autoComplete} />
 {/if}

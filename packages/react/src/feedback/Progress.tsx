@@ -12,6 +12,7 @@
 
 'use client';
 
+import type { CSSProperties, JSX } from 'react';
 import {
   ARKHE_CLASS,
   flag,
@@ -19,7 +20,6 @@ import {
   progressState,
   progressValueText,
 } from '@arkhe/core';
-import type { CSSProperties, JSX } from 'react';
 import { useArkhe } from '../base/ArkheProvider.js';
 
 /**

@@ -11,26 +11,33 @@
 
 'use client';
 
+import type * as combobox from '@zag-js/combobox';
+import type { JSX, ReactNode } from 'react';
 import {
   flag,
   isGrouped,
+  type ListNote,
   partAttrs,
-  slug,
   type SelectOption,
+  slug,
 } from '@arkhe/core';
-import type * as combobox from '@zag-js/combobox';
 import { mergeProps, type PropTypes } from '@zag-js/react';
-import type { JSX, ReactNode } from 'react';
-import { Status } from '../feedback/Status.js';
 import type { VirtualRows, VirtualRowsHandle } from '../list/useVirtualRows.js';
+import { Status } from '../feedback/Status.js';
 
 /**
- * What stands in for the list: results loading, the request failed, or
- * nothing matches.
+ * Renders the line that stands in for the options.
  *
- * @typedef {'loading' | 'failed' | 'empty'} ListNote
+ * @function noteBody
+ * @param {ListNote} note - Which line.
+ * @param {string} emptyText - Text of the empty line.
+ * @returns {ReactNode} Line.
  */
-export type ListNote = 'loading' | 'failed' | 'empty';
+function noteBody(note: ListNote, emptyText: string): ReactNode {
+  if (note === 'loading') return <Status kind='loading' />;
+  if (note === 'failed') return <Status kind='error' />;
+  return <div {...partAttrs('combobox', 'empty')}>{emptyText}</div>;
+}
 
 /**
  * Props of ComboboxList.
@@ -46,6 +53,7 @@ export type ListNote = 'loading' | 'failed' | 'empty';
  * @property {boolean} [inline] - Renders in place and always open.
  * @property {VirtualRows} rows - Virtual rows of a flat list.
  * @property {VirtualRowsHandle['attach']} attach - Callback ref of the list's scroll box.
+ * @property {boolean} [stale] - Dims the options while newer ones load.
  */
 export interface ComboboxListProps<T extends SelectOption> {
   readonly api: combobox.Api<PropTypes, T>;
@@ -57,6 +65,7 @@ export interface ComboboxListProps<T extends SelectOption> {
   readonly inline?: boolean;
   readonly rows: VirtualRows;
   readonly attach: VirtualRowsHandle['attach'];
+  readonly stale?: boolean;
 }
 
 /**
@@ -76,8 +85,25 @@ export const ComboboxList = <T extends SelectOption>({
   inline,
   rows,
   attach,
+  stale,
 }: ComboboxListProps<T>): JSX.Element => {
   const open = inline || api.open;
+  const options = () => {
+    if (rows.on) {
+      return shown
+        .slice(rows.range.start, rows.range.end)
+        .map((item, at) => option(item, rows.range.start + at));
+    }
+    if (!isGrouped(shown)) return shown.map(option);
+    return collection.group().map(([group, members]) => (
+      <div key={group} {...api.getItemGroupProps({ id: slug(group) })}>
+        <div {...api.getItemGroupLabelProps({ htmlFor: slug(group) })}>
+          {group}
+        </div>
+        {members.map(option)}
+      </div>
+    ));
+  };
   return (
     <>
       {note ? (
@@ -85,40 +111,20 @@ export const ComboboxList = <T extends SelectOption>({
           {...partAttrs('combobox', 'note')}
           data-inline={flag(inline)}
           hidden={!open}>
-          {note === 'loading' ? (
-            <Status kind='loading' />
-          ) : note === 'failed' ? (
-            <Status kind='error' />
-          ) : (
-            <div {...partAttrs('combobox', 'empty')}>{emptyText}</div>
-          )}
+          {noteBody(note, emptyText)}
         </div>
       ) : null}
       <div
-        {...mergeProps(api.getContentProps(), { hidden: !!note || !open })}
+        {...mergeProps(api.getContentProps(), {
+          hidden: Boolean(note) || !open,
+        })}
         ref={attach}
         style={rows.vars}
         data-virtual={flag(rows.on)}
-        data-inline={flag(inline)}>
-        {note
-          ? null
-          : rows.on
-            ? shown
-                .slice(rows.range.start, rows.range.end)
-                .map((item, at) => option(item, rows.range.start + at))
-            : isGrouped(shown)
-              ? collection.group().map(([group, members]) => (
-                  <div
-                    key={group}
-                    {...api.getItemGroupProps({ id: slug(group) })}>
-                    <div
-                      {...api.getItemGroupLabelProps({ htmlFor: slug(group) })}>
-                      {group}
-                    </div>
-                    {members.map(option)}
-                  </div>
-                ))
-              : shown.map(option)}
+        data-inline={flag(inline)}
+        data-stale={flag(stale)}
+        aria-busy={stale || undefined}>
+        {note ? null : options()}
       </div>
     </>
   );

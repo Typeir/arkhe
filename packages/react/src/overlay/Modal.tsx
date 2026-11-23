@@ -13,27 +13,29 @@
 
 import {
   ARKHE_CLASS,
-  FocusReturn,
   dialogMachineProps,
-  flag,
-  hideShadowSiblings,
-  watchCloseRequest,
   type DialogRole,
+  flag,
+  FocusReturn,
+  hideShadowSiblings,
+  partAttrs,
+  watchCloseRequest,
 } from '@arkhe/core';
 import * as dialog from '@zag-js/dialog';
-import { Portal, mergeProps, normalizeProps, useMachine } from '@zag-js/react';
+import { mergeProps, normalizeProps, Portal, useMachine } from '@zag-js/react';
 import {
+  type JSX,
+  type ReactNode,
   useEffect,
   useEffectEvent,
   useId,
   useRef,
   useState,
-  type JSX,
-  type ReactNode,
 } from 'react';
-import { useArkhe } from '../base/ArkheProvider.js';
 import { useArkheEnvironment } from '../base/ArkheEnvironment.js';
+import { useArkhe } from '../base/ArkheProvider.js';
 import { Icon } from '../base/Icon.js';
+import { useControllable } from '../base/useControllable.js';
 import { useHydrated } from '../base/useHydrated.js';
 import { usePortalContainer } from '../base/usePortalContainer.js';
 
@@ -92,21 +94,22 @@ export const Modal = ({
   const { labels } = useArkhe();
   const env = useArkheEnvironment();
   const hydrated = useHydrated();
-  const [inner, setInner] = useState(defaultOpen ?? false);
+  const { current: shown, commit } = useControllable({
+    value: open,
+    defaultValue: defaultOpen ?? false,
+    onChange: onOpenChange,
+  });
   const [focusReturn] = useState(() => new FocusReturn());
   useEffect(() => focusReturn.watch(env.getRootNode()), [focusReturn, env]);
-  const change = (next: boolean) => {
-    setInner(next);
-    onOpenChange?.(next);
-  };
+  const id = useId();
   const service = useMachine(
     dialog.machine,
     dialogMachineProps({
-      id: useId(),
-      open: open ?? inner,
+      id,
+      open: shown,
       ready: hydrated,
       role,
-      onOpenChange: change,
+      onOpenChange: commit,
       initialFocus,
       finalFocus,
       focusReturn,
@@ -120,7 +123,9 @@ export const Modal = ({
     if (!api.open || !content.current) return undefined;
     return hideShadowSiblings(content.current);
   }, [api.open]);
-  const requestClose = useEffectEvent(() => api.setOpen(false));
+  const requestClose = useEffectEvent(() => {
+    api.setOpen(false);
+  });
   useEffect(() => {
     if (!api.open) return undefined;
     return watchCloseRequest(env.getRootNode(), requestClose);
@@ -147,15 +152,15 @@ export const Modal = ({
                     ? undefined
                     : api.getDescriptionProps().id
                 }>
-                <header data-scope='dialog' data-part='header'>
+                <div {...partAttrs('dialog', 'header')}>
                   <h2 {...api.getTitleProps()}>{title}</h2>
                   <button
                     {...api.getCloseTriggerProps()}
                     aria-label={labels.close}>
                     <Icon name='x' />
                   </button>
-                </header>
-                <div data-scope='dialog' data-part='body'>
+                </div>
+                <div {...partAttrs('dialog', 'body')}>
                   {description === undefined ? null : (
                     <p {...api.getDescriptionProps()}>{description}</p>
                   )}

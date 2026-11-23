@@ -1,6 +1,6 @@
 import { Field } from '@arkhe/svelte';
-import { inputSnippet } from '@tests/fixtures/svelte/snippets';
 import { render, screen } from '@testing-library/svelte';
+import { inputSnippet } from '@tests/fixtures/svelte/snippets';
 import { describe, expect, it } from 'vitest';
 
 describe('Field', () => {

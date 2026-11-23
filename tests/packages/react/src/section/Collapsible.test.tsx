@@ -97,4 +97,25 @@ describe('Collapsible', () => {
     await userEvent.click(trigger);
     expect(screen.getByText('Old roads.')).toBeInTheDocument();
   });
+
+  it('is a section with a header only when it has a heading', () => {
+    const { container, rerender } = render(
+      <Collapsible title='Layer' heading={3}>
+        <p>Body</p>
+      </Collapsible>,
+    );
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.localName).toBe('section');
+    expect(root.querySelector('[data-part="header"]')?.localName).toBe(
+      'header',
+    );
+    rerender(
+      <Collapsible title='Layer'>
+        <p>Body</p>
+      </Collapsible>,
+    );
+    const plain = container.firstElementChild as HTMLElement;
+    expect(plain.localName).toBe('div');
+    expect(plain.querySelector('[data-part="header"]')?.localName).toBe('div');
+  });
 });

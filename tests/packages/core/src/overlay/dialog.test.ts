@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import {
-  FocusReturn,
   dialogMachineProps,
+  FocusReturn,
   hideShadowSiblings,
   watchCloseRequest,
 } from '@arkhe/core';

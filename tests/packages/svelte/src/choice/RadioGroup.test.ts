@@ -1,7 +1,8 @@
-import { RadioGroup } from '@arkhe/svelte';
 import type { RadioItem } from '@arkhe/core';
-import { render, screen } from '@testing-library/svelte';
+import { RadioGroup } from '@arkhe/svelte';
+import { render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import BoundUnset from '@tests/fixtures/svelte/BoundUnset.svelte';
 import { describe, expect, it, vi } from 'vitest';
 
 const UNITS: readonly RadioItem[] = [
@@ -12,6 +13,21 @@ const UNITS: readonly RadioItem[] = [
 ];
 
 describe('RadioGroup', () => {
+  it('returns to defaultValue on a form reset', async () => {
+    const form = document.body.appendChild(document.createElement('form'));
+    render(RadioGroup, {
+      target: form,
+      props: { label: 'Units', items: UNITS, defaultValue: 'metric' },
+    });
+    await userEvent.click(screen.getByRole('radio', { name: 'Imperial' }));
+    form.reset();
+    await waitFor(() =>
+      expect(screen.getByRole('radio', { name: 'Metric' })).toBeChecked(),
+    );
+    expect(screen.getByRole('radio', { name: 'Imperial' })).not.toBeChecked();
+    form.remove();
+  });
+
   it('is a fieldset named by its legend, one radio per value', () => {
     render(RadioGroup, { label: 'Units', items: UNITS });
     const group = screen.getByRole('radiogroup', { name: 'Units' });
@@ -126,5 +142,14 @@ describe('RadioGroup', () => {
     expect(new FormData(form).get('units')).toBe('imperial');
     expect(form.checkValidity()).toBe(true);
     form.remove();
+  });
+
+  it('starts from defaultValue under a binding that starts unset', async () => {
+    render(BoundUnset, { kind: 'radio' });
+    expect(screen.getByRole('radio', { name: 'Dexterity' })).toBeChecked();
+    expect(screen.getByText('held undefined')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('radio', { name: 'Strength' }));
+    expect(screen.getByRole('radio', { name: 'Strength' })).toBeChecked();
+    expect(screen.getByText('held "str"')).toBeInTheDocument();
   });
 });

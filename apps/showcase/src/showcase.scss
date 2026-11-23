@@ -5,6 +5,8 @@
 
 @use '@arkhe/core/styles/shape' as shape;
 @use '@arkhe/core/styles/text' as text;
+@use 'ikuisuus';
+@use 'ikuisuus-card';
 
 body {
   margin: 0;

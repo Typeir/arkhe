@@ -14,18 +14,20 @@
 
 'use client';
 
-import { ARKHE_CLASS, floatingMachineProps, type Placement } from '@arkhe/core';
-import { Portal, mergeProps, normalizeProps, useMachine } from '@zag-js/react';
-import * as tooltip from '@zag-js/tooltip';
-import { useId, type JSX, type ReactNode } from 'react';
-import { useArkheEnvironment } from '../base/ArkheEnvironment.js';
 import {
-  HintTrigger,
-  useHint,
-  useHintNode,
-  useOpenState,
-} from './HintTrigger.js';
+  ARKHE_CLASS,
+  floatingMachineProps,
+  partAttrs,
+  type Placement,
+  TOOLTIP_GUTTER,
+} from '@arkhe/core';
+import { mergeProps, normalizeProps, Portal, useMachine } from '@zag-js/react';
+import * as tooltip from '@zag-js/tooltip';
+import { type JSX, type ReactNode, useId } from 'react';
+import { useArkheEnvironment } from '../base/ArkheEnvironment.js';
+import { useControllable } from '../base/useControllable.js';
 import { usePortalContainer } from '../base/usePortalContainer.js';
+import { HintTrigger, useHint, useHintNode } from './HintTrigger.js';
 
 /**
  * Props of Tooltip.
@@ -75,15 +77,20 @@ export const Tooltip = ({
   const env = useArkheEnvironment();
   const container = usePortalContainer();
   const node = useHintNode();
-  const { shown, change } = useOpenState(open, defaultOpen, onOpenChange);
+  const { current: shown, commit } = useControllable({
+    value: open,
+    defaultValue: defaultOpen ?? false,
+    onChange: onOpenChange,
+  });
   const service = useMachine(tooltip.machine, {
     ...floatingMachineProps({
       id: useId(),
       open: shown,
       onOpenChange: (next: boolean) => {
-        if (node.request(next)) change(next);
+        if (node.request(next)) commit(next);
       },
       placement,
+      gutter: TOOLTIP_GUTTER,
       getRootNode: env.getRootNode,
     }),
     openDelay,
@@ -94,14 +101,14 @@ export const Tooltip = ({
   const positioner = api.getPositionerProps();
   const hint = useHint({
     open: api.open,
-    setOpen: change,
+    setOpen: commit,
     trigger: api.getTriggerProps(),
     positionerId: positioner.id ?? '',
     node,
     leaving: () => service.state.matches('closing'),
   });
   return (
-    <span className={ARKHE_CLASS} data-scope='tooltip' data-part='root'>
+    <span className={ARKHE_CLASS} {...partAttrs('tooltip', 'root')}>
       <HintTrigger attrs={hint.trigger} inline={inline}>
         {children}
       </HintTrigger>
@@ -109,7 +116,12 @@ export const Tooltip = ({
         <Portal container={container} getRootNode={env.getRootNode}>
           <div className={ARKHE_CLASS}>
             <div {...mergeProps(positioner, { hidden: !api.open })}>
-              <div {...api.getContentProps()}>{content}</div>
+              <div {...api.getContentProps()}>
+                <div {...api.getArrowProps()}>
+                  <div {...api.getArrowTipProps()} />
+                </div>
+                {content}
+              </div>
             </div>
           </div>
         </Portal>

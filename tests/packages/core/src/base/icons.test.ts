@@ -11,11 +11,11 @@ describe('resolveIcon', () => {
   });
 
   it('returns undefined for an unknown name', () => {
-    expect(resolveIcon([{ x: 'lucide' }], 'not-an-icon')).toBeUndefined();
+    expect(resolveIcon([{ x: 'lucide' }], 'not-an-icon')).toBeNull();
   });
 
   it('ignores inherited object members', () => {
-    expect(resolveIcon([{ x: 'lucide' }], 'constructor')).toBeUndefined();
+    expect(resolveIcon([{ x: 'lucide' }], 'constructor')).toBeNull();
   });
 });
 

@@ -13,19 +13,19 @@
 'use client';
 
 import {
-  ARKHE_CLASS,
   announceText,
+  ARKHE_CLASS,
   flag,
-  partAttrs,
   type Fx,
+  partAttrs,
 } from '@arkhe/core';
 import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
   type CSSProperties,
   type JSX,
   type ReactNode,
+  useEffect,
+  useLayoutEffect,
+  useRef,
 } from 'react';
 import { useArkhe } from '../base/ArkheProvider.js';
 
@@ -122,22 +122,22 @@ export const SkeletonGroup = ({
   useLayoutEffect(() => {
     revealed.current = onRevealed;
   });
-  useEffect(
-    () =>
-      loading && label.current
-        ? announceText(label.current, announcer, () => 'polite')
-        : undefined,
-    [announcer, loading],
-  );
+  useEffect(() => {
+    if (!loading || !label.current) return undefined;
+    return announceText(label.current, announcer, () => 'polite');
+  }, [announcer, loading]);
   const attached = useRef<Fx | null>(null);
   useEffect(() => {
     const el = host.current;
-    if (!loading || !effect || !el) return;
+    if (!loading || !effect || !el) return undefined;
     const attach = (fx: Fx | null) => {
       attached.current = fx;
       fx?.attach(el);
     };
-    if (effects.engine) return attach(effects.engine);
+    if (effects.engine) {
+      attach(effects.engine);
+      return undefined;
+    }
     let live = true;
     void effects.request().then((fx) => {
       if (live) attach(fx);
@@ -150,11 +150,12 @@ export const SkeletonGroup = ({
     const was = shown.current;
     shown.current = loading;
     const el = host.current;
-    if (!was || loading || !el) return;
+    if (!was || loading || !el) return undefined;
     const done = () => revealed.current?.();
     const fx = effect ? attached.current : null;
     if (fx) fx.ready(el, done);
     else done();
+    return undefined;
   }, [loading, effect]);
   useEffect(() => {
     const el = host.current;

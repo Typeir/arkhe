@@ -24,6 +24,12 @@ import { tmpdir } from 'node:os';
 import { join, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+/**
+ * Repository root, two levels above this script.
+ *
+ * @constant REPO_ROOT
+ * @type {string}
+ */
 const REPO_ROOT = resolve(import.meta.dirname, '../..');
 
 /**

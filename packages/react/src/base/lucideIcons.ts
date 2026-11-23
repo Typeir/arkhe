@@ -8,11 +8,14 @@
  * @since 0.1.0
  */
 
+'use client';
+
 import type { ArkheIconName } from '@arkhe/core';
 import {
   Check,
   ChevronDown,
   ExternalLink,
+  GripVertical,
   Inbox,
   Info,
   Loader,
@@ -44,4 +47,5 @@ export const LUCIDE_ICONS: Readonly<Record<ArkheIconName, IconComponent>> = {
   pin: Pin,
   'pin-off': PinOff,
   'external-link': ExternalLink,
+  'grip-vertical': GripVertical,
 };

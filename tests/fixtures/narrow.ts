@@ -12,7 +12,18 @@
 import { NARROW_QUERY } from '@arkhe/core';
 import { vi } from 'vitest';
 
+/**
+ * Listeners the stubbed media query holds.
+ *
+ * @constant listeners
+ * @type {Set<() => void>}
+ */
 const listeners = new Set<() => void>();
+/**
+ * Whether the stubbed viewport is phone width now.
+ *
+ * @type {boolean}
+ */
 let narrow = false;
 
 /**

@@ -2,15 +2,15 @@
  * @fileoverview Svelte glue for `NumericSync`: one sync per field, fed each
  * new controlled value from an effect.
  *
- * @module packages/svelte/src/numericSync.svelte
+ * @module packages/svelte/src/field/numericSync.svelte
  * @version 1.0.0
  * @author Typeir
  * @since 0.1.0
  */
 
 import {
-  NumericSync,
   type NumericMachineApi,
+  NumericSync,
   type NumericValue,
 } from '@arkhe/core';
 import { untrack } from 'svelte';
@@ -31,7 +31,9 @@ export function useNumericSync(
   const sync = new NumericSync(api);
   $effect(() => {
     const next = value();
-    untrack(() => sync.receive(next));
+    untrack(() => {
+      sync.receive(next);
+    });
   });
   return sync;
 }

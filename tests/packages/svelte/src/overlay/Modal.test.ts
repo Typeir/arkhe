@@ -1,12 +1,12 @@
 import { Modal } from '@arkhe/svelte';
-import { liveWatcher, stubCloseWatcher } from '@tests/fixtures/closeWatcher';
-import DeleteRows from '@tests/fixtures/svelte/DeleteRows.svelte';
-import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
-import ShadowModal from '@tests/fixtures/svelte/ShadowModal.svelte';
-import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
-import { textSnippet } from '@tests/fixtures/svelte/snippets';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import { liveWatcher, stubCloseWatcher } from '@tests/fixtures/closeWatcher';
+import BoundState from '@tests/fixtures/svelte/BoundState.svelte';
+import DeleteRows from '@tests/fixtures/svelte/DeleteRows.svelte';
+import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
+import ShadowModal from '@tests/fixtures/svelte/ShadowModal.svelte';
+import { textSnippet } from '@tests/fixtures/svelte/snippets';
 import { describe, expect, it, vi } from 'vitest';
 
 function shadowApp() {
@@ -35,6 +35,7 @@ describe('Modal', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Rest' });
     expect(dialog).toHaveAccessibleDescription('Recover your charges.');
     expect(dialog).toHaveTextContent('Body');
+    expect(dialog.querySelector('header')).toBeNull();
   });
 
   it('closes on Escape and returns focus to the trigger', async () => {

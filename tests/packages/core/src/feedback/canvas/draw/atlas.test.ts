@@ -2,8 +2,8 @@
 import { stubCanvas } from '@tests/fixtures/canvas';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
-  StampCache,
   createStampGrid,
+  StampCache,
 } from '../../../../../../../packages/core/src/feedback/canvas/draw/atlas';
 
 afterEach(() => vi.unstubAllGlobals());

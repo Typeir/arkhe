@@ -1,4 +1,3 @@
-import { FX_LOG, resetFx } from '@tests/fixtures/fakeFx';
 import { screen, waitFor } from '@testing-library/dom';
 import {
   act,
@@ -10,6 +9,7 @@ import {
   render as renderSvelte,
 } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import { FX_LOG, resetFx } from '@tests/fixtures/fakeFx';
 import { describe, expect, it, vi } from 'vitest';
 import { ReactCases } from './ReactCases';
 import SvelteCases from './SvelteCases.svelte';

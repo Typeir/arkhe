@@ -1,8 +1,7 @@
 /**
- * @fileoverview What Tooltip and HoverCard share: open state that is
- * controlled or not, a body mounted on first open after hydration and kept
- * after, a place in the hint tree, tap handling, and a trigger that is a
- * button, a link or inline text.
+ * @fileoverview What Tooltip and HoverCard share: a body mounted on first
+ * open after hydration and kept after, a place in the hint tree, tap
+ * handling, and a trigger that is a button, a link or inline text.
  *
  * @module packages/react/src/hint/HintTrigger
  * @version 1.0.0
@@ -14,23 +13,23 @@
 
 import {
   HintNode,
-  REACT_EVENTS,
   hintTriggerProps,
-  watchOutsideTap,
   type PointerMemory,
+  REACT_EVENTS,
+  watchOutsideTap,
 } from '@arkhe/core';
 import {
   createContext,
+  type HTMLAttributes,
+  type JSX,
+  type ReactNode,
   useContext,
   useEffect,
   useEffectEvent,
   useState,
-  type HTMLAttributes,
-  type JSX,
-  type ReactNode,
 } from 'react';
-import { useArkhe } from '../base/ArkheProvider.js';
 import { useArkheEnvironment } from '../base/ArkheEnvironment.js';
+import { useArkhe } from '../base/ArkheProvider.js';
 import { useHydrated } from '../base/useHydrated.js';
 
 /**
@@ -51,43 +50,6 @@ export function useHintNode(): HintNode {
   const parent = useContext(HintContext);
   const [node] = useState(() => new HintNode(parent));
   return node;
-}
-
-/**
- * Open state of a hint and its setter.
- *
- * @interface OpenState
- * @property {boolean} shown - Open state to hand Zag.
- * @property {(open: boolean) => void} change - Sets it and reports changes.
- */
-export interface OpenState {
-  readonly shown: boolean;
-  readonly change: (open: boolean) => void;
-}
-
-/**
- * Holds the open state: `open` when given, else its own, seeded by
- * `defaultOpen`. Reports only real changes.
- *
- * @function useOpenState
- * @param {boolean} [open] - Controlled open state.
- * @param {boolean} [defaultOpen] - First open state when uncontrolled.
- * @param {(open: boolean) => void} [onOpenChange] - Open-state callback.
- * @returns {OpenState} State and setter.
- */
-export function useOpenState(
-  open?: boolean,
-  defaultOpen?: boolean,
-  onOpenChange?: (open: boolean) => void,
-): OpenState {
-  const [inner, setInner] = useState(defaultOpen ?? false);
-  const shown = open ?? inner;
-  const change = (next: boolean) => {
-    if (next === shown) return;
-    setInner(next);
-    onOpenChange?.(next);
-  };
-  return { shown, change };
 }
 
 /**
@@ -126,34 +88,48 @@ export interface HintInput<P extends object> {
  * @param {HintInput<P>} input - Open state, trigger props, positioner id, node.
  * @returns {{ trigger: P; mounted: boolean }} Trigger props and mount flag.
  */
-export function useHint<P extends object>(
-  input: HintInput<P>,
-): { trigger: P; mounted: boolean } {
-  const { open, setOpen, trigger, positionerId, node } = input;
+export function useHint<P extends object>({
+  open,
+  setOpen,
+  trigger,
+  positionerId,
+  node,
+  leaving,
+  activate,
+  keys,
+}: HintInput<P>): { trigger: P; mounted: boolean } {
   const env = useArkheEnvironment();
   const hydrated = useHydrated();
   const [opened, setOpened] = useState(false);
   if (open && hydrated && !opened) setOpened(true);
-  const [memory] = useState<PointerMemory>(() => ({ current: undefined }));
-  const close = useEffectEvent(() => setOpen(false));
-  const leaving = useEffectEvent(() => input.leaving());
+  const [memory] = useState<PointerMemory>(() => ({ current: null }));
+  const close = useEffectEvent(() => {
+    setOpen(false);
+  });
+  const closing = useEffectEvent(() => leaving());
   const triggerId = trigger.id ?? '';
   useEffect(
     () =>
       node.attach({
-        close: () => close(),
-        leaving: () => leaving(),
+        close: () => {
+          close();
+        },
+        leaving: () => closing(),
         ids: () => [triggerId, positionerId],
       }),
     [node, triggerId, positionerId],
   );
-  useEffect(() => node.report(open), [node, open]);
+  useEffect(() => {
+    node.report(open);
+  }, [node, open]);
   useEffect(() => {
     if (!open) return undefined;
     return watchOutsideTap(
       env.getRootNode(),
       () => node.ids(),
-      () => close(),
+      () => {
+        close();
+      },
     );
   }, [open, env, node]);
   return {
@@ -163,8 +139,8 @@ export function useHint<P extends object>(
       memory,
       names: REACT_EVENTS,
       holds: (target) => node.holds(env.getRootNode(), target),
-      activate: input.activate,
-      keys: input.keys,
+      activate,
+      keys,
     }),
     mounted: opened,
   };
@@ -187,9 +163,9 @@ export interface HintTriggerProps {
 }
 
 /**
- * Renders a hint trigger: a button by default, the provider's link with
- * `href`, or a `span` with a tab stop when `inline`, which may hold other
- * triggers. `href` wins over `inline`.
+ * Renders a hint trigger: the provider's link with `href`, a `span` with a
+ * tab stop when `inline`, which may hold other triggers, else a button.
+ * `href` wins over `inline`.
  *
  * @component
  * @param {HintTriggerProps} props - Attributes, kind, content.

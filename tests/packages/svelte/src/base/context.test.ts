@@ -1,7 +1,7 @@
-import { Announcer, FxLoader, resolveLabels } from '@arkhe/core';
 import type { ArkheContextValue } from '@arkhe/svelte';
-import ContextProbe from '@tests/fixtures/svelte/ContextProbe.svelte';
+import { Announcer, FxLoader, resolveLabels } from '@arkhe/core';
 import { render } from '@testing-library/svelte';
+import ContextProbe from '@tests/fixtures/svelte/ContextProbe.svelte';
 import { describe, expect, it } from 'vitest';
 
 describe('useArkhe', () => {

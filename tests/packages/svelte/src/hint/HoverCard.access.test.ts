@@ -1,8 +1,8 @@
 import { HoverCard } from '@arkhe/svelte';
-import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
-import { textSnippet } from '@tests/fixtures/svelte/snippets';
 import { render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
+import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
+import { textSnippet } from '@tests/fixtures/svelte/snippets';
 import { describe, expect, it } from 'vitest';
 
 const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -44,7 +44,7 @@ describe('HoverCard access', () => {
     expect(
       await screen.findByRole('button', { name: 'Unpin Charge' }),
     ).toHaveAttribute('aria-pressed', 'true');
-    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+    await userEvent.click(screen.getByRole('button', { name: /^Close / }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     expect(trigger).toHaveFocus();
   });
@@ -52,7 +52,7 @@ describe('HoverCard access', () => {
   it('closes a pinned card on Escape', async () => {
     render(HoverCard, props());
     await userEvent.click(screen.getByRole('button', { name: 'charge' }));
-    await screen.findByRole('button', { name: 'Close' });
+    await screen.findByRole('button', { name: /^Close / });
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
   });
@@ -63,7 +63,7 @@ describe('HoverCard access', () => {
     trigger.focus();
     await userEvent.keyboard('{Enter}');
     expect(
-      await screen.findByRole('button', { name: 'Close' }),
+      await screen.findByRole('button', { name: /^Close / }),
     ).toBeInTheDocument();
   });
 

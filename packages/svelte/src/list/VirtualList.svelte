@@ -4,15 +4,15 @@ Renders a scroll box over a long list of fixed-pitch rows that draws only the
 rows in view plus an overscan margin. Each row says its place in the whole
 set.
 -->
-<script lang="ts" generics="T">
-  import { ARKHE_CLASS, partAttrs, type VirtualRange } from '@arkhe/core';
-  import { untrack, type Snippet } from 'svelte';
-  import { useVirtualRows } from './virtualRows.svelte.js';
+<script module lang="ts">
+  import type { VirtualRange } from '@arkhe/core';
+  import type { Snippet } from 'svelte';
 
   /**
    * Props of VirtualList.
    *
-   * @interface Props
+   * @interface VirtualListProps
+   * @template T
    * @property {readonly T[]} items - Rows.
    * @property {number} rowPitch - Row height in rem.
    * @property {Snippet<[T, number]>} item - Row body.
@@ -22,7 +22,7 @@ set.
    * @property {(item: T, index: number) => string | number} [getKey] - Stable row key. Defaults to the index.
    * @property {(visible: VirtualRange) => void} [onRange] - Rows in view changed, as to load more near the end.
    */
-  interface Props {
+  export interface VirtualListProps<T> {
     items: readonly T[];
     rowPitch: number;
     item: Snippet<[T, number]>;
@@ -32,37 +32,50 @@ set.
     getKey?: (item: T, index: number) => string | number;
     onRange?: (visible: VirtualRange) => void;
   }
+</script>
 
-  let props: Props = $props();
+<script lang="ts" generics="T">
+  import { ARKHE_CLASS, partAttrs } from '@arkhe/core';
+  import { untrack } from 'svelte';
+  import { useVirtualRows } from './virtualRows.svelte.js';
+
+  let {
+    items,
+    rowPitch,
+    item,
+    label,
+    maxHeight,
+    overscan,
+    getKey,
+    onRange,
+  }: VirtualListProps<T> = $props();
   const rows = useVirtualRows(
-    () => props.items.length,
-    () => props.rowPitch,
-    untrack(() => props.overscan),
+    () => items.length,
+    () => rowPitch,
+    untrack(() => overscan),
   );
   const start = $derived(rows.visible.start);
   const end = $derived(rows.visible.end);
   $effect(() => {
-    props.onRange?.({ start, end });
+    onRange?.({ start, end });
   });
 </script>
 
-<div
+<ul
   class={ARKHE_CLASS}
   {...partAttrs('virtual-list', 'root')}
-  role="list"
-  aria-label={props.label}
+  aria-label={label}
   {@attach rows.attach}
   style:--row-pitch={rows.vars?.['--row-pitch']}
   style:--virtual-before={rows.vars?.['--virtual-before']}
   style:--virtual-after={rows.vars?.['--virtual-after']}
-  style:--virtual-max={props.maxHeight}
+  style:--virtual-max={maxHeight}
   data-virtual="">
-  {#each props.items.slice(rows.range.start, rows.range.end) as entry, at (props.getKey?.(entry, rows.range.start + at) ?? rows.range.start + at)}
-    <div
+  {#each items.slice(rows.range.start, rows.range.end) as entry, at (getKey?.(entry, rows.range.start + at) ?? rows.range.start + at)}
+    <li
       {...partAttrs('virtual-list', 'item')}
-      role="listitem"
       {...rows.position(rows.range.start + at)}>
-      {@render props.item(entry, rows.range.start + at)}
-    </div>
+      {@render item(entry, rows.range.start + at)}
+    </li>
   {/each}
-</div>
+</ul>
