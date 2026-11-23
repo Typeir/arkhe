@@ -8,12 +8,14 @@ toggle stays reachable and ignores presses. `value` binds.
 <script lang="ts">
   import {
     ARKHE_CLASS,
+    dispatch,
     partAttrs,
     rovingFocus,
     toggleRootAttrs,
-    togglePress,
+    toggleReduce,
     toggleShown,
     uniqueByValue,
+    type ToggleAction,
     type ToggleItem,
     type ToggleOrientation,
   } from '@arkhe/core';
@@ -70,12 +72,13 @@ toggle stays reachable and ignores presses. `value` binds.
   const all = $derived(uniqueByValue(items));
   const shown = $derived(toggleShown(all, value, limit, expanded));
   const commit = (next: readonly string[]) => {
-    if (next === value) return;
     value = next;
     onValueChange?.(next);
   };
+  const act = (action: ToggleAction) =>
+    dispatch(toggleReduce, value, action, { multiple, deselectable }, commit);
   const clear = () => {
-    commit([]);
+    act({ type: 'clear' });
     root?.querySelector<HTMLElement>('[data-part="item"]')?.focus();
   };
 </script>
@@ -94,8 +97,7 @@ toggle stays reachable and ignores presses. `value` binds.
       data-value={entry.value}
       aria-pressed={on}
       aria-disabled={entry.disabled ? true : undefined}
-      onclick={() =>
-        commit(togglePress(value, entry, { multiple, deselectable }))}>
+      onclick={() => act({ type: 'press', item: entry })}>
       {#if entry.icon}<Icon name={entry.icon} />{/if}
       {#if content}{@render content(entry, on)}{:else}<span
           {...partAttrs('toggle-group', 'label')}>{entry.label}</span

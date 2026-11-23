@@ -1,5 +1,10 @@
 // @vitest-environment jsdom
-import { collapsibleIds, findableRegion, headingTag } from '@arkhe/core';
+import {
+  collapsibleIds,
+  collapsibleReduce,
+  findableRegion,
+  headingTag,
+} from '@arkhe/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 afterEach(() => {
@@ -57,5 +62,23 @@ describe('findableRegion', () => {
       .querySelector('p')
       ?.dispatchEvent(new Event('beforematch', { bubbles: true }));
     expect(onFound).toHaveBeenCalledOnce();
+  });
+});
+
+describe('collapsibleReduce', () => {
+  it('toggles and sets', () => {
+    expect(collapsibleReduce(false, { type: 'toggle' }, {})).toBe(true);
+    expect(collapsibleReduce(true, { type: 'set', open: false }, {})).toBe(
+      false,
+    );
+  });
+
+  it('ignores presses and sets while disabled, never a reveal', () => {
+    const rules = { disabled: true };
+    expect(collapsibleReduce(false, { type: 'toggle' }, rules)).toBe(false);
+    expect(collapsibleReduce(true, { type: 'set', open: false }, rules)).toBe(
+      true,
+    );
+    expect(collapsibleReduce(false, { type: 'reveal' }, rules)).toBe(true);
   });
 });

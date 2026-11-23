@@ -1,12 +1,18 @@
 <!--
 @component
 Svelte specimen section for sections that open: a collapsible with a heading
-and an action, one nested in another, a lazy one hiding a phrase find-in-page
-can reach, one that grows while open, two disclosures in a single-open group,
-and accordions.
+and a lock that disables its controls, one nested in another, a lazy one
+hiding a phrase find-in-page can reach, one that grows while open, two
+disclosures in a single-open group, and accordions.
 -->
 <script lang="ts">
-  import { Accordion, Button, Collapsible, Disclosure } from '@arkhe/svelte';
+  import {
+    Accordion,
+    Button,
+    Checkbox,
+    Collapsible,
+    Disclosure,
+  } from '@arkhe/svelte';
   import {
     SPECIMEN_ACCORDION,
     SPECIMEN_ACCORDION_TEXT,
@@ -27,7 +33,10 @@ and accordions.
         <Button pressed={locked} onclick={() => (locked = !locked)}
           >Lock</Button>
       {/snippet}
-      <p>Halftone dots over the base image.</p>
+      <fieldset class="bare" disabled={locked}>
+        <p>Halftone dots over the base image.</p>
+        <Checkbox label="Dither" defaultChecked />
+      </fieldset>
       <Collapsible title="Inner">
         <p>Dots per inch, angle and ink.</p>
       </Collapsible>

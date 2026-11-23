@@ -20,4 +20,10 @@ describe('Svelte CollapseSection', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Grow' }));
     expect(screen.getByText('Line 2')).toBeInTheDocument();
   });
+  it('locks the layer controls and leaves its trigger live', async () => {
+    render(CollapseSection);
+    await userEvent.click(screen.getByRole('button', { name: 'Lock' }));
+    expect(screen.getByRole('checkbox', { name: 'Dither' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Layer' })).toBeEnabled();
+  });
 });

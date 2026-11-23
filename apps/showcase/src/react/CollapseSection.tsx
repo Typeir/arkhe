@@ -1,8 +1,9 @@
 /**
  * @fileoverview React specimen section for sections that open: a
- * collapsible with a heading and an action, one nested in another, a lazy
- * one hiding a phrase find-in-page can reach, one that grows while open, two
- * disclosures in a single-open group, and accordions.
+ * collapsible with a heading and a lock that disables its controls, one
+ * nested in another, a lazy one hiding a phrase find-in-page can reach, one
+ * that grows while open, two disclosures in a single-open group, and
+ * accordions.
  *
  * @module apps/showcase/src/react/CollapseSection
  * @version 1.0.0
@@ -10,7 +11,13 @@
  * @since 0.4.0
  */
 
-import { Accordion, Button, Collapsible, Disclosure } from '@arkhe/react';
+import {
+  Accordion,
+  Button,
+  Checkbox,
+  Collapsible,
+  Disclosure,
+} from '@arkhe/react';
 import { useState, type JSX } from 'react';
 import {
   SPECIMEN_ACCORDION,
@@ -40,7 +47,10 @@ export const CollapseSection = (): JSX.Element => {
               Lock
             </Button>
           }>
-          <p>Halftone dots over the base image.</p>
+          <fieldset className='bare' disabled={locked}>
+            <p>Halftone dots over the base image.</p>
+            <Checkbox label='Dither' defaultChecked />
+          </fieldset>
           <Collapsible title='Inner'>
             <p>Dots per inch, angle and ink.</p>
           </Collapsible>

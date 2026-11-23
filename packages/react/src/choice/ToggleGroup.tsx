@@ -13,12 +13,14 @@
 
 import {
   ARKHE_CLASS,
+  dispatch,
   partAttrs,
   rovingFocus,
   toggleRootAttrs,
-  togglePress,
+  toggleReduce,
   toggleShown,
   uniqueByValue,
+  type ToggleAction,
   type ToggleItem,
   type ToggleOrientation,
 } from '@arkhe/core';
@@ -86,12 +88,13 @@ export const ToggleGroup = ({
   const all = uniqueByValue(items);
   useEffect(() => (root.current ? rovingFocus(root.current) : undefined), []);
   const commit = (next: readonly string[]) => {
-    if (next === pressed) return;
     if (value === undefined) setOwn(next);
     onValueChange?.(next);
   };
+  const act = (action: ToggleAction) =>
+    dispatch(toggleReduce, pressed, action, { multiple, deselectable }, commit);
   const clear = () => {
-    commit([]);
+    act({ type: 'clear' });
     root.current?.querySelector<HTMLElement>('[data-part="item"]')?.focus();
   };
   return (
@@ -110,9 +113,7 @@ export const ToggleGroup = ({
             data-value={item.value}
             aria-pressed={on}
             aria-disabled={item.disabled ? true : undefined}
-            onClick={() =>
-              commit(togglePress(pressed, item, { multiple, deselectable }))
-            }>
+            onClick={() => act({ type: 'press', item })}>
             {item.icon ? <Icon name={item.icon} /> : null}
             {renderItem ? (
               renderItem(item, on)

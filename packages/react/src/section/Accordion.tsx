@@ -15,10 +15,11 @@ import {
   ARKHE_CLASS,
   accordionAllOpen,
   accordionHeld,
-  accordionToggle,
-  accordionToggleAll,
+  accordionReduce,
+  dispatch,
   partAttrs,
   uniqueByValue,
+  type AccordionAction,
   type AccordionItem,
   type HeadingLevel,
 } from '@arkhe/core';
@@ -76,12 +77,13 @@ export const Accordion = ({
   const [own, setOwn] = useState<readonly string[]>(defaultValue ?? []);
   const open = value ?? own;
   const all = uniqueByValue(items);
-  const rules = { multiple, collapsible };
+  const rules = { items: all, multiple, collapsible };
   const commit = (next: readonly string[]) => {
-    if (next === open) return;
     if (value === undefined) setOwn(next);
     onValueChange?.(next);
   };
+  const act = (action: AccordionAction) =>
+    dispatch(accordionReduce, open, action, rules, commit);
   const full = accordionAllOpen(all, open);
   const panelFor = (key: string) =>
     typeof panels === 'function' ? panels(key) : panels[key];
@@ -92,7 +94,7 @@ export const Accordion = ({
           type='button'
           {...partAttrs('accordion', 'toggle-all')}
           aria-expanded={full}
-          onClick={() => commit(accordionToggleAll(all, open, rules))}>
+          onClick={() => act({ type: 'toggle-all' })}>
           {full ? labels.collapseAll : labels.expandAll}
         </button>
       ) : null}
@@ -103,9 +105,7 @@ export const Accordion = ({
           heading={heading}
           open={open.includes(item.value)}
           disabled={item.disabled || accordionHeld(open, item.value, rules)}
-          onOpenChange={(next) =>
-            commit(accordionToggle(open, item, next, rules))
-          }>
+          onOpenChange={(next) => act({ type: 'set', item, open: next })}>
           {panelFor(item.value)}
         </Collapsible>
       ))}

@@ -8,9 +8,12 @@ reveals it, the section opens. Height animates in CSS. `open` binds.
   import {
     ARKHE_CLASS,
     collapsibleIds,
+    collapsibleReduce,
+    dispatch,
     findableRegion,
     headingTag,
     partAttrs,
+    type CollapsibleAction,
     type HeadingLevel,
   } from '@arkhe/core';
   import type { Snippet } from 'svelte';
@@ -61,10 +64,12 @@ reveals it, the section opens. Height animates in CSS. `open` binds.
     if (open) seen = true;
   });
   const mounted = $derived(!lazy || seen || open);
-  const change = (next: boolean) => {
+  const commit = (next: boolean) => {
     open = next;
     onOpenChange?.(next);
   };
+  const act = (action: CollapsibleAction) =>
+    dispatch(collapsibleReduce, Boolean(open), action, { disabled }, commit);
 </script>
 
 {#snippet trigger()}
@@ -75,9 +80,7 @@ reveals it, the section opens. Height animates in CSS. `open` binds.
     aria-expanded={open}
     aria-controls={ids.content}
     aria-disabled={disabled ? true : undefined}
-    onclick={() => {
-      if (!disabled) change(!open);
-    }}>
+    onclick={() => act({ type: 'toggle' })}>
     <span {...partAttrs('collapsible', 'marker')}
       ><Icon name="chevron-down" /></span>
     <span {...partAttrs('collapsible', 'title')}>{title}</span>
@@ -85,10 +88,7 @@ reveals it, the section opens. Height animates in CSS. `open` binds.
 {/snippet}
 
 <div
-  {@attach (node) =>
-    findableRegion(node, () => {
-      if (!open) change(true);
-    })}
+  {@attach (node) => findableRegion(node, () => act({ type: 'reveal' }))}
   class={ARKHE_CLASS}
   {...partAttrs('collapsible', 'root')}
   data-state={open ? 'open' : 'closed'}>

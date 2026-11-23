@@ -10,10 +10,11 @@ triggers: arrows scroll long panels. `value` binds.
     ARKHE_CLASS,
     accordionAllOpen,
     accordionHeld,
-    accordionToggle,
-    accordionToggleAll,
+    accordionReduce,
+    dispatch,
     partAttrs,
     uniqueByValue,
+    type AccordionAction,
     type AccordionItem,
     type HeadingLevel,
   } from '@arkhe/core';
@@ -60,13 +61,14 @@ triggers: arrows scroll long panels. `value` binds.
   }: Props = $props();
   const arkhe = useArkhe();
   const all = $derived(uniqueByValue(items));
-  const rules = $derived({ multiple, collapsible });
+  const rules = $derived({ items: all, multiple, collapsible });
   const full = $derived(accordionAllOpen(all, value));
   const commit = (next: readonly string[]) => {
-    if (next === value) return;
     value = next;
     onValueChange?.(next);
   };
+  const act = (action: AccordionAction) =>
+    dispatch(accordionReduce, value, action, rules, commit);
 </script>
 
 <div class={ARKHE_CLASS} {...partAttrs('accordion', 'root')}>
@@ -75,7 +77,7 @@ triggers: arrows scroll long panels. `value` binds.
       type="button"
       {...partAttrs('accordion', 'toggle-all')}
       aria-expanded={full}
-      onclick={() => commit(accordionToggleAll(all, value, rules))}>
+      onclick={() => act({ type: 'toggle-all' })}>
       {full ? arkhe().labels.collapseAll : arkhe().labels.expandAll}
     </button>
   {/if}
@@ -85,8 +87,7 @@ triggers: arrows scroll long panels. `value` binds.
       {heading}
       open={value.includes(item.value)}
       disabled={item.disabled || accordionHeld(value, item.value, rules)}
-      onOpenChange={(next) =>
-        commit(accordionToggle(value, item, next, rules))}>
+      onOpenChange={(next) => act({ type: 'set', item, open: next })}>
       {@render panel(item.value)}
     </Collapsible>
   {/each}

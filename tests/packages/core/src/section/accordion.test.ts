@@ -1,9 +1,9 @@
 import {
   accordionAllOpen,
   accordionHeld,
-  accordionToggle,
-  accordionToggleAll,
+  accordionReduce,
   type AccordionItem,
+  type AccordionRules,
 } from '@arkhe/core';
 import { describe, expect, it } from 'vitest';
 
@@ -13,44 +13,51 @@ const ITEMS: readonly AccordionItem[] = [
   { value: 'c', title: 'C', disabled: true },
 ];
 const [A, B, C] = ITEMS as [AccordionItem, AccordionItem, AccordionItem];
+const RULES: AccordionRules = { items: ITEMS };
+const set = (item: AccordionItem, open: boolean) =>
+  ({ type: 'set', item, open }) as const;
+const ALL = { type: 'toggle-all' } as const;
 
-describe('accordionToggle', () => {
+describe('accordionReduce: set', () => {
   it('opens and closes independently by default', () => {
-    expect(accordionToggle(['a'], B, true, {})).toEqual(['a', 'b']);
-    expect(accordionToggle(['a', 'b'], A, false, {})).toEqual(['b']);
+    expect(accordionReduce(['a'], set(B, true), RULES)).toEqual(['a', 'b']);
+    expect(accordionReduce(['a', 'b'], set(A, false), RULES)).toEqual(['b']);
   });
 
   it('closes the rest when one opens without multiple', () => {
-    expect(accordionToggle(['a'], B, true, { multiple: false })).toEqual(['b']);
+    expect(
+      accordionReduce(['a'], set(B, true), { ...RULES, multiple: false }),
+    ).toEqual(['b']);
   });
 
   it('holds the last open section when not collapsible', () => {
     const open = ['a'];
-    expect(accordionToggle(open, A, false, { collapsible: false })).toBe(open);
-    expect(accordionHeld(open, 'a', { collapsible: false })).toBe(true);
-    expect(accordionHeld(open, 'a', {})).toBe(false);
+    const held = { ...RULES, collapsible: false };
+    expect(accordionReduce(open, set(A, false), held)).toBe(open);
+    expect(accordionHeld(open, 'a', held)).toBe(true);
+    expect(accordionHeld(open, 'a', RULES)).toBe(false);
   });
 
   it('leaves disabled sections and unchanged requests alone', () => {
     const open = ['a'];
-    expect(accordionToggle(open, C, true, {})).toBe(open);
-    expect(accordionToggle(open, A, true, {})).toBe(open);
+    expect(accordionReduce(open, set(C, true), RULES)).toBe(open);
+    expect(accordionReduce(open, set(A, true), RULES)).toBe(open);
   });
 });
 
-describe('accordionToggleAll', () => {
+describe('accordionReduce: toggle-all', () => {
   it('opens every enabled section, then closes them', () => {
     expect(accordionAllOpen(ITEMS, ['a'])).toBe(false);
-    const all = accordionToggleAll(ITEMS, ['a'], {});
+    const all = accordionReduce(['a'], ALL, RULES);
     expect(all).toEqual(['a', 'b']);
     expect(accordionAllOpen(ITEMS, all)).toBe(true);
-    expect(accordionToggleAll(ITEMS, all, {})).toEqual([]);
+    expect(accordionReduce(all, ALL, RULES)).toEqual([]);
   });
 
   it('keeps disabled sections as they were and one open when held', () => {
-    expect(accordionToggleAll(ITEMS, ['a', 'b', 'c'], {})).toEqual(['c']);
+    expect(accordionReduce(['a', 'b', 'c'], ALL, RULES)).toEqual(['c']);
     expect(
-      accordionToggleAll(ITEMS, ['b', 'a'], { collapsible: false }),
+      accordionReduce(['b', 'a'], ALL, { ...RULES, collapsible: false }),
     ).toEqual(['b']);
   });
 });

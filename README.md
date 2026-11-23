@@ -8,7 +8,7 @@
 | `@arkhe/react`  | [Typeir/arkhe-react](https://github.com/Typeir/arkhe-react)   |
 | `@arkhe/svelte` | [Typeir/arkhe-svelte](https://github.com/Typeir/arkhe-svelte) |
 
-## Docs
+## Docs (Agent Turf)
 
 - [Changelog](.github/docs/changelog.md)
 - [Decisions](.github/docs/decisions.md)

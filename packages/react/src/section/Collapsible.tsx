@@ -14,9 +14,12 @@
 import {
   ARKHE_CLASS,
   collapsibleIds,
+  collapsibleReduce,
+  dispatch,
   findableRegion,
   headingTag,
   partAttrs,
+  type CollapsibleAction,
   type HeadingLevel,
 } from '@arkhe/core';
 import {
@@ -82,13 +85,13 @@ export const Collapsible = ({
   const [seen, setSeen] = useState(shown);
   if (shown && !seen) setSeen(true);
   const root = useRef<HTMLDivElement>(null);
-  const change = (next: boolean) => {
+  const commit = (next: boolean) => {
     if (open === undefined) setOwn(next);
     onOpenChange?.(next);
   };
-  const found = useEffectEvent(() => {
-    if (!shown) change(true);
-  });
+  const act = (action: CollapsibleAction) =>
+    dispatch(collapsibleReduce, shown, action, { disabled }, commit);
+  const found = useEffectEvent(() => act({ type: 'reveal' }));
   useEffect(
     () => (root.current ? findableRegion(root.current, found) : undefined),
     [],
@@ -101,9 +104,7 @@ export const Collapsible = ({
       aria-expanded={shown}
       aria-controls={ids.content}
       aria-disabled={disabled ? true : undefined}
-      onClick={() => {
-        if (!disabled) change(!shown);
-      }}>
+      onClick={() => act({ type: 'toggle' })}>
       <span {...partAttrs('collapsible', 'marker')}>
         <Icon name='chevron-down' />
       </span>
