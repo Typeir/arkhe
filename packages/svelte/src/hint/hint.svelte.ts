@@ -66,6 +66,7 @@ export function useHintNode(): HintNode {
  * @property {() => boolean} leaving - Whether Zag waits to close it after the pointer left.
  * @property {() => void} [activate] - A click that is not a tap; pins a card.
  * @property {boolean} [keys] - Enter and Space also activate.
+ * @property {string | null} [pressed] - Pointer kind of a press that came before the hint started.
  */
 export interface HintInput<P extends object> {
   readonly open: boolean;
@@ -77,6 +78,7 @@ export interface HintInput<P extends object> {
   readonly leaving: () => boolean;
   readonly activate?: () => void;
   readonly keys?: boolean;
+  readonly pressed?: string | null;
 }
 
 /**
@@ -104,7 +106,9 @@ export interface Hint<P extends object> {
  * @returns {Hint<P>} Trigger props and mount flag.
  */
 export function useHint<P extends object>(read: () => HintInput<P>): Hint<P> {
-  const memory: PointerMemory = { current: null };
+  const memory: PointerMemory = {
+    current: untrack(() => read().pressed) ?? null,
+  };
   const node = untrack(() => read().node);
   const triggerId = $derived(read().trigger.id ?? '');
   const positionerId = $derived(read().positionerId);

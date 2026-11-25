@@ -39,24 +39,10 @@ container, so server markup holds the trigger alone.
 </script>
 
 <script lang="ts">
-  import type { HTMLAttributes } from 'svelte/elements';
-  import {
-    ARKHE_CLASS,
-    floatingMachineProps,
-    partAttrs,
-    TOOLTIP_GUTTER,
-  } from '@arkhe/core';
-  import {
-    mergeProps,
-    normalizeProps,
-    portal,
-    useMachine,
-  } from '@zag-js/svelte';
-  import * as tooltip from '@zag-js/tooltip';
-  import { untrack } from 'svelte';
-  import { useArkheEnvironment } from '../base/environment.js';
-  import { useHint, useHintNode } from './hint.svelte.js';
+  import { ARKHE_CLASS, partAttrs } from '@arkhe/core';
   import HintTrigger from './HintTrigger.svelte';
+  import LiveTooltip from './LiveTooltip.svelte';
+  import { useSleep } from './sleep.svelte.js';
 
   let {
     content,
@@ -65,61 +51,28 @@ container, so server markup holds the trigger alone.
     open = $bindable(),
     defaultOpen,
     onOpenChange,
-    placement = 'top',
-    openDelay = 400,
-    closeDelay = 150,
-  }: TooltipProps = $props();
-  const id = $props.id();
-  const env = useArkheEnvironment();
-  const node = useHintNode();
-  const initial = untrack(() => defaultOpen ?? false);
-  const shown = $derived(open ?? initial);
-  const commit = (next: boolean) => {
-    if (next === shown) return;
-    open = next;
-    onOpenChange?.(next);
-  };
-  const service = useMachine(tooltip.machine, () => ({
-    ...floatingMachineProps({
-      id,
-      open: shown,
-      onOpenChange: (next: boolean) => {
-        if (node.request(next)) commit(next);
-      },
-      placement,
-      gutter: TOOLTIP_GUTTER,
-      getRootNode: env().getRootNode,
-    }),
+    placement,
     openDelay,
     closeDelay,
-    interactive: true,
-  }));
-  const api = $derived(tooltip.connect(service, normalizeProps));
-  const hint = useHint(() => ({
-    open: api.open,
-    setOpen: commit,
-    trigger: api.getTriggerProps() as HTMLAttributes<HTMLElement>,
-    positionerId: api.getPositionerProps().id ?? '',
-    getRootNode: env().getRootNode,
-    node,
-    leaving: () => service.state.matches('closing'),
-  }));
+  }: TooltipProps = $props();
+  const id = $props.id();
+  const sleep = useSleep(
+    'tooltip',
+    id,
+    () => open === true || defaultOpen === true,
+  );
 </script>
 
 <span class={ARKHE_CLASS} {...partAttrs('tooltip', 'root')}
-  ><HintTrigger attrs={hint.trigger} {inline}>{@render children()}</HintTrigger
-  >{#if hint.mounted}<div
-      class={ARKHE_CLASS}
-      use:portal={{
-        container: env().container(),
-        getRootNode: env().getRootNode,
-      }}>
-      <div {...mergeProps(api.getPositionerProps(), { hidden: !api.open })}>
-        <div {...api.getContentProps()}>
-          <div {...api.getArrowProps()}>
-            <div {...api.getArrowTipProps()}></div>
-          </div>
-          {#if typeof content === 'string'}{content}{:else}{@render content()}{/if}
-        </div>
-      </div>
-    </div>{/if}</span>
+  ><HintTrigger attrs={sleep.attrs} {inline}>{@render children()}</HintTrigger
+  >{#if sleep.waking !== null}<LiveTooltip
+      bind:open
+      {content}
+      {defaultOpen}
+      {onOpenChange}
+      {placement}
+      {openDelay}
+      {closeDelay}
+      {id}
+      waking={sleep.waking}
+      report={sleep.report} />{/if}</span>

@@ -65,6 +65,7 @@ export function useHintNode(): HintNode {
  * @property {() => boolean} leaving - Whether Zag waits to close it after the pointer left.
  * @property {() => void} [activate] - A click that is not a tap; pins a card.
  * @property {boolean} [keys] - Enter and Space also activate.
+ * @property {string | null} [pressed] - Pointer kind of a press that came before the hint started.
  */
 export interface HintInput<P extends object> {
   readonly open: boolean;
@@ -75,6 +76,7 @@ export interface HintInput<P extends object> {
   readonly leaving: () => boolean;
   readonly activate?: () => void;
   readonly keys?: boolean;
+  readonly pressed?: string | null;
 }
 
 /**
@@ -97,12 +99,15 @@ export function useHint<P extends object>({
   leaving,
   activate,
   keys,
+  pressed,
 }: HintInput<P>): { trigger: P; mounted: boolean } {
   const env = useArkheEnvironment();
   const hydrated = useHydrated();
   const [opened, setOpened] = useState(false);
   if (open && hydrated && !opened) setOpened(true);
-  const [memory] = useState<PointerMemory>(() => ({ current: null }));
+  const [memory] = useState<PointerMemory>(() => ({
+    current: pressed ?? null,
+  }));
   const close = useEffectEvent(() => {
     setOpen(false);
   });

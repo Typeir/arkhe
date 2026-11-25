@@ -9,6 +9,7 @@ describe('event names', () => {
       keydown: 'onKeyDown',
       pointerdown: 'onPointerDown',
       pointerleave: 'onPointerLeave',
+      pointerover: 'onPointerOver',
       click: 'onClick',
     });
   });
@@ -20,6 +21,7 @@ describe('event names', () => {
       keydown: 'onkeydown',
       pointerdown: 'onpointerdown',
       pointerleave: 'onpointerleave',
+      pointerover: 'onpointerover',
       click: 'onclick',
     });
   });
