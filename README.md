@@ -16,8 +16,8 @@
 ## Install
 
 ```bash
-npm install github:Typeir/arkhe-react#v0.3.0
-npm install github:Typeir/arkhe-svelte#v0.3.0
+npm install github:Typeir/arkhe-react#v0.4.0
+npm install github:Typeir/arkhe-svelte#v0.4.0
 ```
 
 ## Use
