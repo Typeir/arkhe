@@ -15,11 +15,13 @@ replays the waking event, and renders the body once opened.
    * @property {string} id - Machine id.
    * @property {Waking} waking - What woke the machine; replayed once.
    * @property {(props: object) => void} report - Takes the trigger props.
+   * @property {() => boolean} hovering - The waking pointer is still over the trigger.
    */
   export interface LiveTooltipProps extends Omit<TooltipProps, 'children'> {
     id: string;
     waking: Waking;
     report: (props: object) => void;
+    hovering: () => boolean;
   }
 </script>
 
@@ -52,6 +54,7 @@ replays the waking event, and renders the body once opened.
     id,
     waking,
     report,
+    hovering,
   }: LiveTooltipProps = $props();
   const env = useArkheEnvironment();
   const node = useHintNode();
@@ -98,7 +101,7 @@ replays the waking event, and renders the body once opened.
     if (waking === 'focus' && el?.matches(':focus-visible') === true) {
       service.send({ type: 'open', src: 'trigger.focus' });
     }
-    if (waking === 'hover' && el?.matches(':hover') === true) {
+    if (waking === 'hover' && hovering()) {
       service.send({ type: 'pointer.move' });
     }
   });

@@ -75,4 +75,5 @@ container, so server markup holds the trigger alone.
       {closeDelay}
       {id}
       waking={sleep.waking}
-      report={sleep.report} />{/if}</span>
+      report={sleep.report}
+      hovering={sleep.hovering} />{/if}</span>

@@ -21,7 +21,7 @@ import {
   type HintWake,
   REACT_EVENTS,
   sleepingTrigger,
-  wakeHandlers,
+  WakeWatch,
 } from '@arkhe/core';
 import { trackFocusVisible } from '@zag-js/focus-visible';
 import {
@@ -54,11 +54,13 @@ type TriggerProps = Record<string, unknown>;
  * @property {Waking | null} waking - Why the machine runs; null while asleep.
  * @property {HTMLAttributes<HTMLElement>} attrs - Trigger props to spread.
  * @property {(props: object) => void} report - The live machine hands its trigger props here after each render.
+ * @property {() => boolean} hovering - The pointer that woke the hint is still over the trigger.
  */
 export interface Sleep {
   readonly waking: Waking | null;
   readonly attrs: HTMLAttributes<HTMLElement>;
   readonly report: (props: object) => void;
+  readonly hovering: () => boolean;
 }
 
 /**
@@ -128,13 +130,23 @@ export function useSleep(scope: HintScope, id: string, open: boolean): Sleep {
       ),
     [keys],
   );
-  const wake = useMemo(
-    () =>
-      wakeHandlers(REACT_EVENTS, (kind) => {
-        setWaking(kind);
-      }),
-    [],
-  );
-  const attrs = { ...view, ...(waking === null ? wake : proxies) };
-  return { waking, attrs: attrs as HTMLAttributes<HTMLElement>, report };
+  const [watch] = useState(() => new WakeWatch(REACT_EVENTS, setWaking));
+  const [hovering] = useState(() => () => watch.hovering);
+  const [leave] = useState(() => (event: unknown) => {
+    watch.leave();
+    (
+      handlers.current[REACT_EVENTS.pointerleave] as
+        ((e: unknown) => void) | undefined
+    )?.(event);
+  });
+  const attrs =
+    waking === null
+      ? { ...view, ...watch.handlers }
+      : { ...view, ...proxies, [REACT_EVENTS.pointerleave]: leave };
+  return {
+    waking,
+    attrs: attrs as HTMLAttributes<HTMLElement>,
+    report,
+    hovering,
+  };
 }

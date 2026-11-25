@@ -9,8 +9,8 @@ and focus inside it returns to the trigger; a tap outside closes an unpinned
 one. Cards nest, load content on first open, and pin open until unpinned;
 unpinning hands the card back to hover, so it stays open while the pointer
 is over it. A card stays open while a card nested in it is open. A new
-`load` loads afresh. The card mounts on first open, portalled into the
-environment's container, so server markup holds the trigger alone and the
+`load` loads afresh. The machine sleeps until the first hover, focus or tap.
+The card mounts on first open, portalled into the environment's container, so server markup holds the trigger alone and the
 body may hold any content. Give `content`, or `load` with `loaded`.
 -->
 <script module lang="ts">
@@ -64,221 +64,41 @@ body may hold any content. Give `content`, or `load` with `loaded`.
 </script>
 
 <script lang="ts" generics="T">
-  import {
-    ARKHE_CLASS,
-    CardAccess,
-    cardContentProps,
-    cardTriggerAria,
-    elementById,
-    flag,
-    floatingMachineProps,
-    HINT_GUTTER,
-    partAttrs,
-    SVELTE_EVENTS,
-  } from '@arkhe/core';
-  import * as hoverCard from '@zag-js/hover-card';
-  import {
-    mergeProps,
-    normalizeProps,
-    portal,
-    useMachine,
-  } from '@zag-js/svelte';
-  import { untrack } from 'svelte';
-  import { useArkhe } from '../base/context.js';
-  import { useArkheEnvironment } from '../base/environment.js';
-  import { useContentLoader } from '../feedback/contentLoader.svelte.js';
-  import Status from '../feedback/Status.svelte';
-  import { useCardDrag } from './cardDrag.svelte.js';
-  import CardHeader from './CardHeader.svelte';
-  import { useHint, useHintNode } from './hint.svelte.js';
-  import HintScope from './HintScope.svelte';
+  import { ARKHE_CLASS, cardTriggerAria, partAttrs } from '@arkhe/core';
   import HintTrigger from './HintTrigger.svelte';
+  import LiveHoverCard from './LiveHoverCard.svelte';
+  import { useSleep } from './sleep.svelte.js';
 
-  let {
-    title,
-    children,
-    href,
-    headerLink = true,
-    actions,
-    inline,
-    content,
-    load,
-    loaded,
-    pinnable = true,
-    open = $bindable(),
-    defaultOpen,
-    onOpenChange,
-    placement = 'bottom-start',
-    openDelay = 400,
-    closeDelay = 200,
-    width,
-    card,
-  }: HoverCardProps<T> = $props();
+  let { children, open = $bindable(), ...rest }: HoverCardProps<T> = $props();
   const id = $props.id();
-  const arkhe = useArkhe();
-  const env = useArkheEnvironment();
-  const node = useHintNode();
-  const body = useContentLoader(() => load);
-  const initial = untrack(() => defaultOpen ?? false);
-  const shown = $derived(open ?? initial);
-  let pinned = $state(false);
-  let detached = $state(false);
-  const commit = (next: boolean) => {
-    if (next === shown) return;
-    open = next;
-    onOpenChange?.(next);
-  };
-  const service = useMachine(hoverCard.machine, () => ({
-    ...floatingMachineProps({
-      id,
-      open: shown,
-      hold: pinned,
-      placement,
-      gutter: HINT_GUTTER,
-      onOpenChange: (next: boolean) => {
-        if (node.request(next)) commit(next);
-      },
-      getRootNode: env().getRootNode,
-    }),
-    openDelay,
-    closeDelay,
-    disabled: !(card ?? arkhe().hoverCards),
-  }));
-  const api = $derived(hoverCard.connect(service, normalizeProps));
-  const shownCard = $derived(api.open);
-  const triggerId = $derived(api.getTriggerProps().id ?? '');
-  const contentId = $derived(api.getContentProps().id ?? '');
-  const togglePin = () => {
-    if (pinned) commit(service.state.matches('open'));
-    pinned = !pinned;
-    detached = false;
-  };
-  const unpinAndClose = () => {
-    pinned = false;
-    detached = false;
-    commit(false);
-  };
-  $effect(() => {
-    if (!shown) detached = false;
-  });
-  $effect(() => {
-    if (!shownCard) return undefined;
-    const byId = (key: string) => elementById(env().getRootNode(), key);
-    const [trigger, content] = [triggerId, contentId];
-    const access = new CardAccess({
-      getRootNode: env().getRootNode,
-      trigger: () => byId(trigger),
-      content: () => byId(content),
-      node,
-      close: () => {
-        untrack(() => {
-          commit(false);
-        });
-      },
-      release: () => {
-        untrack(unpinAndClose);
-      },
-    });
-    access.pin(pinned);
-    return access.attach();
-  });
-  const hint = useHint(() => ({
-    open: api.open,
-    setOpen: (next: boolean) => {
-      if (next || !pinned) commit(next);
-    },
-    trigger: api.getTriggerProps(),
-    positionerId: api.getPositionerProps().id ?? '',
-    getRootNode: env().getRootNode,
-    node,
-    leaving: () => service.state.matches('closing'),
-    activate: href === undefined ? togglePin : undefined,
-    keys: href === undefined && Boolean(inline),
-  }));
-  const cardOpen = $derived(api.open && hint.mounted);
-  const move = useCardDrag({
-    open: () => cardOpen,
-    contentId: () => contentId,
-    triggerId: () => triggerId,
-    getRootNode: () => env().getRootNode(),
-    detached: () => detached,
-    setDetached: (on: boolean) => {
-      if (on) pinned = true;
-      detached = on;
-    },
-    pin: () => {
-      pinned = true;
-    },
-    title: () => title,
-    labels: () => arkhe().labels,
-    announce: (text: string) => {
-      arkhe().announcer.announce(text);
-    },
-  });
-  $effect(() => {
-    if (api.open) body.load();
-  });
+  const sleep = useSleep(
+    'hover-card',
+    id,
+    () => open === true || rest.defaultOpen === true,
+  );
+  const attrs = $derived(
+    sleep.waking === null
+      ? {
+          ...sleep.attrs,
+          ...cardTriggerAria({
+            link: rest.href !== undefined,
+            inline: Boolean(rest.inline),
+            open: false,
+            contentId: '',
+            bodyId: '',
+          }),
+        }
+      : sleep.attrs,
+  );
 </script>
 
 <span class={ARKHE_CLASS} {...partAttrs('hover-card', 'root')}
-  ><HintTrigger
-    attrs={{
-      ...hint.trigger,
-      ...cardTriggerAria({
-        link: href !== undefined,
-        inline: Boolean(inline),
-        open: shownCard,
-        contentId,
-        bodyId: `${id}body`,
-      }),
-    }}
-    {href}
-    {inline}>{@render children()}</HintTrigger
-  >{#if hint.mounted}<div
-      class={ARKHE_CLASS}
-      {...partAttrs('hover-card', 'frame')}
-      data-detached={flag(detached)}
-      use:portal={{
-        container: env().container(),
-        getRootNode: env().getRootNode,
-      }}>
-      <div {...mergeProps(api.getPositionerProps(), { hidden: !api.open })}>
-        <div
-          {...mergeProps(
-            cardContentProps(api.getContentProps(), pinned, SVELTE_EVENTS),
-            {
-              role: 'dialog',
-              'aria-labelledby': `${id}title`,
-            },
-          )}
-          data-pinned={flag(pinned)}
-          data-width={width}>
-          <CardHeader
-            {title}
-            titleId={`${id}title`}
-            href={headerLink ? href : undefined}
-            {actions}
-            {pinnable}
-            {pinned}
-            {detached}
-            onMove={move}
-            onTogglePin={togglePin}
-            onClose={() => {
-              elementById(env().getRootNode(), triggerId)?.focus();
-              unpinAndClose();
-            }} />
-          <div {...partAttrs('hover-card', 'body')} id={`${id}body`}>
-            <HintScope {node}>
-              {@render content?.()}
-              {#if body.state.status === 'loading'}
-                <Status kind="loading" />
-              {:else if body.state.status === 'error'}
-                <Status kind="error" />
-              {:else if body.state.status === 'ready'}
-                {@render loaded?.(body.state.value)}
-              {/if}
-            </HintScope>
-          </div>
-        </div>
-      </div>
-    </div>{/if}</span>
+  ><HintTrigger {attrs} href={rest.href} inline={rest.inline}
+    >{@render children()}</HintTrigger
+  >{#if sleep.waking !== null}<LiveHoverCard
+      bind:open
+      {...rest}
+      {id}
+      waking={sleep.waking}
+      report={sleep.report}
+      hovering={sleep.hovering} />{/if}</span>

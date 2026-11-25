@@ -1,9 +1,10 @@
+// @vitest-environment jsdom
 import {
   REACT_EVENTS,
   sleepingTrigger,
   SVELTE_EVENTS,
-  wakeHandlers,
   wakeOf,
+  WakeWatch,
 } from '@arkhe/core';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -35,20 +36,72 @@ describe('wakeOf', () => {
   });
 });
 
-describe('wakeHandlers', () => {
+describe('WakeWatch', () => {
   it.each([
-    [REACT_EVENTS, ['onPointerOver', 'onFocus', 'onPointerDown']],
-    [SVELTE_EVENTS, ['onpointerover', 'onfocusin', 'onpointerdown']],
+    [
+      REACT_EVENTS,
+      ['onPointerOver', 'onFocus', 'onPointerDown', 'onPointerOut'],
+    ],
+    [
+      SVELTE_EVENTS,
+      ['onpointerover', 'onfocusin', 'onpointerdown', 'onpointerout'],
+    ],
   ])('listens on the framework names', (names, keys) => {
-    expect(Object.keys(wakeHandlers(names, () => undefined))).toEqual(keys);
+    expect(Object.keys(new WakeWatch(names, () => undefined).handlers)).toEqual(
+      keys,
+    );
   });
 
-  it('wakes only for events that wake', () => {
+  it('wakes only for events that wake, and tracks the hovering pointer', () => {
     const wake = vi.fn();
-    const handlers = wakeHandlers(REACT_EVENTS, wake);
-    handlers.onPointerOver?.({ type: 'pointerover', pointerType: 'touch' });
+    const watch = new WakeWatch(REACT_EVENTS, wake);
+    const { onPointerOver, onPointerOut, onFocus } = watch.handlers;
+    const trigger = document.createElement('span');
+    const child = trigger.appendChild(document.createElement('b'));
+    onPointerOver?.({ type: 'pointerover', pointerType: 'touch' });
     expect(wake).not.toHaveBeenCalled();
-    handlers.onFocus?.({ type: 'focus' });
-    expect(wake).toHaveBeenCalledWith('focus');
+    expect(watch.hovering).toBe(false);
+    onPointerOver?.({ type: 'pointerover', pointerType: 'mouse' });
+    expect(wake).toHaveBeenCalledWith('hover');
+    expect(watch.hovering).toBe(true);
+    onPointerOut?.({
+      type: 'pointerout',
+      currentTarget: trigger,
+      relatedTarget: child,
+    });
+    expect(watch.hovering).toBe(true);
+    onPointerOut?.({
+      type: 'pointerout',
+      currentTarget: trigger,
+      relatedTarget: document.body,
+    });
+    expect(watch.hovering).toBe(false);
+    onFocus?.({ type: 'focus' });
+    expect(wake).toHaveBeenLastCalledWith('focus');
+  });
+
+  it('leaves events from a nested trigger to that trigger', () => {
+    const outer = document.createElement('span');
+    outer.dataset.scope = 'tooltip';
+    outer.dataset.part = 'trigger';
+    const inner = outer.appendChild(document.createElement('span'));
+    inner.dataset.scope = 'tooltip';
+    inner.dataset.part = 'trigger';
+    const wake = vi.fn();
+    const { onPointerOver } = new WakeWatch(REACT_EVENTS, wake).handlers;
+    onPointerOver?.({
+      type: 'pointerover',
+      pointerType: 'mouse',
+      target: inner,
+      currentTarget: outer,
+    });
+    expect(wake).not.toHaveBeenCalled();
+    onPointerOver?.({
+      type: 'pointerover',
+      pointerType: 'mouse',
+      target: outer,
+      currentTarget: outer,
+    });
+    expect(wake).toHaveBeenCalledWith('hover');
   });
 });

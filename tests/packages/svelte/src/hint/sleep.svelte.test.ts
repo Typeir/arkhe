@@ -1,4 +1,4 @@
-import { Tooltip } from '@arkhe/svelte';
+import { HoverCard, Tooltip } from '@arkhe/svelte';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { textSnippet } from '@tests/fixtures/svelte/snippets';
 import { describe, expect, it } from 'vitest';
@@ -35,4 +35,31 @@ describe('useSleep', () => {
       'Hint',
     );
   });
+
+  it.each([
+    ['button', {}],
+    ['inline', { inline: true }],
+    ['link', { href: '#charge' }],
+  ])(
+    'wakes a %s HoverCard without touching the trigger node or its attributes',
+    async (_kind, extra) => {
+      render(HoverCard, {
+        title: 'Charge',
+        openDelay: 10_000,
+        children: textSnippet('charge'),
+        ...extra,
+      });
+      const trigger = document.querySelector(
+        '[data-scope="hover-card"][data-part="trigger"]',
+      ) as HTMLElement;
+      const before = attributes(trigger);
+      await fireEvent.pointerOver(trigger, { pointerType: 'mouse' });
+      expect(
+        document.querySelector(
+          '[data-scope="hover-card"][data-part="trigger"]',
+        ),
+      ).toBe(trigger);
+      expect(attributes(trigger)).toEqual(before);
+    },
+  );
 });

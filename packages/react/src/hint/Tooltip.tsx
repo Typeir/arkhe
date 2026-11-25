@@ -87,6 +87,7 @@ export const Tooltip = (props: TooltipProps): JSX.Element => {
           id={id}
           waking={sleep.waking}
           report={sleep.report}
+          hovering={sleep.hovering}
         />
       )}
     </span>
@@ -100,11 +101,13 @@ export const Tooltip = (props: TooltipProps): JSX.Element => {
  * @property {string} id - Machine id.
  * @property {Waking} waking - What woke the machine; replayed once.
  * @property {(props: object) => void} report - Takes the trigger props.
+ * @property {() => boolean} hovering - The waking pointer is still over the trigger.
  */
 interface LiveTooltipProps extends TooltipProps {
   readonly id: string;
   readonly waking: Waking;
   readonly report: (props: object) => void;
+  readonly hovering: () => boolean;
 }
 
 /**
@@ -126,6 +129,7 @@ const LiveTooltip = ({
   id,
   waking,
   report,
+  hovering,
 }: LiveTooltipProps): JSX.Element | null => {
   const env = useArkheEnvironment();
   const container = usePortalContainer();
@@ -170,7 +174,7 @@ const LiveTooltip = ({
     if (waking === 'focus' && el?.matches(':focus-visible') === true) {
       service.send({ type: 'open', src: 'trigger.focus' });
     }
-    if (waking === 'hover' && el?.matches(':hover') === true) {
+    if (waking === 'hover' && hovering()) {
       service.send({ type: 'pointer.move' });
     }
   });

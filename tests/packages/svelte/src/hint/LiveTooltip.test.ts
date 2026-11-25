@@ -10,6 +10,7 @@ describe('LiveTooltip', () => {
       id: 'r1',
       waking: 'hover',
       report,
+      hovering: () => false,
     });
     expect(report).toHaveBeenCalled();
     expect(report.mock.lastCall?.[0]).toMatchObject({
@@ -26,6 +27,7 @@ describe('LiveTooltip', () => {
       id: 'r1',
       waking: 'open',
       report: () => undefined,
+      hovering: () => false,
     });
     expect(screen.getByRole('tooltip', { hidden: true })).toHaveTextContent(
       'Hint',

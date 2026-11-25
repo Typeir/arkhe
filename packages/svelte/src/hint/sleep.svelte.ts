@@ -20,7 +20,7 @@ import {
   type HintWake,
   sleepingTrigger,
   SVELTE_EVENTS,
-  wakeHandlers,
+  WakeWatch,
 } from '@arkhe/core';
 import { trackFocusVisible } from '@zag-js/focus-visible';
 import { flushSync, onMount, untrack } from 'svelte';
@@ -40,11 +40,13 @@ export type Waking = HintWake | 'open';
  * @property {Waking | null} waking - Why the machine runs; null while asleep.
  * @property {HTMLAttributes<HTMLElement>} attrs - Trigger props to spread.
  * @property {(props: object) => void} report - The live machine hands its trigger props here.
+ * @property {() => boolean} hovering - The pointer that woke the hint is still over the trigger.
  */
 export interface Sleep {
   readonly waking: Waking | null;
   readonly attrs: HTMLAttributes<HTMLElement>;
   readonly report: (props: object) => void;
+  readonly hovering: () => boolean;
 }
 
 /**
@@ -70,23 +72,31 @@ export function useSleep(
   $effect.pre(() => {
     if (held() && untrack(() => waking) === null) waking = 'open';
   });
+  const watch = new WakeWatch(SVELTE_EVENTS, (kind) => {
+    flushSync(() => {
+      waking = kind;
+    });
+  });
   const asleep = {
     ...sleepingTrigger(scope, id),
-    ...wakeHandlers(SVELTE_EVENTS, (kind) => {
-      flushSync(() => {
-        waking = kind;
-      });
-    }),
+    ...watch.handlers,
   } as HTMLAttributes<HTMLElement>;
+  const leave = (event: PointerEvent) => {
+    watch.leave();
+    (live?.onpointerleave as ((e: PointerEvent) => void) | null | undefined)?.(
+      event,
+    );
+  };
   return {
     get waking() {
       return waking;
     },
     get attrs() {
-      return live ?? asleep;
+      return live === null ? asleep : { ...live, onpointerleave: leave };
     },
     report: (props: object) => {
       live = props as HTMLAttributes<HTMLElement>;
     },
+    hovering: () => watch.hovering,
   };
 }
