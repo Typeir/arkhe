@@ -8,7 +8,7 @@
  * @since 0.1.0
  */
 
-import { ContentLoader, type LoadState } from '@arkhe/core';
+import { type ContentLoader, loaderFor, type LoadState } from '@arkhe/core';
 import { createSubscriber } from 'svelte/reactivity';
 
 /**
@@ -63,7 +63,7 @@ export function useContentLoader<T>(
   const current = $derived.by(() => {
     const next = source();
     if (!next) return null;
-    const loader = new ContentLoader(next);
+    const loader = loaderFor(next);
     return { loader, read: watch(loader) };
   });
   return {

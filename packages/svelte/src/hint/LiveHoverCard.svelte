@@ -7,7 +7,7 @@ moving, loading and nested cards all live here.
 -->
 <script module lang="ts">
   import type { HoverCardProps } from './HoverCard.svelte';
-  import type { Waking } from './sleep.svelte.js';
+  import type { Sleep } from './sleep.svelte.js';
 
   /**
    * Props of LiveHoverCard.
@@ -15,18 +15,16 @@ moving, loading and nested cards all live here.
    * @interface LiveHoverCardProps
    * @template T
    * @property {string} id - Machine id.
-   * @property {Waking} waking - What woke the machine; replayed once.
-   * @property {(props: object) => void} report - Takes the trigger props.
-   * @property {() => boolean} hovering - The waking pointer is still over the trigger.
+   * @property {NonNullable<Sleep['waking']>} waking - What woke the machine; replayed once.
+   * @property {Sleep} sleeper - The sleeping trigger: report, hover, press and sleep.
    */
   export interface LiveHoverCardProps<T> extends Omit<
     HoverCardProps<T>,
     'children'
   > {
     id: string;
-    waking: Waking;
-    report: (props: object) => void;
-    hovering: () => boolean;
+    waking: NonNullable<Sleep['waking']>;
+    sleeper: Sleep;
   }
 </script>
 
@@ -59,6 +57,7 @@ moving, loading and nested cards all live here.
   import CardHeader from './CardHeader.svelte';
   import { useHint, useHintNode } from './hint.svelte.js';
   import HintScope from './HintScope.svelte';
+  import { useSleepAgain } from './sleep.svelte.js';
 
   let {
     title,
@@ -80,8 +79,7 @@ moving, loading and nested cards all live here.
     card,
     id,
     waking,
-    report,
-    hovering,
+    sleeper,
   }: LiveHoverCardProps<T> = $props();
   const arkhe = useArkhe();
   const env = useArkheEnvironment();
@@ -162,7 +160,7 @@ moving, loading and nested cards all live here.
     leaving: () => service.state.matches('closing'),
     activate: href === undefined ? togglePin : undefined,
     keys: href === undefined && Boolean(inline),
-    pressed: waking === 'touch' ? 'touch' : null,
+    pressed: sleeper.press,
   }));
   const cardOpen = $derived(api.open && hint.mounted);
   const move = useCardDrag({
@@ -187,8 +185,17 @@ moving, loading and nested cards all live here.
   $effect(() => {
     if (api.open) body.load();
   });
+  useSleepAgain(() => ({
+    closed: shown !== true && !api.open && service.state.matches('closed'),
+    idle: () => service.state.matches('closed'),
+    opened: hint.mounted,
+    pressing: hint.pressing,
+    hovering: sleeper.hovering,
+    positionerId: api.getPositionerProps().id ?? '',
+    sleep: sleeper.sleep,
+  }));
   $effect.pre(() => {
-    report({
+    sleeper.report({
       ...hint.trigger,
       ...cardTriggerAria({
         link: href !== undefined,
@@ -205,7 +212,7 @@ moving, loading and nested cards all live here.
     if (waking === 'focus' && el?.matches(':focus') === true) {
       service.send({ type: 'TRIGGER_FOCUS' });
     }
-    if (waking === 'hover' && hovering()) {
+    if (waking === 'hover' && sleeper.hovering()) {
       service.send({ type: 'POINTER_ENTER', src: 'trigger' });
     }
   });

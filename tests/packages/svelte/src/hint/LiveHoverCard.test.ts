@@ -1,7 +1,18 @@
 import { render, screen } from '@testing-library/svelte';
 import { textSnippet } from '@tests/fixtures/svelte/snippets';
 import { describe, expect, it, vi } from 'vitest';
+import type { Sleep } from '../../../../../packages/svelte/src/hint/sleep.svelte';
 import LiveHoverCard from '../../../../../packages/svelte/src/hint/LiveHoverCard.svelte';
+
+const sleeper = (report: (props: object) => void): Sleep => ({
+  waking: 'hover',
+  attrs: {},
+  report,
+  hovering: () => false,
+  fresh: true,
+  press: null,
+  sleep: () => undefined,
+});
 
 describe('LiveHoverCard', () => {
   it('reports the closed trigger props with its aria and renders no card while closed', () => {
@@ -10,8 +21,7 @@ describe('LiveHoverCard', () => {
       title: 'Charge',
       id: 'r1',
       waking: 'hover',
-      report,
-      hovering: () => false,
+      sleeper: sleeper(report),
     });
     expect(report.mock.lastCall?.[0]).toMatchObject({
       id: 'hover-card:r1:trigger',
@@ -28,8 +38,7 @@ describe('LiveHoverCard', () => {
       defaultOpen: true,
       id: 'r1',
       waking: 'open',
-      report: () => undefined,
-      hovering: () => false,
+      sleeper: sleeper(() => undefined),
     });
     expect(screen.getByRole('dialog', { name: 'Charge' })).toHaveTextContent(
       'Body',

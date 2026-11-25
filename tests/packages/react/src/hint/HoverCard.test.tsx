@@ -2,16 +2,11 @@ import type { AnchorHTMLAttributes } from 'react';
 import { ArkheProvider, HoverCard } from '@arkhe/react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { card, shown } from '@tests/fixtures/cards';
 import { NestedCards } from '@tests/fixtures/react/NestedCards';
 import { tap } from '@tests/fixtures/tap';
 import { renderToString } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
-
-function card(title: string) {
-  return screen
-    .getAllByText(title, { selector: '[data-part="title"]' })[0]
-    .closest('[data-part="content"]') as HTMLElement;
-}
 
 const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -32,8 +27,8 @@ describe('HoverCard nesting through the portal', () => {
     expect(card('Charge')).toBeVisible();
     expect(card('Action')).toBeVisible();
     await user.hover(screen.getByText('elsewhere'));
-    await waitFor(() => expect(card('Charge')).not.toBeVisible());
-    await waitFor(() => expect(card('Action')).not.toBeVisible());
+    await waitFor(() => expect(shown('Charge')).toBe(false));
+    await waitFor(() => expect(shown('Action')).toBe(false));
   });
 
   it('a tap in the nested card keeps both open; one outside closes both', async () => {
@@ -47,8 +42,8 @@ describe('HoverCard nesting through the portal', () => {
     expect(card('Charge')).toBeVisible();
     expect(card('Action')).toBeVisible();
     await tap(screen.getByText('elsewhere'));
-    await waitFor(() => expect(card('Charge')).not.toBeVisible());
-    expect(card('Action')).not.toBeVisible();
+    await waitFor(() => expect(shown('Charge')).toBe(false));
+    expect(shown('Action')).toBe(false);
   });
 });
 
@@ -144,7 +139,7 @@ describe('HoverCard', () => {
     expect(card('Charge')).toBeVisible();
     expect(card('Charge')).not.toHaveAttribute('data-pinned');
     await user.hover(screen.getByText('elsewhere'));
-    await waitFor(() => expect(card('Charge')).not.toBeVisible());
+    await waitFor(() => expect(shown('Charge')).toBe(false));
   });
 
   it('loads afresh when load changes while open', async () => {
@@ -218,7 +213,7 @@ describe('HoverCard', () => {
     expect(follow).toHaveAttribute('href', '/charge');
     expect(follow).toHaveAttribute('data-routed');
     await tap(trigger);
-    await waitFor(() => expect(card('Charge')).not.toBeVisible());
+    await waitFor(() => expect(shown('Charge')).toBe(false));
   });
 
   it('opens on tap and closes on a tap outside, unless pinned', async () => {
@@ -235,7 +230,7 @@ describe('HoverCard', () => {
     await tap(trigger);
     await waitFor(() => expect(card('Charge')).toBeVisible());
     await tap(screen.getByText('elsewhere'));
-    await waitFor(() => expect(card('Charge')).not.toBeVisible());
+    await waitFor(() => expect(shown('Charge')).toBe(false));
     await tap(trigger);
     await waitFor(() => expect(card('Charge')).toBeVisible());
     await userEvent.click(screen.getByRole('button', { name: 'Pin Charge' }));
@@ -256,7 +251,7 @@ describe('HoverCard', () => {
     );
     await waitFor(() => expect(card('Charge')).toBeVisible());
     await userEvent.keyboard('{Escape}');
-    await waitFor(() => expect(card('Charge')).not.toBeVisible());
+    await waitFor(() => expect(shown('Charge')).toBe(false));
     expect(report).toHaveBeenCalledExactlyOnceWith(false);
   });
 });

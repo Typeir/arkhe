@@ -5,7 +5,10 @@ import {
   render,
   renderHook,
   screen,
+  waitFor,
+  within,
 } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { useSleep } from '../../../../../packages/react/src/hint/useSleep';
 
@@ -14,7 +17,9 @@ const attributes = (el: Element) =>
 
 describe('useSleep', () => {
   it('sleeps with the closed trigger attributes and wakes on hover, not a touch over', () => {
-    const { result } = renderHook(() => useSleep('tooltip', 'r1', false));
+    const { result } = renderHook(() =>
+      useSleep('tooltip', 'r1', false, false),
+    );
     expect(result.current.waking).toBeNull();
     expect(result.current.attrs).toMatchObject({
       id: 'tooltip:r1:trigger',
@@ -32,12 +37,12 @@ describe('useSleep', () => {
   });
 
   it('wakes at once when held open', () => {
-    const { result } = renderHook(() => useSleep('tooltip', 'r1', true));
+    const { result } = renderHook(() => useSleep('tooltip', 'r1', true, false));
     expect(result.current.waking).toBe('open');
   });
 
   it('takes reported attributes and routes handlers through stable proxies', () => {
-    const { result } = renderHook(() => useSleep('tooltip', 'r1', true));
+    const { result } = renderHook(() => useSleep('tooltip', 'r1', true, false));
     const first = vi.fn();
     const second = vi.fn();
     act(() => {
@@ -94,7 +99,9 @@ describe('useSleep', () => {
   );
 
   it('knows whether the waking pointer is still over the trigger', () => {
-    const { result } = renderHook(() => useSleep('tooltip', 'r1', false));
+    const { result } = renderHook(() =>
+      useSleep('tooltip', 'r1', false, false),
+    );
     const handler = (name: string) =>
       (result.current.attrs as Record<string, (e: object) => void>)[name];
     act(() => {
@@ -104,6 +111,83 @@ describe('useSleep', () => {
     act(() => {
       handler('onPointerLeave')?.({ type: 'pointerleave' });
     });
+    expect(result.current.hovering()).toBe(false);
+  });
+
+  it('sleeps again after closing, on the same trigger node', async () => {
+    render(
+      <Tooltip content='Hint' openDelay={0} closeDelay={0}>
+        word
+      </Tooltip>,
+    );
+    const trigger = screen.getByRole('button', { name: 'word' });
+    const before = attributes(trigger);
+    await userEvent.hover(trigger);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Hint');
+    await userEvent.unhover(trigger);
+    await waitFor(() =>
+      expect(screen.queryByRole('tooltip', { hidden: true })).toBeNull(),
+    );
+    expect(screen.getByRole('button', { name: 'word' })).toBe(trigger);
+    expect(attributes(trigger)).toEqual(before);
+    await userEvent.hover(trigger);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Hint');
+  });
+
+  it('counts defaultOpen only before the first sleep', async () => {
+    render(
+      <HoverCard title='Charge' content='Body' defaultOpen openDelay={10_000}>
+        charge
+      </HoverCard>,
+    );
+    expect(screen.getByRole('dialog', { name: 'Charge' })).toBeVisible();
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    fireEvent.pointerOver(screen.getByRole('button', { name: 'charge' }), {
+      pointerType: 'mouse',
+    });
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('keeps a loaded card body across sleeps', async () => {
+    const load = vi.fn(async () => 'Loaded body');
+    render(
+      <HoverCard
+        title='Charge'
+        load={load}
+        loaded={(text) => <p>{text}</p>}
+        openDelay={0}
+        closeDelay={0}>
+        charge
+      </HoverCard>,
+    );
+    const trigger = screen.getByRole('button', { name: 'charge' });
+    await userEvent.hover(trigger);
+    expect(await screen.findByText('Loaded body')).toBeInTheDocument();
+    await userEvent.unhover(trigger);
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    await userEvent.hover(trigger);
+    const reopened = await screen.findByRole('dialog', { name: 'Charge' });
+    expect(within(reopened).getByText('Loaded body')).toBeInTheDocument();
+    expect(within(reopened).queryByText('Loading…')).toBeNull();
+    expect(load).toHaveBeenCalledTimes(1);
+  });
+
+  it('goes back to sleep through its sleep callback', () => {
+    const { result } = renderHook(() =>
+      useSleep('tooltip', 'r1', false, false),
+    );
+    act(() => {
+      (
+        result.current.attrs as Record<string, (e: object) => void>
+      ).onPointerOver?.({ type: 'pointerover', pointerType: 'mouse' });
+    });
+    expect(result.current.waking).toBe('hover');
+    act(() => {
+      result.current.sleep();
+    });
+    expect(result.current.waking).toBeNull();
+    expect(result.current.fresh).toBe(false);
     expect(result.current.hovering()).toBe(false);
   });
 });

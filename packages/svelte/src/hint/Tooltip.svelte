@@ -59,7 +59,8 @@ container, so server markup holds the trigger alone.
   const sleep = useSleep(
     'tooltip',
     id,
-    () => open === true || defaultOpen === true,
+    () => open === true,
+    () => defaultOpen === true,
   );
 </script>
 
@@ -68,12 +69,11 @@ container, so server markup holds the trigger alone.
   >{#if sleep.waking !== null}<LiveTooltip
       bind:open
       {content}
-      {defaultOpen}
+      defaultOpen={sleep.fresh ? defaultOpen : undefined}
       {onOpenChange}
       {placement}
       {openDelay}
       {closeDelay}
       {id}
       waking={sleep.waking}
-      report={sleep.report}
-      hovering={sleep.hovering} />{/if}</span>
+      sleeper={sleep} />{/if}</span>

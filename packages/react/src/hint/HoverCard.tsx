@@ -79,7 +79,8 @@ export interface HoverCardProps<T> {
  * returns to the trigger. A tap outside closes an unpinned card. A card
  * stays open while a card nested in it is open. Unpinning hands the card
  * back to hover: it stays open while the pointer is over it.
- * The machine sleeps until the first hover, focus or tap.
+ * The machine sleeps until the first hover, focus or tap, and again once
+ * the card has closed.
  *
  * @component
  * @param {HoverCardProps<T>} props - Title, trigger, body, open state, timing.
@@ -88,11 +89,7 @@ export interface HoverCardProps<T> {
 export const HoverCard = <T,>(props: HoverCardProps<T>): JSX.Element => {
   const { children, href, inline, open, defaultOpen } = props;
   const id = useId();
-  const sleep = useSleep(
-    'hover-card',
-    id,
-    open === true || defaultOpen === true,
-  );
+  const sleep = useSleep('hover-card', id, open === true, defaultOpen === true);
   const attrs =
     sleep.waking === null
       ? {
@@ -114,10 +111,10 @@ export const HoverCard = <T,>(props: HoverCardProps<T>): JSX.Element => {
       {sleep.waking === null ? null : (
         <LiveHoverCard
           {...props}
+          defaultOpen={sleep.fresh ? defaultOpen : undefined}
           id={id}
           waking={sleep.waking}
-          report={sleep.report}
-          hovering={sleep.hovering}
+          sleeper={sleep}
         />
       )}
     </span>

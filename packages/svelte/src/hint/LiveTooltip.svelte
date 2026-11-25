@@ -5,7 +5,7 @@ hover, focus or tap. Hands its trigger props to the sleeping trigger,
 replays the waking event, and renders the body once opened.
 -->
 <script module lang="ts">
-  import type { Waking } from './sleep.svelte.js';
+  import type { Sleep } from './sleep.svelte.js';
   import type { TooltipProps } from './Tooltip.svelte';
 
   /**
@@ -13,15 +13,13 @@ replays the waking event, and renders the body once opened.
    *
    * @interface LiveTooltipProps
    * @property {string} id - Machine id.
-   * @property {Waking} waking - What woke the machine; replayed once.
-   * @property {(props: object) => void} report - Takes the trigger props.
-   * @property {() => boolean} hovering - The waking pointer is still over the trigger.
+   * @property {NonNullable<Sleep['waking']>} waking - What woke the machine; replayed once.
+   * @property {Sleep} sleeper - The sleeping trigger: report, hover, press and sleep.
    */
   export interface LiveTooltipProps extends Omit<TooltipProps, 'children'> {
     id: string;
-    waking: Waking;
-    report: (props: object) => void;
-    hovering: () => boolean;
+    waking: NonNullable<Sleep['waking']>;
+    sleeper: Sleep;
   }
 </script>
 
@@ -42,6 +40,7 @@ replays the waking event, and renders the body once opened.
   import { onMount, untrack } from 'svelte';
   import { useArkheEnvironment } from '../base/environment.js';
   import { useHint, useHintNode } from './hint.svelte.js';
+  import { useSleepAgain } from './sleep.svelte.js';
 
   let {
     content,
@@ -53,8 +52,7 @@ replays the waking event, and renders the body once opened.
     closeDelay = 150,
     id,
     waking,
-    report,
-    hovering,
+    sleeper,
   }: LiveTooltipProps = $props();
   const env = useArkheEnvironment();
   const node = useHintNode();
@@ -89,10 +87,19 @@ replays the waking event, and renders the body once opened.
     getRootNode: env().getRootNode,
     node,
     leaving: () => service.state.matches('closing'),
-    pressed: waking === 'touch' ? 'touch' : null,
+    pressed: sleeper.press,
+  }));
+  useSleepAgain(() => ({
+    closed: shown !== true && !api.open && service.state.matches('closed'),
+    idle: () => service.state.matches('closed'),
+    opened: hint.mounted,
+    pressing: hint.pressing,
+    hovering: sleeper.hovering,
+    positionerId: api.getPositionerProps().id ?? '',
+    sleep: sleeper.sleep,
   }));
   $effect.pre(() => {
-    report(hint.trigger);
+    sleeper.report(hint.trigger);
   });
   onMount(() => {
     const el = env()
@@ -101,7 +108,7 @@ replays the waking event, and renders the body once opened.
     if (waking === 'focus' && el?.matches(':focus-visible') === true) {
       service.send({ type: 'open', src: 'trigger.focus' });
     }
-    if (waking === 'hover' && hovering()) {
+    if (waking === 'hover' && sleeper.hovering()) {
       service.send({ type: 'pointer.move' });
     }
   });

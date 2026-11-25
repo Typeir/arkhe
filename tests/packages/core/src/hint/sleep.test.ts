@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import {
+  afterExit,
   REACT_EVENTS,
   sleepingTrigger,
   SVELTE_EVENTS,
@@ -103,5 +104,44 @@ describe('WakeWatch', () => {
       currentTarget: outer,
     });
     expect(wake).toHaveBeenCalledWith('hover');
+  });
+});
+
+describe('WakeWatch press', () => {
+  it('remembers the pointer kind of a waking press until reset', () => {
+    const watch = new WakeWatch(REACT_EVENTS, () => undefined);
+    expect(watch.press).toBeNull();
+    watch.handlers.onPointerDown?.({
+      type: 'pointerdown',
+      pointerType: 'touch',
+    });
+    expect(watch.press).toBe('touch');
+    watch.reset();
+    expect(watch.press).toBeNull();
+    expect(watch.hovering).toBe(false);
+  });
+});
+
+describe('afterExit', () => {
+  it('waits a frame and every running animation, and can be cancelled', async () => {
+    const el = document.body.appendChild(document.createElement('div'));
+    el.id = 'exit';
+    let finish: () => void = () => undefined;
+    const finished = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    Object.assign(el, { getAnimations: () => [{ finished }] });
+    const done = vi.fn();
+    afterExit(document, 'exit', done);
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    await Promise.resolve();
+    expect(done).not.toHaveBeenCalled();
+    finish();
+    await vi.waitFor(() => expect(done).toHaveBeenCalledTimes(1));
+    const cancelled = vi.fn();
+    afterExit(document, 'missing', cancelled)();
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    expect(cancelled).not.toHaveBeenCalled();
+    el.remove();
   });
 });

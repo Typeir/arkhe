@@ -1,4 +1,4 @@
-import { ContentLoader } from '@arkhe/core';
+import { ContentLoader, loaderFor } from '@arkhe/core';
 import { describe, expect, it, vi } from 'vitest';
 
 describe('ContentLoader', () => {
@@ -53,5 +53,18 @@ describe('ContentLoader', () => {
     loader.subscribe(listener)();
     await loader.load();
     expect(listener).not.toHaveBeenCalled();
+  });
+});
+
+describe('loaderFor', () => {
+  it('hands every caller with the same source the same loader', async () => {
+    const source = vi.fn(async () => 'card');
+    const first = loaderFor(source);
+    await first.load();
+    const again = loaderFor(source);
+    expect(again).toBe(first);
+    expect(again.snapshot()).toEqual({ status: 'ready', value: 'card' });
+    expect(loaderFor(async () => 'other')).not.toBe(first);
+    expect(source).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,8 +1,9 @@
 /**
  * @fileoverview The running half of HoverCard: Zag's hover-card machine,
  * started on the first hover, focus or tap. Hands its trigger props to the
- * sleeping trigger, replays the waking event, and renders the card once
- * opened: pinning, moving, loading and nested cards all live here.
+ * sleeping trigger, replays the waking event, renders the card once opened,
+ * and goes back to sleep once closed: pinning, moving, loading and nested
+ * cards all live here.
  *
  * @module packages/react/src/hint/LiveHoverCard
  * @version 1.0.0
@@ -34,7 +35,6 @@ import {
   useState,
 } from 'react';
 import type { HoverCardProps } from './HoverCard.js';
-import type { Waking } from './useSleep.js';
 import { useArkheEnvironment } from '../base/ArkheEnvironment.js';
 import { useArkhe } from '../base/ArkheProvider.js';
 import { useControllable } from '../base/useControllable.js';
@@ -44,6 +44,7 @@ import { useContentLoader } from '../feedback/useContentLoader.js';
 import { CardHeader } from './CardHeader.js';
 import { HintContext, useHint, useHintNode } from './HintTrigger.js';
 import { useCardDrag } from './useCardDrag.js';
+import { type Sleep, useSleepAgain } from './useSleep.js';
 
 /**
  * Props of LiveHoverCard.
@@ -51,18 +52,16 @@ import { useCardDrag } from './useCardDrag.js';
  * @interface LiveHoverCardProps
  * @template T
  * @property {string} id - Machine id.
- * @property {Waking} waking - What woke the machine; replayed once.
- * @property {(props: object) => void} report - Takes the trigger props.
- * @property {() => boolean} hovering - The waking pointer is still over the trigger.
+ * @property {NonNullable<Sleep['waking']>} waking - What woke the machine; replayed once.
+ * @property {Sleep} sleeper - The sleeping trigger: report, hover, press and sleep.
  */
 export interface LiveHoverCardProps<T> extends Omit<
   HoverCardProps<T>,
   'children'
 > {
   readonly id: string;
-  readonly waking: Waking;
-  readonly report: (props: object) => void;
-  readonly hovering: () => boolean;
+  readonly waking: NonNullable<Sleep['waking']>;
+  readonly sleeper: Sleep;
 }
 
 /**
@@ -92,9 +91,9 @@ export const LiveHoverCard = <T,>({
   card,
   id,
   waking,
-  report,
-  hovering,
+  sleeper,
 }: LiveHoverCardProps<T>): JSX.Element | null => {
+  const { report, hovering, press, sleep } = sleeper;
   const { hoverCards, labels, announcer } = useArkhe();
   const env = useArkheEnvironment();
   const container = usePortalContainer();
@@ -158,7 +157,7 @@ export const LiveHoverCard = <T,>({
     leaving: () => service.state.matches('closing'),
     activate: href === undefined ? togglePin : undefined,
     keys: href === undefined && inline,
-    pressed: waking === 'touch' ? 'touch' : null,
+    pressed: press,
   });
   const move = useCardDrag({
     open: api.open && hint.mounted,
@@ -212,6 +211,15 @@ export const LiveHoverCard = <T,>({
         bodyId: `${id}body`,
       }),
     });
+  });
+  useSleepAgain({
+    closed: !shown && !api.open && service.state.matches('closed'),
+    idle: () => service.state.matches('closed'),
+    opened: hint.mounted,
+    pressing: hint.pressing,
+    hovering,
+    positionerId: positioner.id ?? '',
+    sleep,
   });
   const replay = useEffectEvent(() => {
     if (!(card ?? hoverCards)) return;

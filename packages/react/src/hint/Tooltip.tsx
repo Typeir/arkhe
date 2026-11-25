@@ -35,7 +35,7 @@ import { useArkheEnvironment } from '../base/ArkheEnvironment.js';
 import { useControllable } from '../base/useControllable.js';
 import { usePortalContainer } from '../base/usePortalContainer.js';
 import { HintTrigger, useHint, useHintNode } from './HintTrigger.js';
-import { useSleep, type Waking } from './useSleep.js';
+import { type Sleep, useSleep, useSleepAgain } from './useSleep.js';
 
 /**
  * Props of Tooltip.
@@ -66,7 +66,7 @@ export interface TooltipProps {
 /**
  * Renders a trigger that shows `content` on hover, keyboard focus and tap.
  * A tap outside or Escape closes it. The machine sleeps until the first
- * hover, focus or tap.
+ * hover, focus or tap, and again once it has closed.
  *
  * @component
  * @param {TooltipProps} props - Description, trigger, open state, timing.
@@ -75,7 +75,7 @@ export interface TooltipProps {
 export const Tooltip = (props: TooltipProps): JSX.Element => {
   const { children, inline, open, defaultOpen } = props;
   const id = useId();
-  const sleep = useSleep('tooltip', id, open === true || defaultOpen === true);
+  const sleep = useSleep('tooltip', id, open === true, defaultOpen === true);
   return (
     <span className={ARKHE_CLASS} {...partAttrs('tooltip', 'root')}>
       <HintTrigger attrs={sleep.attrs} inline={inline}>
@@ -84,10 +84,10 @@ export const Tooltip = (props: TooltipProps): JSX.Element => {
       {sleep.waking === null ? null : (
         <LiveTooltip
           {...props}
+          defaultOpen={sleep.fresh ? defaultOpen : undefined}
           id={id}
           waking={sleep.waking}
-          report={sleep.report}
-          hovering={sleep.hovering}
+          sleeper={sleep}
         />
       )}
     </span>
@@ -99,23 +99,22 @@ export const Tooltip = (props: TooltipProps): JSX.Element => {
  *
  * @interface LiveTooltipProps
  * @property {string} id - Machine id.
- * @property {Waking} waking - What woke the machine; replayed once.
- * @property {(props: object) => void} report - Takes the trigger props.
- * @property {() => boolean} hovering - The waking pointer is still over the trigger.
+ * @property {NonNullable<Sleep['waking']>} waking - What woke the machine; replayed once.
+ * @property {Sleep} sleeper - The sleeping trigger: report, hover, press and sleep.
  */
 interface LiveTooltipProps extends TooltipProps {
   readonly id: string;
-  readonly waking: Waking;
-  readonly report: (props: object) => void;
-  readonly hovering: () => boolean;
+  readonly waking: NonNullable<Sleep['waking']>;
+  readonly sleeper: Sleep;
 }
 
 /**
  * Runs the tooltip machine, hands its trigger props to the sleeping
- * trigger, replays the waking event, and renders the body once opened.
+ * trigger, replays the waking event, renders the body once opened, and goes
+ * back to sleep once closed.
  *
  * @component
- * @param {LiveTooltipProps} props - Tooltip props, id, wake, report.
+ * @param {LiveTooltipProps} props - Tooltip props, id, wake, sleeping trigger.
  * @returns {JSX.Element | null} Body, once opened.
  */
 const LiveTooltip = ({
@@ -128,9 +127,9 @@ const LiveTooltip = ({
   closeDelay = 150,
   id,
   waking,
-  report,
-  hovering,
+  sleeper,
 }: LiveTooltipProps): JSX.Element | null => {
+  const { report, hovering, press, sleep } = sleeper;
   const env = useArkheEnvironment();
   const container = usePortalContainer();
   const node = useHintNode();
@@ -164,10 +163,19 @@ const LiveTooltip = ({
     positionerId: positioner.id ?? '',
     node,
     leaving: () => service.state.matches('closing'),
-    pressed: waking === 'touch' ? 'touch' : null,
+    pressed: press,
   });
   useLayoutEffect(() => {
     report(hint.trigger);
+  });
+  useSleepAgain({
+    closed: !shown && !api.open && service.state.matches('closed'),
+    idle: () => service.state.matches('closed'),
+    opened: hint.mounted,
+    pressing: hint.pressing,
+    hovering,
+    positionerId: positioner.id ?? '',
+    sleep,
   });
   const replay = useEffectEvent(() => {
     const el = env.getRootNode().getElementById(triggerProps.id ?? '');

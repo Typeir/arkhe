@@ -10,7 +10,7 @@
 
 'use client';
 
-import { ContentLoader, type LoadState } from '@arkhe/core';
+import { type ContentLoader, loaderFor, type LoadState } from '@arkhe/core';
 import { useCallback, useState, useSyncExternalStore } from 'react';
 
 /**
@@ -54,7 +54,7 @@ interface Held<T> {
  * @returns {Held<T>} Source and loader.
  */
 function hold<T>(source: (() => Promise<T>) | undefined): Held<T> {
-  return { source, loader: source ? new ContentLoader(source) : null };
+  return { source, loader: source ? loaderFor(source) : null };
 }
 
 /**

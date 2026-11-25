@@ -74,7 +74,8 @@ body may hold any content. Give `content`, or `load` with `loaded`.
   const sleep = useSleep(
     'hover-card',
     id,
-    () => open === true || rest.defaultOpen === true,
+    () => open === true,
+    () => rest.defaultOpen === true,
   );
   const attrs = $derived(
     sleep.waking === null
@@ -98,7 +99,7 @@ body may hold any content. Give `content`, or `load` with `loaded`.
   >{#if sleep.waking !== null}<LiveHoverCard
       bind:open
       {...rest}
+      defaultOpen={sleep.fresh ? rest.defaultOpen : undefined}
       {id}
       waking={sleep.waking}
-      report={sleep.report}
-      hovering={sleep.hovering} />{/if}</span>
+      sleeper={sleep} />{/if}</span>

@@ -1,6 +1,17 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import type { Sleep } from '../../../../../packages/react/src/hint/useSleep';
 import { LiveHoverCard } from '../../../../../packages/react/src/hint/LiveHoverCard';
+
+const sleeper = (report: (props: object) => void): Sleep => ({
+  waking: 'hover',
+  attrs: {},
+  report,
+  hovering: () => false,
+  fresh: true,
+  press: null,
+  sleep: () => undefined,
+});
 
 describe('LiveHoverCard', () => {
   it('reports the closed trigger props with its aria and renders no card while closed', () => {
@@ -10,8 +21,7 @@ describe('LiveHoverCard', () => {
         title='Charge'
         id='r1'
         waking='hover'
-        report={report}
-        hovering={() => false}
+        sleeper={sleeper(report)}
       />,
     );
     expect(report.mock.lastCall?.[0]).toMatchObject({
@@ -30,8 +40,7 @@ describe('LiveHoverCard', () => {
         defaultOpen
         id='r1'
         waking='open'
-        report={() => undefined}
-        hovering={() => false}
+        sleeper={sleeper(() => undefined)}
       />,
     );
     expect(screen.getByRole('dialog', { name: 'Charge' })).toHaveTextContent(

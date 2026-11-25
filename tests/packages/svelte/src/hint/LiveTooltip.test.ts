@@ -1,6 +1,17 @@
 import { render, screen } from '@testing-library/svelte';
 import { describe, expect, it, vi } from 'vitest';
+import type { Sleep } from '../../../../../packages/svelte/src/hint/sleep.svelte';
 import LiveTooltip from '../../../../../packages/svelte/src/hint/LiveTooltip.svelte';
+
+const sleeper = (report: (props: object) => void): Sleep => ({
+  waking: 'hover',
+  attrs: {},
+  report,
+  hovering: () => false,
+  fresh: true,
+  press: null,
+  sleep: () => undefined,
+});
 
 describe('LiveTooltip', () => {
   it('reports the closed trigger props and renders no body while closed', () => {
@@ -9,8 +20,7 @@ describe('LiveTooltip', () => {
       content: 'Hint',
       id: 'r1',
       waking: 'hover',
-      report,
-      hovering: () => false,
+      sleeper: sleeper(report),
     });
     expect(report).toHaveBeenCalled();
     expect(report.mock.lastCall?.[0]).toMatchObject({
@@ -26,8 +36,7 @@ describe('LiveTooltip', () => {
       defaultOpen: true,
       id: 'r1',
       waking: 'open',
-      report: () => undefined,
-      hovering: () => false,
+      sleeper: sleeper(() => undefined),
     });
     expect(screen.getByRole('tooltip', { hidden: true })).toHaveTextContent(
       'Hint',

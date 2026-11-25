@@ -2,7 +2,7 @@
  * @fileoverview Sleeping hints: the first hover and the first Tab wake the
  * machine and open the tooltip or card as a live one would, on the same
  * trigger node, which keeps focus. A card nested in a woken card wakes on
- * its own. Hovers scroll first: a scroll while a tooltip opens closes it,
+ * its own, and every hint sleeps again once closed. Hovers scroll first: a scroll while a tooltip opens closes it,
  * sleeping or not.
  *
  * @module tests/e2e/hint-wake.spec
@@ -74,6 +74,19 @@ for (const target of TARGETS) {
         await expect(hint(page)).toBeVisible();
       });
 
+      test('it sleeps again after closing and wakes again', async ({
+        page,
+      }) => {
+        const trigger = page.getByRole('button', { name, exact: true });
+        await trigger.scrollIntoViewIfNeeded();
+        await frames(page);
+        await trigger.hover();
+        await expect(hint(page)).toBeVisible();
+        await page.mouse.move(0, 0);
+        await expect(hint(page)).toHaveCount(0);
+        await trigger.hover();
+        await expect(hint(page)).toBeVisible();
+      });
       test('the first Tab opens it on the same focused node', async ({
         page,
       }) => {

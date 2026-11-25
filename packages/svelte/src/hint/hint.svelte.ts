@@ -88,10 +88,12 @@ export interface HintInput<P extends object> {
  * @template {object} P
  * @property {P} trigger - Trigger props with tap handling.
  * @property {boolean} mounted - Whether the body renders: from the first open on.
+ * @property {() => boolean} pressing - A press is waiting for its click.
  */
 export interface Hint<P extends object> {
   readonly trigger: P;
   readonly mounted: boolean;
+  readonly pressing: () => boolean;
 }
 
 /**
@@ -162,5 +164,6 @@ export function useHint<P extends object>(read: () => HintInput<P>): Hint<P> {
     get mounted() {
       return opened.current;
     },
+    pressing: () => memory.current !== null,
   };
 }

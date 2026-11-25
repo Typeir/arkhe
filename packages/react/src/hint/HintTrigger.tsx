@@ -88,7 +88,7 @@ export interface HintInput<P extends object> {
  * @function useHint
  * @template {object} P
  * @param {HintInput<P>} input - Open state, trigger props, positioner id, node.
- * @returns {{ trigger: P; mounted: boolean }} Trigger props and mount flag.
+ * @returns {{ trigger: P; mounted: boolean; pressing: () => boolean }} Trigger props, mount flag, and whether a press is waiting for its click.
  */
 export function useHint<P extends object>({
   open,
@@ -100,7 +100,11 @@ export function useHint<P extends object>({
   activate,
   keys,
   pressed,
-}: HintInput<P>): { trigger: P; mounted: boolean } {
+}: HintInput<P>): {
+  trigger: P;
+  mounted: boolean;
+  pressing: () => boolean;
+} {
   const env = useArkheEnvironment();
   const hydrated = useHydrated();
   const [opened, setOpened] = useState(false);
@@ -148,6 +152,7 @@ export function useHint<P extends object>({
       keys,
     }),
     mounted: opened,
+    pressing: () => memory.current !== null,
   };
 }
 
