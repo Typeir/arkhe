@@ -3,7 +3,8 @@
  * rhombus that slides to the selected tab. `folder`: the host's drawer tabs,
  * which take the layer opposite their ground so they nest to any depth. Zag
  * sets the bar's transition inline from the `--transition-*` variables, so
- * those carry the timing.
+ * those carry the timing. Panels share one cell; hidden ones stay laid out
+ * for find-in-page, so they let the pointer through to the selected one.
  */
 
 @use '../../contrast' as *;
@@ -20,6 +21,10 @@
 
     > [data-part='content'] {
       grid-area: panel;
+
+      &[hidden] {
+        pointer-events: none;
+      }
     }
   }
 
