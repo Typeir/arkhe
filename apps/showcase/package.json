@@ -11,9 +11,9 @@
     "typecheck": "tsc -p tsconfig.json && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings"
   },
   "dependencies": {
-    "@arkhe/core": "0.4.0",
-    "@arkhe/react": "0.4.0",
-    "@arkhe/svelte": "0.4.0",
+    "@arkhe/core": "0.4.1",
+    "@arkhe/react": "0.4.1",
+    "@arkhe/svelte": "0.4.1",
     "@lucide/svelte": "1.64.0",
     "lucide-react": "1.64.0",
     "react": "19.3.1",

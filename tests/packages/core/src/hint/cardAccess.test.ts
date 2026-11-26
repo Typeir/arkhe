@@ -139,6 +139,22 @@ describe('CardAccess', () => {
     stop();
   });
 
+  it('leaves Escape to a menu open in the card before the menu takes focus', () => {
+    const { byId, access, release, stop } = page();
+    access.pin(true);
+    const pin = byId('pin');
+    pin.setAttribute('aria-haspopup', 'menu');
+    pin.setAttribute('aria-expanded', 'true');
+    pin.focus();
+    press(pin, 'Escape');
+    expect(release).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(pin);
+    pin.setAttribute('aria-expanded', 'false');
+    press(pin, 'Escape');
+    expect(release).toHaveBeenCalledOnce();
+    stop();
+  });
+
   it('leaves Escape to an unpinned card and to the card pinned last', () => {
     const { byId, access, release, stop } = page();
     press(byId('trigger'), 'Escape');
