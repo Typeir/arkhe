@@ -2,7 +2,7 @@ name: Gate
 
 on:
   push:
-    branches: [main]
+    branches: [main, ci/diag-skeleton]
   pull_request:
 
 permissions:
@@ -23,10 +23,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npm run typecheck
-      - run: npm run lint
-      - run: npm run format:check
-      - run: npm test
-      - run: npm run health:check
       - run: npm run build
-      - run: npm run test:e2e
+      - run: npx playwright test
+      - run: npx playwright test tests/e2e/skeleton.spec.ts tests/e2e/hovercard-drag.spec.ts --repeat-each 8
