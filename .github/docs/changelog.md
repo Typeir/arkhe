@@ -10,6 +10,7 @@ Decisions: [decisions.md](decisions.md).
 
 - Fixed hidden [Tabs](../../packages/react/src/section/Tabs.tsx) panels so they let clicks through to the selected panel
 - Fixed [HoverCard](../../packages/react/src/hint/HoverCard.tsx) so Escape closes only a menu opened in it, even before the menu takes focus
+- Fixed [SkeletonGroup](../../packages/react/src/feedback/Skeleton.tsx) so content swapped in right after a scroll is covered in the same frame
 
 ## 0.4.0
 

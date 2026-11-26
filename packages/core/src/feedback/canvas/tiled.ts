@@ -151,18 +151,26 @@ export class TiledSurface {
   /**
    * Repaints every live tile in the current task, so a DOM swap and its
    * cover land in the same frame. `top` is the host's padding-box top from
-   * before the swap, which a swap inside the host does not move.
+   * before the swap, which a swap inside the host does not move. With `top`
+   * known, a tile on screen paints now even when the visible observer has
+   * not yet reported a scroll that brought it there.
    *
    * @param {number} top - Host top, viewport px; not finite to re-read it.
    * @returns {void}
    */
   paintNow(top: number): void {
     const t = performance.now();
-    if (Number.isFinite(top)) {
+    const known = Number.isFinite(top);
+    const viewH = this.ctx.display.viewH;
+    if (known) {
       this.#viewT = t;
-      this.#viewRange = [-top, this.ctx.display.viewH - top];
+      this.#viewRange = [-top, viewH - top];
     }
-    for (const tile of this.#tiles) tile.repaint(t);
+    for (const tile of this.#tiles) {
+      const { y, h } = tile.tile;
+      const seen = known ? top + y < viewH && top + y + h > 0 : tile.visible;
+      tile.repaint(t, seen);
+    }
   }
 
   /**

@@ -56,6 +56,22 @@ describe('TiledSurface', () => {
     expect(painted).toHaveBeenCalledWith(region);
   });
 
+  it('paints the tiles on screen at a swap before the visible report catches up', () => {
+    const { ctx } = testContext();
+    const slice = mockSlice();
+    const surface = new TiledSurface(ctx, mockRegion(host, 2000, slice));
+    const [wake, visible] = FakeIntersectionObserver.all;
+    for (const s of sentinels(host)) {
+      wake?.report(s, true);
+      visible?.report(s, false);
+    }
+    const before = slice.paint.mock.calls.length;
+    surface.paintNow(-1700);
+    const calls = slice.paint.mock.calls.slice(before);
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.[0]).toMatchObject({ y0: 1584 });
+  });
+
   it('keeps pixels on later frames while the slice retains them', () => {
     const { ctx, step } = testContext();
     const slice = mockSlice();
