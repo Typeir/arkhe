@@ -4,6 +4,12 @@ Decisions: [decisions.md](decisions.md).
 
 ⚠ Breaking.
 
+## 0.4.1
+
+### Fixed
+
+- Fixed hidden [Tabs](../../packages/react/src/section/Tabs.tsx) panels so they let clicks through to the selected panel
+
 ## 0.4.0
 
 ### Added
