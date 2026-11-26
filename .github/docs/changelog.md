@@ -9,6 +9,7 @@ Decisions: [decisions.md](decisions.md).
 ### Fixed
 
 - Fixed hidden [Tabs](../../packages/react/src/section/Tabs.tsx) panels so they let clicks through to the selected panel
+- Fixed [HoverCard](../../packages/react/src/hint/HoverCard.tsx) so Escape closes only a menu opened in it, even before the menu takes focus
 
 ## 0.4.0
 

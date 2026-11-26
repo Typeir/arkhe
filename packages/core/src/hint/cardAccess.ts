@@ -19,6 +19,15 @@ import { FOCUSABLE, isElement } from '../base/dom.js';
 import { documentOf, type RootNode } from '../base/environment.js';
 
 /**
+ * A menu trigger whose menu is open. Zag focuses a new menu a frame after it
+ * opens, so the trigger, not focus, says the menu holds Escape.
+ *
+ * @constant OPEN_MENU
+ * @type {string}
+ */
+const OPEN_MENU = '[aria-haspopup="menu"][aria-expanded="true"]';
+
+/**
  * What a card hands to `CardAccess`.
  *
  * @interface CardAccessInput
@@ -191,7 +200,7 @@ export class CardAccess {
 
   /**
    * Escape: returns focus to the trigger and releases a pinned card, the
-   * last pinned first. Tab: moves from the trigger into the card, and out of
+   * last pinned first, unless a menu in the card is open. Tab: moves from the trigger into the card, and out of
    * it back to the trigger or on to the stop after the trigger.
    *
    * @param {KeyboardEvent} event - Key press on the window.
@@ -206,6 +215,7 @@ export class CardAccess {
     if (event.key === 'Escape') {
       if (this.#input.node.nested()) return;
       if (isElement(at) && at.closest('[role="menu"]')) return;
+      if (content.querySelector(OPEN_MENU)) return;
       const pinned = CardAccess.#pinned.includes(this);
       if (pinned && CardAccess.#pinned.at(-1) !== this) return;
       if (inside) trigger.focus();
