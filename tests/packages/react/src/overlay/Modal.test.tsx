@@ -8,6 +8,7 @@ import {
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { liveWatcher, stubCloseWatcher } from '@tests/fixtures/closeWatcher';
+import { trapped } from '@tests/fixtures/trapped';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -123,7 +124,7 @@ describe('Modal', () => {
     const fallback = document.createElement('button');
     document.body.append(fallback);
     render(<Modal title='Rest' defaultOpen finalFocus={() => fallback} />);
-    await screen.findByRole('dialog');
+    await trapped(await screen.findByRole('dialog'));
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(fallback).toHaveFocus());
     fallback.remove();
@@ -132,9 +133,8 @@ describe('Modal', () => {
   it('returns focus to the nearest row when the opener row is gone', async () => {
     render(<Rows />);
     await userEvent.click(screen.getByRole('button', { name: 'Delete a' }));
-    await userEvent.click(
-      await screen.findByRole('button', { name: 'Confirm' }),
-    );
+    await trapped(await screen.findByRole('dialog'));
+    await userEvent.click(screen.getByRole('button', { name: 'Confirm' }));
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'Delete b' })).toHaveFocus(),
     );
@@ -146,9 +146,8 @@ describe('Modal', () => {
     await fireEvent.pointerDown(opener);
     await fireEvent.click(opener);
     expect(opener).not.toHaveFocus();
-    await userEvent.click(
-      await screen.findByRole('button', { name: 'Confirm' }),
-    );
+    await trapped(await screen.findByRole('dialog'));
+    await userEvent.click(screen.getByRole('button', { name: 'Confirm' }));
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'Delete b' })).toHaveFocus(),
     );

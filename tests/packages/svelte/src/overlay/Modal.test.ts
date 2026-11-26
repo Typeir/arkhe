@@ -7,6 +7,7 @@ import DeleteRows from '@tests/fixtures/svelte/DeleteRows.svelte';
 import { renderWithProvider } from '@tests/fixtures/svelte/renderWithProvider';
 import ShadowModal from '@tests/fixtures/svelte/ShadowModal.svelte';
 import { textSnippet } from '@tests/fixtures/svelte/snippets';
+import { trapped } from '@tests/fixtures/trapped';
 import { describe, expect, it, vi } from 'vitest';
 
 function shadowApp() {
@@ -88,7 +89,7 @@ describe('Modal', () => {
       defaultOpen: true,
       finalFocus: () => fallback,
     });
-    await screen.findByRole('dialog');
+    await trapped(await screen.findByRole('dialog'));
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(fallback).toHaveFocus());
     fallback.remove();
@@ -97,9 +98,8 @@ describe('Modal', () => {
   it('returns focus to the nearest row when the opener row is gone', async () => {
     render(DeleteRows);
     await userEvent.click(screen.getByRole('button', { name: 'Delete a' }));
-    await userEvent.click(
-      await screen.findByRole('button', { name: 'Confirm' }),
-    );
+    await trapped(await screen.findByRole('dialog'));
+    await userEvent.click(screen.getByRole('button', { name: 'Confirm' }));
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'Delete b' })).toHaveFocus(),
     );
@@ -111,9 +111,8 @@ describe('Modal', () => {
     await fireEvent.pointerDown(opener);
     await fireEvent.click(opener);
     expect(opener).not.toHaveFocus();
-    await userEvent.click(
-      await screen.findByRole('button', { name: 'Confirm' }),
-    );
+    await trapped(await screen.findByRole('dialog'));
+    await userEvent.click(screen.getByRole('button', { name: 'Confirm' }));
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'Delete b' })).toHaveFocus(),
     );
